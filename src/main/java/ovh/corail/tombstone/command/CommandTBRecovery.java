@@ -215,7 +215,7 @@ public class CommandTBRecovery extends TombstoneCommand {
             reader.close();
             if (!nbt.keySet().isEmpty()) {
                 player.read(nbt);
-                player.getServerWorld().getSaveHandler().writePlayerData(player);
+                player.server.getPlayerList().writePlayerData(player);
                 sendMessage(sender, LangKey.MESSAGE_RECOVERY_LOAD_PLAYER_SUCCESS.getText(player.getName()), false);
             }
         } catch (Exception e) {

@@ -6,6 +6,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -121,9 +122,9 @@ public class ItemLostTablet extends ItemGraveMagic {
         if (noStructureInCurrentWorld || Helper.random.nextFloat() < 0.3f) {
             if (ConfigTombstone.decorative_grave.lostTabletSearchOutsideWorld.get()) {
                 // search in a different world
-                DimensionType dimensionType = Helper.getRandomInList(SupportStructures.getDimensionTypesForStructure(world.getServer(), structure));
-                if (dimensionType != null) {
-                    world = world.getServer().getWorld(dimensionType);
+                RegistryKey<World> dimension = Helper.getRandomInList(SupportStructures.getDimensionTypesForStructure(world.getServer(), structure));
+                if (dimension != null) {
+                    world = world.getServer().getWorld(dimension);
                 } else if (noStructureInCurrentWorld) {
                     return false;
                 }

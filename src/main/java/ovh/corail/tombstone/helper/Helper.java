@@ -43,6 +43,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceContext;
@@ -53,6 +54,7 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.Color;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.world.Dimension;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
@@ -70,6 +72,8 @@ import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.LogicalSidedProvider;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraftforge.registries.ForgeRegistries;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.tuple.Pair;
@@ -174,20 +178,12 @@ public class Helper {
         return list;
     }
 
-    public static int getDimensionId(Entity entity) {
-        return getDimensionType(entity).getId();
-    }
-
-    public static int getDimensionId(IWorld world) {
-        return getDimensionType(world).getId();
-    }
-
-    public static DimensionType getDimensionType(Entity entity) {
+    public static RegistryKey<World> getDimensionType(Entity entity) {
         return getDimensionType(entity.world);
     }
 
-    public static DimensionType getDimensionType(IWorld world) {
-        return world.getDimension().getType();
+    public static RegistryKey<World> getDimensionType(World world) {
+        return world.func_234923_W_();
     }
 
     public static BlockPos getCloserValidPos(World world, BlockPos pos) {
@@ -203,7 +199,7 @@ public class Helper {
             z = Math.min(Math.max(pos.getZ(), (int) border.minZ()), (int) border.maxZ());
         }
         if (!validY) {
-            y = Math.max(Math.min(pos.getY(), world.getDimension().getActualHeight()), 0);
+            y = Math.max(Math.min(pos.getY(), world.func_230315_m_().func_241513_m_()), 0);
         }
         return new BlockPos(x, y, z);
     }
@@ -212,9 +208,9 @@ public class Helper {
         return world.getWorldBorder().contains(pos) && !World.isOutsideBuildHeight(pos);
     }
 
-    @SuppressWarnings("deprecation")
-    public static boolean isInvalidDimension(int dimId) {
-        return DimensionManager.getRegistry().stream().noneMatch(dim -> dim.getId() == dimId);
+    public static boolean isInvalidDimension(MinecraftServer server, RegistryKey<World> key) {
+    	
+    	return server.getWorld(key) == null;
     }
 
     @Nullable

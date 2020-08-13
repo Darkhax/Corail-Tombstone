@@ -2,6 +2,7 @@ package ovh.corail.tombstone.helper;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
@@ -9,7 +10,8 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 
 public class Location {
-    public int x, y, z, dim;
+    public int x, y, z;
+    public RegistryKey<World> dim;
     static final BlockPos ORIGIN_POS = new BlockPos(0, Integer.MIN_VALUE, 0);
     public static final Location ORIGIN = new Location(ORIGIN_POS, Integer.MIN_VALUE);
 
@@ -25,7 +27,7 @@ public class Location {
         this(x, y, z, Helper.getDimensionId(world));
     }
 
-    public Location(int x, int y, int z, int dim) {
+    public Location(int x, int y, int z, RegistryKey<World> dim) {
         this.x = x;
         this.y = y;
         this.z = z;
