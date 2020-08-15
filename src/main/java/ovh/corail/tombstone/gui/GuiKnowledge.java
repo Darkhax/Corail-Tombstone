@@ -4,11 +4,16 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.resources.I18n;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.ITextProperties;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
@@ -104,6 +109,8 @@ public class GuiKnowledge extends TBScreen {
         RenderSystem.disableDepthTest();
         RenderSystem.color4f(1f, 1f, 1f, 1f);
 
+        Matrix4f matrix = matrixStack.getLast().getMatrix();
+
         hLine(matrixStack, this.guiLeft + 5, this.guiRight - 5, this.guiTop + 4, this.textColor);
         hLine(matrixStack, this.guiLeft + 5, this.guiRight - 5, this.guiTop + 6, this.textColor);
         String titleName = LangKey.MESSAGE_KNOWLEDGE_OF_DEATH.getClientTranslation();
@@ -120,8 +127,8 @@ public class GuiKnowledge extends TBScreen {
         int startAlignmentY = 44;
         drawCenteredString(matrixStack, this.font, "Alignment", this.halfWidth, this.guiTop + startAlignmentY - 4, 0xffffffff);
         fill(matrixStack, this.guiLeft + 20, this.guiTop + startAlignmentY + 10, this.guiRight - 20, this.guiTop + startAlignmentY + 17, 0xff000000);
-        Helper.fillGradient(this.guiLeft + 21, this.guiTop + startAlignmentY + 11, this.halfWidth, this.guiTop + startAlignmentY + 16, 0xffff0000, 0xffffffff, getBlitOffset(), true);
-        Helper.fillGradient(this.halfWidth, this.guiTop + startAlignmentY + 11, this.guiRight - 21, this.guiTop + startAlignmentY + 16, 0xffffffff, 0xff0000ff, getBlitOffset(), true);
+        Helper.fillGradient(matrix, this.guiLeft + 21, this.guiTop + startAlignmentY + 11, this.halfWidth, this.guiTop + startAlignmentY + 16, 0xffff0000, 0xffffffff, getBlitOffset(), true);
+        Helper.fillGradient(matrix, this.halfWidth, this.guiTop + startAlignmentY + 11, this.guiRight - 21, this.guiTop + startAlignmentY + 16, 0xffffffff, 0xff0000ff, getBlitOffset(), true);
         float step = (this.xSize - 42) / 8f;
         for (int i = 0; i < 8; i++) {
             if (i != 4) {
@@ -208,31 +215,32 @@ public class GuiKnowledge extends TBScreen {
         if (this.hoveredIcon != null) {
             this.hoveredPerkLevel = this.cap.getPerkLevel(getMinecraft().player, this.hoveredIcon.perk);
             int levelWithBonus = this.cap.getPerkLevelWithBonus(getMinecraft().player, hoveredIcon.perk);
-            List<String> list = new ArrayList<>();
-            list.add(this.hoveredIcon.perk.getClientTranslation());
-            String specialInfo = hoveredIcon.perk.getSpecialInfo(levelWithBonus);
-            if (!specialInfo.isEmpty()) {
+            List<ITextProperties> list = new ArrayList<>();
+            list.add(this.hoveredIcon.perk.getTranslation());
+            ITextComponent specialInfo = hoveredIcon.perk.getSpecialInfo(levelWithBonus);
+            if (specialInfo != StringTextComponent.EMPTY) {
                 list.add(specialInfo);
             }
             IntStream.rangeClosed(1, this.hoveredIcon.perk.getLevelMax()).forEach(i -> {
-                String info = this.hoveredIcon.perk.getTooltip(i, this.hoveredPerkLevel, levelWithBonus);
-                if (!info.isEmpty()) {
-                    list.add((this.hoveredPerkLevel >= i ? TextFormatting.WHITE : (hoveredIcon.perk.isEncrypted() ? levelWithBonus >= i : levelWithBonus == i) ? TextFormatting.DARK_PURPLE : TextFormatting.DARK_GRAY).toString() + i + " -> " + I18n.format(info));
+                ITextComponent info = new StringTextComponent(this.hoveredIcon.perk.getTooltip(i, this.hoveredPerkLevel, levelWithBonus));
+                if (info != StringTextComponent.EMPTY) {
+                    TextFormatting formatting = this.hoveredPerkLevel >= i ? TextFormatting.WHITE : (hoveredIcon.perk.isEncrypted() ? levelWithBonus >= i : levelWithBonus == i) ? TextFormatting.DARK_PURPLE : TextFormatting.DARK_GRAY;
+                    list.add(new StringTextComponent(i + " -> ").append(info).mergeStyle(formatting));
                 }
             });
             if (this.hoveredPerkLevel < this.hoveredIcon.perk.getLevelMax()) {
                 int cost = this.hoveredIcon.perk.getCost(this.hoveredPerkLevel + 1);
                 boolean canUpgrade = this.leftPerkPoints >= cost;
-                list.add((canUpgrade ? TextFormatting.AQUA : TextFormatting.RED) + LangKey.MESSAGE_COST.getClientTranslation(cost));
-                list.add((canUpgrade ? TextFormatting.BLUE + LangKey.MESSAGE_CLICK_TO_UPGRADE.getClientTranslation() : TextFormatting.RED + LangKey.MESSAGE_CANT_UPGRADE.getClientTranslation()));
+                list.add(LangKey.MESSAGE_COST.getText(canUpgrade ? TextFormatting.AQUA : TextFormatting.RED, cost));
+                list.add(canUpgrade ? LangKey.MESSAGE_CLICK_TO_UPGRADE.getText(TextFormatting.BLUE) : LangKey.MESSAGE_CANT_UPGRADE.getText(TextFormatting.RED));
             } else {
-                list.add(TextFormatting.GOLD + LangKey.MESSAGE_MAX.getClientTranslation());
+                list.add(LangKey.MESSAGE_MAX.getText(TextFormatting.GOLD));
             }
             drawHoveringText(matrixStack, list, this.hoveredIcon.minX + 10, this.hoveredIcon.minY + 10, this.font);
         }
     }
 
-    private void drawHoveringText(MatrixStack matrixStack, List<String> textLines, int x, int y, FontRenderer font) {
+    private void drawHoveringText(MatrixStack matrixStack, List<ITextProperties> textLines, int x, int y, FontRenderer font) {
         int maxTextWidth = 200;
         if (!textLines.isEmpty()) {
             RenderSystem.disableRescaleNormal();
@@ -240,9 +248,8 @@ public class GuiKnowledge extends TBScreen {
             RenderSystem.disableLighting();
             RenderSystem.disableDepthTest();
             int tooltipTextWidth = 0;
-            for (String textLine : textLines) {
-                int textLineWidth = font.getStringWidth(textLine);
-
+            for (ITextProperties textLine : textLines) {
+                int textLineWidth = font.func_238414_a_(textLine);
                 if (textLineWidth > tooltipTextWidth) {
                     tooltipTextWidth = textLineWidth;
                 }
@@ -252,8 +259,7 @@ public class GuiKnowledge extends TBScreen {
             int tooltipX = x + 12;
             if (tooltipX + tooltipTextWidth + 4 > width) {
                 tooltipX = x - 16 - tooltipTextWidth;
-                if (tooltipX < 4) // if the tooltip doesn't fit on the screen
-                {
+                if (tooltipX < 4) { // if the tooltip doesn't fit on the screen
                     if (x > width / 2) {
                         tooltipTextWidth = x - 12 - 8;
                     } else {
@@ -268,15 +274,15 @@ public class GuiKnowledge extends TBScreen {
             }
             if (needsWrap) {
                 int wrappedTooltipWidth = 0;
-                List<String> wrappedTextLines = new ArrayList<>();
+                List<ITextProperties> wrappedTextLines = new ArrayList<>();
                 for (int i = 0; i < textLines.size(); i++) {
-                    String textLine = textLines.get(i);
-                    List<String> wrappedLine = font.listFormattedStringToWidth(textLine, tooltipTextWidth);
+                    ITextProperties textLine = textLines.get(i);
+                    List<ITextProperties> wrappedLine = font.func_238425_b_(textLine, tooltipTextWidth);
                     if (i == 0) {
                         titleLinesCount = wrappedLine.size();
                     }
-                    for (String line : wrappedLine) {
-                        int lineWidth = font.getStringWidth(line);
+                    for (ITextProperties line : wrappedLine) {
+                        int lineWidth = font.func_238414_a_(line);
                         if (lineWidth > wrappedTooltipWidth) {
                             wrappedTooltipWidth = lineWidth;
                         }
@@ -308,21 +314,24 @@ public class GuiKnowledge extends TBScreen {
             int backgroundColor = 0xF0100010;
             int borderColorStart = 0x505000FF;
             int borderColorEnd = (borderColorStart & 0xFEFEFE) >> 1 | borderColorStart & 0xFF000000;
-            Helper.fillGradient(tooltipX - 3, tooltipY - 4, tooltipX + tooltipTextWidth + 3, tooltipY - 3, backgroundColor, backgroundColor, zLevel, false);
-            Helper.fillGradient(tooltipX - 3, tooltipY + tooltipHeight + 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 4, backgroundColor, backgroundColor, zLevel, false);
-            Helper.fillGradient(tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor, zLevel, false);
-            Helper.fillGradient(tooltipX - 4, tooltipY - 3, tooltipX - 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor, zLevel, false);
-            Helper.fillGradient(tooltipX + tooltipTextWidth + 3, tooltipY - 3, tooltipX + tooltipTextWidth + 4, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor, zLevel, false);
-            Helper.fillGradient(tooltipX - 3, tooltipY - 3 + 1, tooltipX - 3 + 1, tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd, zLevel, false);
-            Helper.fillGradient(tooltipX + tooltipTextWidth + 2, tooltipY - 3 + 1, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd, zLevel, false);
-            Helper.fillGradient(tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY - 3 + 1, borderColorStart, borderColorStart, zLevel, false);
-            Helper.fillGradient(tooltipX - 3, tooltipY + tooltipHeight + 2, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, borderColorEnd, borderColorEnd, zLevel, false);
+            matrixStack.push();
+            Matrix4f matrix = matrixStack.getLast().getMatrix();
+            Helper.fillGradient(matrix, tooltipX - 3, tooltipY - 4, tooltipX + tooltipTextWidth + 3, tooltipY - 3, backgroundColor, backgroundColor, zLevel, false);
+            Helper.fillGradient(matrix, tooltipX - 3, tooltipY + tooltipHeight + 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 4, backgroundColor, backgroundColor, zLevel, false);
+            Helper.fillGradient(matrix, tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor, zLevel, false);
+            Helper.fillGradient(matrix, tooltipX - 4, tooltipY - 3, tooltipX - 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor, zLevel, false);
+            Helper.fillGradient(matrix, tooltipX + tooltipTextWidth + 3, tooltipY - 3, tooltipX + tooltipTextWidth + 4, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor, zLevel, false);
+            Helper.fillGradient(matrix, tooltipX - 3, tooltipY - 3 + 1, tooltipX - 3 + 1, tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd, zLevel, false);
+            Helper.fillGradient(matrix, tooltipX + tooltipTextWidth + 2, tooltipY - 3 + 1, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd, zLevel, false);
+            Helper.fillGradient(matrix, tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY - 3 + 1, borderColorStart, borderColorStart, zLevel, false);
+            Helper.fillGradient(matrix, tooltipX - 3, tooltipY + tooltipHeight + 2, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, borderColorEnd, borderColorEnd, zLevel, false);
             int perkLine = 0;
+            IRenderTypeBuffer.Impl renderType = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
             for (int lineNumber = 0; lineNumber < textLines.size(); ++lineNumber) {
-                String line = textLines.get(lineNumber);
+                ITextProperties line = textLines.get(lineNumber);
                 // font.drawStringWithShadow(line, (float)tooltipX, (float)tooltipY, -1);
                 RenderSystem.color4f(1f, 1f, 1f, 1f);
-                String[] splits = line.split(" -> ");
+                String[] splits = line.getString().split(" -> ");
                 boolean isPerkLine = splits.length > 1;
                 if (isPerkLine && this.hoveredIcon.perk.isEncrypted() && perkLine > this.cap.getPerkLevelWithBonus(getMinecraft().player, this.hoveredIcon.perk)) {
                     String subString = splits[0] + " -> ";
@@ -332,7 +341,7 @@ public class GuiKnowledge extends TBScreen {
                         standardGalacticFontRenderer.drawString(matrixStack, TextFormatting.DARK_GRAY + splits[1], (float) (tooltipX + font.getStringWidth(subString)), (float) tooltipY, 0xffE1C87C);
                     }
                 } else {
-                    font.drawString(matrixStack, line, (float) tooltipX, (float) tooltipY, 0xffE1C87C);
+                    font.func_238416_a_(line, (float) tooltipX, (float) tooltipY, -1, true, matrix, renderType, false, 0, 0xffE1C87C);
                 }
                 if (isPerkLine) {
                     perkLine++;
@@ -342,6 +351,8 @@ public class GuiKnowledge extends TBScreen {
                 }
                 tooltipY += 10;
             }
+            renderType.finish();
+            matrixStack.pop();
             RenderSystem.enableLighting();
             RenderSystem.enableDepthTest();
             //PortingHelper.enableStandardItemLighting();

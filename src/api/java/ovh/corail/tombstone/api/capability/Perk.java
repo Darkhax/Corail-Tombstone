@@ -1,9 +1,11 @@
 package ovh.corail.tombstone.api.capability;
 
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistryEntry;
@@ -14,6 +16,7 @@ import javax.annotation.Nullable;
 public abstract class Perk extends ForgeRegistryEntry<Perk> implements Comparable<Perk>, IStringSerializable {
     protected final String name;
     protected final ResourceLocation icon;
+    protected ITextComponent translation;
 
     public Perk(String name, @Nullable ResourceLocation icon) {
         this.name = name;
@@ -53,14 +56,16 @@ public abstract class Perk extends ForgeRegistryEntry<Perk> implements Comparabl
         return TombstoneAPIProps.OWNER + ".perk." + this.name;
     }
 
-    @OnlyIn(Dist.CLIENT)
-    public String getClientTranslation() {
-        return I18n.format(getTranslationKey());
+    public ITextComponent getTranslation() {
+        if (this.translation == null) {
+            this.translation = new TranslationTextComponent(getTranslationKey());
+        }
+        return this.translation;
     }
 
     @OnlyIn(Dist.CLIENT)
-    public String getSpecialInfo(int levelWithBonus) {
-        return "";
+    public ITextComponent getSpecialInfo(int levelWithBonus) {
+        return StringTextComponent.EMPTY;
     }
 
     @Override

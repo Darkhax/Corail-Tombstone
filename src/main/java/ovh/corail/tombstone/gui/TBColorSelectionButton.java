@@ -28,7 +28,7 @@ public class TBColorSelectionButton extends OptionSlider {
     protected void renderBg(MatrixStack matrixStack, Minecraft minecraft, int x, int y) {
         minecraft.getTextureManager().bindTexture(WIDGETS_LOCATION);
         fill(matrixStack, this.x - 1, this.y - 1, this.x + this.width + 1, this.y + this.height + 1, 0xff000000);
-        Helper.fillGradient(this.x, this.y, this.x + this.width, this.y + this.height, this.intSupplier1.getAsInt() + 0xff000000, this.intSupplier2.getAsInt() + 0xff000000, getBlitOffset(), true);
+        Helper.fillGradient(matrixStack.getLast().getMatrix(), this.x, this.y, this.x + this.width, this.y + this.height, this.intSupplier1.getAsInt() + 0xff000000, this.intSupplier2.getAsInt() + 0xff000000, getBlitOffset(), true);
         fillGradient(matrixStack, this.x + (int) (this.width * this.field_230683_b_) - 1, this.y, this.x + (int) (this.width * this.field_230683_b_) + 1, this.y + this.height, 0xffc0c0c0, 0xff000000);
     }
 

@@ -92,7 +92,7 @@ public class ItemVoodooPoppet extends ItemGeneric implements ISoulConsumer {
             }
             addItemUse(list, isEnchanted(stack) ? "3" : hasProt ? "2" : "1");
             if (EntityHelper.getPerkLevelWithBonus(Minecraft.getInstance().player, ModPerks.voodoo_poppet) <= 0) {
-                addWarn(list, LangKey.MESSAGE_PERK_REQUIRED, new TranslationTextComponent(ModPerks.voodoo_poppet.getTranslationKey()).mergeStyle(StyleType.TOOLTIP_ITEM));
+                addWarn(list, LangKey.MESSAGE_PERK_REQUIRED, ModPerks.voodoo_poppet.getTranslation().copyRaw().mergeStyle(StyleType.TOOLTIP_ITEM));
             }
         } else {
             addInfoShowTooltip(list);

@@ -47,6 +47,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.util.registry.Registry;
@@ -171,10 +172,6 @@ public class Helper {
         List<T> list = new ArrayList<>();
         it.forEach(list::add);
         return list;
-    }
-
-    public static RegistryKey<World> getDimensionType(Entity entity) {
-        return getDimensionType(entity.world);
     }
 
     public static RegistryKey<World> getDimensionType(World world) {
@@ -511,7 +508,7 @@ public class Helper {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void fillGradient(int left, int top, int right, int bottom, int color1, int color2, int zLevel, boolean isHorizontal) {
+    public static void fillGradient(Matrix4f matrix, int left, int top, int right, int bottom, int color1, int color2, int zLevel, boolean isHorizontal) {
         float[] argb1 = getRGBColor4F(color1);
         float[] argb2 = getRGBColor4F(color2);
 
@@ -523,10 +520,10 @@ public class Helper {
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuffer();
         bufferbuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-        makeVertex(bufferbuilder, right, top, zLevel, isHorizontal ? argb2 : argb1);
-        makeVertex(bufferbuilder, left, top, zLevel, argb1);
-        makeVertex(bufferbuilder, left, bottom, zLevel, isHorizontal ? argb1 : argb2);
-        makeVertex(bufferbuilder, right, bottom, zLevel, argb2);
+        makeVertex(matrix, bufferbuilder, right, top, zLevel, isHorizontal ? argb2 : argb1);
+        makeVertex(matrix, bufferbuilder, left, top, zLevel, argb1);
+        makeVertex(matrix, bufferbuilder, left, bottom, zLevel, isHorizontal ? argb1 : argb2);
+        makeVertex(matrix, bufferbuilder, right, bottom, zLevel, argb2);
         tessellator.draw();
         RenderSystem.shadeModel(GL11.GL_FLAT);
         RenderSystem.disableBlend();
@@ -589,8 +586,8 @@ public class Helper {
     }
 
     @OnlyIn(Dist.CLIENT)
-    private static void makeVertex(BufferBuilder bufferbuilder, int x, int y, int zLevel, float[] colorArray) {
-        bufferbuilder.pos(x, y, zLevel).color(colorArray[0], colorArray[1], colorArray[2], colorArray[3]).endVertex();
+    private static void makeVertex(Matrix4f matrix, BufferBuilder bufferbuilder, int x, int y, int zLevel, float[] colorArray) {
+        bufferbuilder.pos(matrix, x, y, zLevel).color(colorArray[0], colorArray[1], colorArray[2], colorArray[3]).endVertex();
     }
 
     public static Set<Enchantment> getTombstoneEnchantments(ItemStack stack) {

@@ -3,6 +3,7 @@ package ovh.corail.tombstone.perk;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import ovh.corail.tombstone.api.capability.Perk;
@@ -53,7 +54,7 @@ public class PerkJailer extends Perk {
     }
 
     @Override
-    public String getSpecialInfo(int levelWithBonus) {
-        return LangKey.TOOLTIP_ACTUAL_BONUS.getClientTranslationWithStyle(StyleType.MESSAGE_SPECIAL, SharedConfigTombstone.general.chanceEnchantedGraveKey.get() + levelWithBonus * 20);
+    public ITextComponent getSpecialInfo(int levelWithBonus) {
+        return LangKey.TOOLTIP_ACTUAL_BONUS.getText(StyleType.MESSAGE_SPECIAL, SharedConfigTombstone.general.chanceEnchantedGraveKey.get() + levelWithBonus * 20);
     }
 }
