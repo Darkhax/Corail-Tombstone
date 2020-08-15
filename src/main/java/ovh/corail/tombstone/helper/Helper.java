@@ -31,7 +31,6 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.SnowballEntity;
 import net.minecraft.item.EnchantedBookItem;
 import net.minecraft.item.FishingRodItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemModelsProperties;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -54,9 +53,7 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.Color;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.Dimension;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.Chunk;
@@ -72,7 +69,6 @@ import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.LogicalSidedProvider;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.network.NetworkEvent;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -98,7 +94,6 @@ import ovh.corail.tombstone.command.CommandTBTeleportGrave;
 import ovh.corail.tombstone.command.CommandTBTeleportHome;
 import ovh.corail.tombstone.config.ConfigTombstone;
 import ovh.corail.tombstone.config.SharedConfigTombstone;
-import ovh.corail.tombstone.item.ItemBoneNeedle;
 import ovh.corail.tombstone.registry.ModBlocks;
 import ovh.corail.tombstone.registry.ModEnchantments;
 import ovh.corail.tombstone.registry.ModItems;
@@ -204,8 +199,8 @@ public class Helper {
         return new BlockPos(x, y, z);
     }
 
-    public static boolean isValidPos(World world, BlockPos pos) {
-        return world.getWorldBorder().contains(pos) && !World.isOutsideBuildHeight(pos);
+    public static boolean isValidPos(@Nullable World world, BlockPos pos) {
+        return world != null && world.getWorldBorder().contains(pos) && !World.isOutsideBuildHeight(pos);
     }
 
     public static boolean isInvalidDimension(MinecraftServer server, RegistryKey<World> key) {
@@ -264,9 +259,9 @@ public class Helper {
         if (!entity.world.isRemote) {
             MinecraftServer server = entity.getServer();
             if (server != null) {
-                DimensionType dimType = DimensionType.getById(loc.dim);
-                if (dimType != null) {
-                    TeleportationHandler.teleportEntity(entity, dimType, (double) loc.x + 0.5d, (double) loc.y + 0.1d, (double) loc.z + 0.5d);
+                ServerWorld targetWorld = server.getWorld(loc.dim);
+                if (targetWorld != null) {
+                    TeleportationHandler.teleportEntity(entity, targetWorld, (double) loc.x + 0.5d, (double) loc.y + 0.1d, (double) loc.z + 0.5d);
                 }
             }
         }

@@ -4,6 +4,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.Pair;
 import ovh.corail.tombstone.block.BlockGraveMarble.MarbleType;
 import ovh.corail.tombstone.block.GraveModel;
@@ -51,7 +53,7 @@ public class DeathHandler {
         }
     }
 
-    public void logLastGrave(@Nullable PlayerEntity player, int x, int y, int z, int dim) {
+    public void logLastGrave(@Nullable PlayerEntity player, int x, int y, int z, RegistryKey<World> dim) {
         if (player == null) {
             return;
         }

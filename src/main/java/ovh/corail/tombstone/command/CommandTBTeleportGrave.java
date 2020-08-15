@@ -8,6 +8,8 @@ import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.server.ServerWorld;
 import ovh.corail.tombstone.helper.DeathHandler;
 import ovh.corail.tombstone.helper.EntityHelper;
 import ovh.corail.tombstone.helper.Helper;
@@ -44,11 +46,12 @@ public class CommandTBTeleportGrave extends TombstoneCommand {
         checkAlive(player);
         checkNotSpectator(player);
 
+        MinecraftServer server = sender.getServer();
         DeathHandler deathHandler = DeathHandler.INSTANCE;
         Location lastGrave = deathHandler.getLastGrave(target.getGameProfile().getName());
         if (!lastGrave.isOrigin()) {
-            DimensionType dimensionType = getOrThrowDimensionType(lastGrave.dim);
-            if (!(sender.getServer().getWorld(dimensionType).getTileEntity(lastGrave.getPos()) instanceof TileEntityGrave)) {
+            ServerWorld world = getOrThrowWorld(server, lastGrave.dim);
+            if (!(world.getTileEntity(lastGrave.getPos()) instanceof TileEntityGrave)) {
                 deathHandler.removeGrave(lastGrave);
                 lastGrave = Location.ORIGIN;
             }
@@ -62,8 +65,8 @@ public class CommandTBTeleportGrave extends TombstoneCommand {
             }
         }
 
-        DimensionType dimensionType = getOrThrowDimensionType(lastGrave.dim);
-        checkValidPos(sender.getServer().getWorld(dimensionType), lastGrave.getPos());
+        ServerWorld world = getOrThrowWorld(server, lastGrave.dim);
+        checkValidPos(world, lastGrave.getPos());
         Entity newEntity = Helper.teleportToGrave(player, lastGrave);
         if (EntityHelper.isValidPlayer(newEntity)) {
             LangKey.MESSAGE_TELEPORT_SUCCESS.sendMessage((PlayerEntity) newEntity, StyleType.MESSAGE_SPELL);

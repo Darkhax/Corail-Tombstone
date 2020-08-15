@@ -48,8 +48,7 @@ public class CommandTBRestoreInventory extends TombstoneCommand {
             }
         }
 
-        DimensionType dimensionType = getOrThrowDimensionType(lastGrave.dim);
-        ServerWorld world = sender.getServer().getWorld(dimensionType);
+        ServerWorld world = getOrThrowWorld(sender.getServer(), lastGrave.dim);
         checkValidPos(world, lastGrave.getPos());
 
         TileEntity tile = world.getTileEntity(lastGrave.getPos());

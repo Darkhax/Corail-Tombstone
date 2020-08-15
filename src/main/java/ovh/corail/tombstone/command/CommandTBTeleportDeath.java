@@ -58,8 +58,7 @@ public class CommandTBTeleportDeath extends TombstoneCommand {
             LangKey.MESSAGE_COMMAND_IN_COOLDOWN.sendMessage(player, timeArray[0], timeArray[1], timeArray[2]);
             return 0;
         }
-        DimensionType dimensionType = getOrThrowDimensionType(lastDeathLocation.dim);
-        ServerWorld world = sender.getServer().getWorld(dimensionType);
+        ServerWorld world = getOrThrowWorld(sender.getServer(), lastDeathLocation.dim);
         Location location = new SpawnHelper(world, lastDeathLocation.getPos()).findSpawnPlace(false);
         if (location.isOrigin()) {
             throw LangKey.MESSAGE_NO_SPAWN.asCommandException();

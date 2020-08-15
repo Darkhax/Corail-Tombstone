@@ -1,10 +1,10 @@
 package ovh.corail.tombstone.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
+import net.minecraft.command.arguments.DimensionArgument;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.command.arguments.ResourceLocationArgument;
 import net.minecraft.entity.Entity;
@@ -12,7 +12,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.registries.GameData;
+import net.minecraftforge.registries.ForgeRegistries;
 import ovh.corail.tombstone.helper.EntityHelper;
 import ovh.corail.tombstone.helper.Helper;
 import ovh.corail.tombstone.helper.LangKey;
@@ -39,8 +39,8 @@ public class CommandTBTeleportDiscovery extends TombstoneCommand {
                         .executes(c -> teleportDiscovery(c.getSource(), EntityArgument.getEntity(c, TARGET_PARAM), DEFAULT_STRUCTURE))
                         .then(Commands.argument(STRUCTURE_PARAM, ResourceLocationArgument.resourceLocation()).suggests(SUGGESTION_STRUCTURE)
                                 .executes(c -> teleportDiscovery(c.getSource(), EntityArgument.getEntity(c, TARGET_PARAM), ResourceLocationArgument.getResourceLocation(c, STRUCTURE_PARAM)))
-                                .then(Commands.argument(DIM_PARAM, IntegerArgumentType.integer()).suggests(SUGGESTION_DIM_IDS)
-                                        .executes(c -> teleportDiscovery(c.getSource(), EntityArgument.getEntity(c, TARGET_PARAM), ResourceLocationArgument.getResourceLocation(c, STRUCTURE_PARAM), c.getSource().getServer().getWorld(getOrThrowDimensionType(IntegerArgumentType.getInteger(c, DIM_PARAM)))))
+                                .then(Commands.argument(DIM_PARAM, DimensionArgument.getDimension())
+                                        .executes(c -> teleportDiscovery(c.getSource(), EntityArgument.getEntity(c, TARGET_PARAM), ResourceLocationArgument.getResourceLocation(c, STRUCTURE_PARAM), DimensionArgument.getDimensionArgument(c, DIM_PARAM)))
                                 )
                         )
                 );
@@ -54,11 +54,8 @@ public class CommandTBTeleportDiscovery extends TombstoneCommand {
     private int teleportDiscovery(CommandSource sender, Entity target, ResourceLocation structureRL, ServerWorld world) {
         checkAlive(target);
         checkNotSpectator(target);
-        if (!GameData.getStructureFeatures().keySet().contains(structureRL)) {
+        if (!ForgeRegistries.STRUCTURE_FEATURES.getKeys().contains(structureRL)) {
             throw LangKey.MESSAGE_INVALID_STRUCTURE.asCommandException();
-        }
-        if (!world.getWorldInfo().isMapFeaturesEnabled()) {
-            throw LangKey.MESSAGE_NO_STRUCTURE.asCommandException();
         }
         int y = SupportStructures.getY(structureRL);
         final BlockPos targetPos = new BlockPos(target.getPosX(), y, target.getPosZ());

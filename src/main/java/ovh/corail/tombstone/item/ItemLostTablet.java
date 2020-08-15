@@ -201,9 +201,8 @@ public class ItemLostTablet extends ItemGraveMagic {
             LangKey.MESSAGE_TELEPORT_SAME_DIMENSION.sendMessage(player);
             return false;
         }
-        DimensionType dimType = DimensionType.getById(location.dim);
-        assert player.getServer() != null && dimType != null;
-        ServerWorld targetWorld = player.getServer().getWorld(dimType);
+        assert player.getServer() != null;
+        ServerWorld targetWorld = player.getServer().getWorld(location.dim);
         // TODO break tablets instead
         if (!Helper.isValidPos(targetWorld, location.getPos())) {
             LangKey.MESSAGE_TELEPORT_FAILED.sendMessage(player);
