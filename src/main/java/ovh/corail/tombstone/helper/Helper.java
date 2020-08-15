@@ -204,7 +204,6 @@ public class Helper {
     }
 
     public static boolean isInvalidDimension(MinecraftServer server, RegistryKey<World> key) {
-    	
     	return server.getWorld(key) == null;
     }
 

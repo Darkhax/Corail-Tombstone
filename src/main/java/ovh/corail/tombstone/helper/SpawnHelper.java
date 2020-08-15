@@ -9,6 +9,7 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -52,7 +53,7 @@ public class SpawnHelper {
     public enum EnumSpawnType {NONE, MINIMAL, NORMAL, FIT, IDEAL}
 
     private final World world;
-    private final int dimId;
+    private final RegistryKey<World> dimId;
     private final int actualHeight;
     private final BlockPos initPos;
     private List<BlockPos> positions;
@@ -62,8 +63,8 @@ public class SpawnHelper {
 
     public SpawnHelper(ServerWorld world, BlockPos initPos) {
         this.world = world;
-        this.dimId = Helper.getDimensionId(world);
-        this.actualHeight = world.getActualHeight();
+        this.dimId = world.func_234923_W_();
+        this.actualHeight = world.func_230315_m_().func_241513_m_();
         this.initPos = Helper.getCloserValidPos(world, initPos);
     }
 
@@ -332,7 +333,7 @@ public class SpawnHelper {
         } else if (block.isIn(BlockTags.TRAPDOORS) || block.isIn(BlockTags.DOORS) || block.isIn(BlockTags.FENCES) || block.isIn(Tags.Blocks.FENCE_GATES)) {
             return EnumSpawnPlace.UNSAFE;
         } else {
-            return !mat.blocksMovement() ? EnumSpawnPlace.SAFE : (block.isNormalCube(state, world, pos) ? EnumSpawnPlace.GROUND : EnumSpawnPlace.UNSAFE);
+            return !mat.blocksMovement() ? EnumSpawnPlace.SAFE : (state.isNormalCube(world, pos) ? EnumSpawnPlace.GROUND : EnumSpawnPlace.UNSAFE);
         }
     }
 }

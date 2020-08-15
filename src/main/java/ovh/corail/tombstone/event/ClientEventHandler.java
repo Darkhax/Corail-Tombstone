@@ -293,7 +293,7 @@ public class ClientEventHandler {
         } else {
             return;
         }
-        if (location.isOrigin() || location.dim != Helper.getDimensionId(player) || !World.isValid(location.getPos())) {
+        if (location.isOrigin() || !location.dim.equals(player.world.func_234923_W_()) || !World.isValid(location.getPos())) {
             return;
         }
         createBox(event.getMatrixStack(), location.x, location.y, location.z, 1f);

@@ -18,12 +18,17 @@ import net.minecraft.network.play.server.SPlayerAbilitiesPacket;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.concurrent.ThreadTaskExecutor;
+import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.FolderName;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import org.apache.commons.lang3.tuple.Pair;
 import ovh.corail.tombstone.ModTombstone;
 import ovh.corail.tombstone.config.ConfigTombstone;
 import ovh.corail.tombstone.helper.LangKey;
+import ovh.corail.tombstone.helper.NBTStackHelper;
 import ovh.corail.tombstone.helper.StyleType;
 import ovh.corail.tombstone.helper.ThreadedBackup;
 
@@ -32,7 +37,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.nio.file.Path;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -207,6 +213,8 @@ public class CommandTBRecovery extends TombstoneCommand {
         return saveFolder;
     }
 
+    private static final Method methodWritePlayerData = ObfuscationReflectionHelper.findMethod(PlayerList.class, "func_75753_a", ServerPlayerEntity.class);
+
     private int recoverPlayerOffline(CommandSource sender, GameProfile profil, String fileString) {
         PlayerList playerList = sender.getServer().getPlayerList();
         ServerPlayerEntity player = playerList.createPlayerForUser(profil);
@@ -215,7 +223,11 @@ public class CommandTBRecovery extends TombstoneCommand {
             reader.close();
             if (!nbt.keySet().isEmpty()) {
                 player.read(nbt);
-                player.server.getPlayerList().writePlayerData(player);
+                try {
+                    methodWritePlayerData.invoke(sender.getServer(), player);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    e.printStackTrace();
+                }
                 sendMessage(sender, LangKey.MESSAGE_RECOVERY_LOAD_PLAYER_SUCCESS.getText(player.getName()), false);
             }
         } catch (Exception e) {
@@ -233,10 +245,13 @@ public class CommandTBRecovery extends TombstoneCommand {
             CompoundNBT nbt = JsonToNBT.getTagFromJson(reader.readLine());
             reader.close();
             if (!nbt.keySet().isEmpty()) {
-                DimensionType sourceDim = player.world.dimension.getType();
-                DimensionType targetDim = DimensionType.getById(nbt.getInt("Dimension"));
-                if (targetDim == null) {
-                    targetDim = DimensionType.OVERWORLD;
+                RegistryKey<World> sourceDim = player.world.func_234923_W_();
+                RegistryKey<World> targetDim = NBTStackHelper.getWorldKey(nbt, "Dimension");
+                MinecraftServer server = sender.getServer();
+                ServerWorld targetWorld;
+                if (targetDim == null || (targetWorld = sender.getServer().getWorld(targetDim)) == null) {
+                    targetDim = World.field_234918_g_;
+                    targetWorld = server.getWorld(targetDim);
                 }
                 ListNBT pos = nbt.getList("Pos", 6);
                 double x = pos.getDouble(0);
@@ -249,7 +264,7 @@ public class CommandTBRecovery extends TombstoneCommand {
                 nbt.remove("Pos");
                 nbt.remove("Rotation");
                 player.deserializeNBT(nbt);
-                player.teleport(sender.getServer().getWorld(targetDim), x, y, z, yaw, pitch);
+                player.teleport(targetWorld, x, y, z, yaw, pitch);
                 if (sourceDim == targetDim) {
                     player.connection.sendPacket(new SPlayerAbilitiesPacket(player.abilities));
                     for (EffectInstance potioneffect : player.getActivePotionEffects()) {

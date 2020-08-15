@@ -152,7 +152,7 @@ public class ItemGraveKey extends ItemGraveMagic {
         }
         assert player.getServer() != null;
         ServerWorld targetWorld = player.getServer().getWorld(location.dim);
-        if (Helper.isInvalidDimension(location.dim) || !Helper.isValidPos(targetWorld, location.getPos())) {
+        if (targetWorld == null || !Helper.isValidPos(targetWorld, location.getPos())) {
             LangKey.MESSAGE_INVALID_LOCATION.sendMessage(player);
             return false;
         }
