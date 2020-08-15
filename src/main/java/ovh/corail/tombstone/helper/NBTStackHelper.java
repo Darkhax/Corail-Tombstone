@@ -3,11 +3,15 @@ package ovh.corail.tombstone.helper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.NBTDynamicOps;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.Constants.NBT;
+import ovh.corail.tombstone.ModTombstone;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -104,7 +108,7 @@ public class NBTStackHelper {
 
     public static CompoundNBT setLocation(CompoundNBT tag, String keyName, Location location) {
         setBlockPos(tag, keyName, location.getPos());
-        tag.putInt(keyName + "D", location.dim);
+        setWorldKey(tag, keyName + "D", location.dim);
         return tag;
     }
 
@@ -115,11 +119,34 @@ public class NBTStackHelper {
     public static Location getLocation(@Nullable CompoundNBT tag, String keyName) {
         if (tag != null && tag.contains(keyName + "D")) {
             BlockPos pos = getBlockPos(tag, keyName);
-            if (!pos.equals(Location.ORIGIN_POS)) {
-                return new Location(pos, tag.getInt(keyName + "D"));
+            RegistryKey<World> worldKey = getWorldKey(tag, keyName + "D");
+            if (!pos.equals(Location.ORIGIN_POS) && worldKey != null) {
+                return new Location(pos, worldKey);
             }
         }
         return Location.ORIGIN;
+    }
+
+    public static ItemStack setWorldKey(ItemStack stack, String keyName, RegistryKey<World> worldKey) {
+        setWorldKey(stack.getOrCreateTag(), keyName, worldKey);
+        return stack;
+    }
+
+    public static CompoundNBT setWorldKey(CompoundNBT tag, String keyName, RegistryKey<World> worldKey) {
+        World.field_234917_f_.encodeStart(NBTDynamicOps.INSTANCE, worldKey).resultOrPartial(ModTombstone.LOGGER::error).ifPresent(rl -> {
+            tag.put(keyName, rl);
+        });
+        return tag;
+    }
+
+    @Nullable
+    public static RegistryKey<World> getWorldKey(ItemStack stack, String keyName) {
+        return getWorldKey(stack.getTag(), keyName);
+    }
+
+    @Nullable
+    public static RegistryKey<World> getWorldKey(@Nullable CompoundNBT tag, String keyName) {
+        return tag != null && tag.contains(keyName) ? World.field_234917_f_.parse(NBTDynamicOps.INSTANCE, tag.get(keyName)).result().orElse(null) : null;
     }
 
     public static boolean removeLocation(ItemStack stack, String keyName) {
