@@ -3,10 +3,7 @@ package ovh.corail.tombstone.gui;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
@@ -18,6 +15,7 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.client.gui.GuiUtils;
 import ovh.corail.tombstone.api.capability.ITBCapability;
 import ovh.corail.tombstone.api.capability.Perk;
 import ovh.corail.tombstone.helper.Helper;
@@ -222,7 +220,8 @@ public class GuiKnowledge extends TBScreen {
                 list.add(specialInfo);
             }
             IntStream.rangeClosed(1, this.hoveredIcon.perk.getLevelMax()).forEach(i -> {
-                ITextComponent info = new StringTextComponent(this.hoveredIcon.perk.getTooltip(i, this.hoveredPerkLevel, levelWithBonus));
+                String tooltip = this.hoveredIcon.perk.getTooltip(i, this.hoveredPerkLevel, levelWithBonus);
+                ITextComponent info = tooltip.isEmpty() ? StringTextComponent.EMPTY : new StringTextComponent(tooltip);
                 if (info != StringTextComponent.EMPTY) {
                     TextFormatting formatting = this.hoveredPerkLevel >= i ? TextFormatting.WHITE : (hoveredIcon.perk.isEncrypted() ? levelWithBonus >= i : levelWithBonus == i) ? TextFormatting.DARK_PURPLE : TextFormatting.DARK_GRAY;
                     list.add(new StringTextComponent(i + " -> ").append(info).mergeStyle(formatting));
@@ -236,127 +235,8 @@ public class GuiKnowledge extends TBScreen {
             } else {
                 list.add(LangKey.MESSAGE_MAX.getText(TextFormatting.GOLD));
             }
-            drawHoveringText(matrixStack, list, this.hoveredIcon.minX + 10, this.hoveredIcon.minY + 10, this.font);
-        }
-    }
-
-    private void drawHoveringText(MatrixStack matrixStack, List<ITextProperties> textLines, int x, int y, FontRenderer font) {
-        int maxTextWidth = 200;
-        if (!textLines.isEmpty()) {
-            RenderSystem.disableRescaleNormal();
-            RenderHelper.disableStandardItemLighting();
-            RenderSystem.disableLighting();
-            RenderSystem.disableDepthTest();
-            int tooltipTextWidth = 0;
-            for (ITextProperties textLine : textLines) {
-                int textLineWidth = font.func_238414_a_(textLine);
-                if (textLineWidth > tooltipTextWidth) {
-                    tooltipTextWidth = textLineWidth;
-                }
-            }
-            boolean needsWrap = false;
-            int titleLinesCount = 1;
-            int tooltipX = x + 12;
-            if (tooltipX + tooltipTextWidth + 4 > width) {
-                tooltipX = x - 16 - tooltipTextWidth;
-                if (tooltipX < 4) { // if the tooltip doesn't fit on the screen
-                    if (x > width / 2) {
-                        tooltipTextWidth = x - 12 - 8;
-                    } else {
-                        tooltipTextWidth = width - 16 - x;
-                    }
-                    needsWrap = true;
-                }
-            }
-            if (tooltipTextWidth > maxTextWidth) {
-                tooltipTextWidth = maxTextWidth;
-                needsWrap = true;
-            }
-            if (needsWrap) {
-                int wrappedTooltipWidth = 0;
-                List<ITextProperties> wrappedTextLines = new ArrayList<>();
-                for (int i = 0; i < textLines.size(); i++) {
-                    ITextProperties textLine = textLines.get(i);
-                    List<ITextProperties> wrappedLine = font.func_238425_b_(textLine, tooltipTextWidth);
-                    if (i == 0) {
-                        titleLinesCount = wrappedLine.size();
-                    }
-                    for (ITextProperties line : wrappedLine) {
-                        int lineWidth = font.func_238414_a_(line);
-                        if (lineWidth > wrappedTooltipWidth) {
-                            wrappedTooltipWidth = lineWidth;
-                        }
-                        wrappedTextLines.add(line);
-                    }
-                }
-                tooltipTextWidth = wrappedTooltipWidth;
-                textLines = wrappedTextLines;
-                if (x > width / 2) {
-                    tooltipX = x - 16 - tooltipTextWidth;
-                } else {
-                    tooltipX = x + 12;
-                }
-            }
-            int tooltipY = y - 12;
-            int tooltipHeight = 8;
-            if (textLines.size() > 1) {
-                tooltipHeight += (textLines.size() - 1) * 10;
-                if (textLines.size() > titleLinesCount) {
-                    tooltipHeight += 2; // gap between title lines and next lines
-                }
-            }
-            if (tooltipY < 4) {
-                tooltipY = 4;
-            } else if (tooltipY + tooltipHeight + 4 > this.height) {
-                tooltipY = this.height - tooltipHeight - 4;
-            }
-            final int zLevel = 300;
-            int backgroundColor = 0xF0100010;
-            int borderColorStart = 0x505000FF;
-            int borderColorEnd = (borderColorStart & 0xFEFEFE) >> 1 | borderColorStart & 0xFF000000;
-            matrixStack.push();
-            Matrix4f matrix = matrixStack.getLast().getMatrix();
-            Helper.fillGradient(matrix, tooltipX - 3, tooltipY - 4, tooltipX + tooltipTextWidth + 3, tooltipY - 3, backgroundColor, backgroundColor, zLevel, false);
-            Helper.fillGradient(matrix, tooltipX - 3, tooltipY + tooltipHeight + 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 4, backgroundColor, backgroundColor, zLevel, false);
-            Helper.fillGradient(matrix, tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor, zLevel, false);
-            Helper.fillGradient(matrix, tooltipX - 4, tooltipY - 3, tooltipX - 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor, zLevel, false);
-            Helper.fillGradient(matrix, tooltipX + tooltipTextWidth + 3, tooltipY - 3, tooltipX + tooltipTextWidth + 4, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor, zLevel, false);
-            Helper.fillGradient(matrix, tooltipX - 3, tooltipY - 3 + 1, tooltipX - 3 + 1, tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd, zLevel, false);
-            Helper.fillGradient(matrix, tooltipX + tooltipTextWidth + 2, tooltipY - 3 + 1, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd, zLevel, false);
-            Helper.fillGradient(matrix, tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY - 3 + 1, borderColorStart, borderColorStart, zLevel, false);
-            Helper.fillGradient(matrix, tooltipX - 3, tooltipY + tooltipHeight + 2, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, borderColorEnd, borderColorEnd, zLevel, false);
-            int perkLine = 0;
-            IRenderTypeBuffer.Impl renderType = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
-            for (int lineNumber = 0; lineNumber < textLines.size(); ++lineNumber) {
-                ITextProperties line = textLines.get(lineNumber);
-                // font.drawStringWithShadow(line, (float)tooltipX, (float)tooltipY, -1);
-                RenderSystem.color4f(1f, 1f, 1f, 1f);
-                String[] splits = line.getString().split(" -> ");
-                boolean isPerkLine = splits.length > 1;
-                if (isPerkLine && this.hoveredIcon.perk.isEncrypted() && perkLine > this.cap.getPerkLevelWithBonus(getMinecraft().player, this.hoveredIcon.perk)) {
-                    String subString = splits[0] + " -> ";
-                    font.drawString(matrixStack, subString, (float) tooltipX, (float) tooltipY, 0xffE1C87C);
-                    FontRenderer standardGalacticFontRenderer = getMinecraft().getFontResourceManager().getFontRenderer(Minecraft.standardGalacticFontRenderer);
-                    if (standardGalacticFontRenderer != null) {
-                        standardGalacticFontRenderer.drawString(matrixStack, TextFormatting.DARK_GRAY + splits[1], (float) (tooltipX + font.getStringWidth(subString)), (float) tooltipY, 0xffE1C87C);
-                    }
-                } else {
-                    font.func_238416_a_(line, (float) tooltipX, (float) tooltipY, -1, true, matrix, renderType, false, 0, 0xffE1C87C);
-                }
-                if (isPerkLine) {
-                    perkLine++;
-                }
-                if (lineNumber + 1 == titleLinesCount) {
-                    tooltipY += 2;
-                }
-                tooltipY += 10;
-            }
-            renderType.finish();
-            matrixStack.pop();
-            RenderSystem.enableLighting();
-            RenderSystem.enableDepthTest();
-            //PortingHelper.enableStandardItemLighting();
-            RenderSystem.enableRescaleNormal();
+            // TODO re-add the encrypted text for tooltip (perk.isEncrypted())
+            GuiUtils.drawHoveringText(matrixStack, list, this.hoveredIcon.minX + 10, this.hoveredIcon.minY + 10, this.width, this.height, 200, this.font);
         }
     }
 

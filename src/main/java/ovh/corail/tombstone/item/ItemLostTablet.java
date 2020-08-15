@@ -192,7 +192,7 @@ public class ItemLostTablet extends ItemGraveMagic {
     protected boolean doEffects(World world, ServerPlayerEntity player, ItemStack stack) {
         Location location = getStructurePos(stack);
         String structureId = getStructureId(stack);
-        if (structureId == null || location.isOrigin() || Helper.isInvalidDimension(location.dim)) {
+        if (structureId == null || location.isOrigin()) {
             LangKey.MESSAGE_TELEPORT_FAILED.sendMessage(player);
             resetStack(world, stack);
             return false;

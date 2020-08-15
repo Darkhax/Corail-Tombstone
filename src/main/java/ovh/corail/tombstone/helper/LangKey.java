@@ -198,7 +198,7 @@ public enum LangKey {
     }
     
     public IFormattableTextComponent getText(Object... args) {
-    	return args.length > 0 ? new TranslationTextComponent(this.key, args) : new TranslationTextComponent(this.key);
+    	return args.length > 0 ? new TranslationTextComponent(this.getKey(), args) : new TranslationTextComponent(this.getKey());
     }
     
     public void sendMessage(PlayerEntity player, TextFormatting format, Object... args) {

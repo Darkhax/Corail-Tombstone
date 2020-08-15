@@ -23,27 +23,37 @@ import static ovh.corail.tombstone.api.TombstoneAPIProps.OWNER;
 public class RecipeEnchantedGraveKey extends ShapelessRecipe {
     @ObjectHolder("tombstone:grave_key")
     public static final Item GRAVE_KEY = Items.AIR;
-    private static final ITag.INamedTag ENCHANTED_GRAVE_KEY_INGREDIENTS = ItemTags.makeWrapperTag(OWNER + ":enchanted_grave_key_ingredients");
+    private static final ITag.INamedTag<Item> ENCHANTED_GRAVE_KEY_INGREDIENTS = ItemTags.makeWrapperTag(OWNER + ":enchanted_grave_key_ingredients");
 
     public RecipeEnchantedGraveKey(ResourceLocation rl) {
         // default recipe "tombstone:enchanted_grave_key" as example
-        this(rl, getAdditionalIngredients());
-    }
-
-    private static NonNullList<Ingredient> getAdditionalIngredients() {
-        NonNullList<Ingredient> ingredients = NonNullList.create();
-        ingredients.add(Ingredient.fromTag(ENCHANTED_GRAVE_KEY_INGREDIENTS));
-        return ingredients;
+        this(rl, NonNullList.withSize(1, Ingredient.EMPTY));
     }
 
     public RecipeEnchantedGraveKey(ResourceLocation rl, NonNullList<Ingredient> ingredients) {
         super(rl, "enchanted_grave_key", setEnchant(new ItemStack(GRAVE_KEY), false), ingredients);
-        getIngredients().add(Ingredient.fromStacks(new ItemStack(GRAVE_KEY)));
     }
 
     @Override
     public boolean matches(CraftingInventory inv, World world) {
-        return GRAVE_KEY != Items.AIR && ((IDisableable) GRAVE_KEY).isEnabled() && super.matches(inv, world);
+        if (GRAVE_KEY != Items.AIR && ((IDisableable) GRAVE_KEY).isEnabled()) {
+            boolean keyFound = false, compoFound = false;
+            for (int i = 0; i < inv.getSizeInventory(); i++) {
+                ItemStack stack = inv.getStackInSlot(i);
+                if (!stack.isEmpty()) {
+                    if (!keyFound && stack.getItem() == GRAVE_KEY && (stack.getTag() == null || !stack.getTag().getBoolean("enchant"))) {
+                        keyFound = true;
+                        continue;
+                    } else if (!compoFound && ENCHANTED_GRAVE_KEY_INGREDIENTS.contains(stack.getItem())) {
+                        compoFound = true;
+                        continue;
+                    }
+                    return false;
+                }
+            }
+            return keyFound && compoFound;
+        }
+        return false;
     }
 
     @Override

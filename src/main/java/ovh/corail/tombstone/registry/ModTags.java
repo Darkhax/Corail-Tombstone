@@ -22,6 +22,8 @@ public class ModTags {
     }
 
     public static class Items {
+        public static final INamedTag<Item> VOODOO_POPPET_INGREDIENTS = tag("voodoo_poppet_ingredients");
+
         private static INamedTag<Item> tag(String name) {
             return ItemTags.makeWrapperTag(new ResourceLocation(MOD_ID, name).toString());
         }

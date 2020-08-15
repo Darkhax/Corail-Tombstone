@@ -8,8 +8,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.ShapelessRecipe;
-import net.minecraft.tags.ITag;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
@@ -17,23 +15,20 @@ import ovh.corail.tombstone.helper.EntityHelper;
 import ovh.corail.tombstone.item.ItemVoodooPoppet.PoppetProtections;
 import ovh.corail.tombstone.registry.ModItems;
 import ovh.corail.tombstone.registry.ModPerks;
+import ovh.corail.tombstone.registry.ModTags;
 
 import javax.annotation.Nullable;
 
-import static ovh.corail.tombstone.ModTombstone.MOD_ID;
-
 public class RecipeVoodooPoppetProtection extends ShapelessRecipe {
     private static final NonNullList<Ingredient> INGREDIENTS = NonNullList.create();
-    private static final ITag.INamedTag VOODOO_POPPET_INGREDIENTS = ItemTags.makeWrapperTag(MOD_ID + ":voodoo_poppet_ingredients");
 
     static {
         INGREDIENTS.add(Ingredient.fromStacks(new ItemStack(ModItems.voodoo_poppet)));
         INGREDIENTS.add(Ingredient.fromStacks(new ItemStack(ModItems.grave_dust)));
-        INGREDIENTS.add(Ingredient.fromTag(VOODOO_POPPET_INGREDIENTS));
     }
 
     public RecipeVoodooPoppetProtection(ResourceLocation rl) {
-        super(rl, "voodoo_poppet_protection", new ItemStack(ModItems.voodoo_poppet), INGREDIENTS);
+        super(rl, "voodoo_poppet_protection", new ItemStack(ModItems.voodoo_poppet), NonNullList.withSize(1, Ingredient.EMPTY));
     }
 
     @Override
@@ -51,7 +46,7 @@ public class RecipeVoodooPoppetProtection extends ShapelessRecipe {
                 } else if (!dustFound && INGREDIENTS.get(1).test(stack)) {
                     dustFound = true;
                     continue;
-                } else if (!compoFound && INGREDIENTS.get(2).test(stack)) {
+                } else if (!compoFound && ModTags.Items.VOODOO_POPPET_INGREDIENTS.contains(stack.getItem())) {
                     compoFound = true;
                     continue;
                 }
@@ -70,7 +65,7 @@ public class RecipeVoodooPoppetProtection extends ShapelessRecipe {
             ItemStack stack = inv.getStackInSlot(i);
             if (poppet.isEmpty() && stack.getItem() == ModItems.voodoo_poppet) {
                 poppet = stack;
-            } else if (compo.isEmpty() && INGREDIENTS.get(2).test(stack)) {
+            } else if (compo.isEmpty() && ModTags.Items.VOODOO_POPPET_INGREDIENTS.contains(stack.getItem())) {
                 prot = getPoppetProtection(stack);
             }
         }

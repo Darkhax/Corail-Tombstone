@@ -51,7 +51,8 @@ public final class WorldFunctionInjector {
     }
 
     private static void inject(FunctionManager manager, ImmutableMap<ResourceLocation, CommandFunction> functions) {
-        Map<ResourceLocation, FunctionObject> delegate = manager.getFunctions();
+        // TODO disabled
+        /*Map<ResourceLocation, FunctionObject> delegate = manager.getFunctions();
         ImmutableMap.Builder<ResourceLocation, CommandFunction> builder = ImmutableMap.builder();
         for (Map.Entry<ResourceLocation, CommandFunction> entry : functions.entrySet()) {
             if (!delegate.containsKey(entry.getKey())) {
@@ -61,7 +62,7 @@ public final class WorldFunctionInjector {
         ImmutableMap<ResourceLocation, CommandFunction> uniqueFunctions = builder.build();
         if (!uniqueFunctions.isEmpty()) {
             manager.functions = new WorldFunctionInjector.InjectionMap(delegate, uniqueFunctions, Maps.newHashMap());
-        }
+        }*/
     }
 
     private static final class InjectionMap extends ForwardingMap<ResourceLocation, FunctionObject> {

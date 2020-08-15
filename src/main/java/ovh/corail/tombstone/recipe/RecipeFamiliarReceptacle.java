@@ -9,6 +9,7 @@ import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.ShapedRecipe;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
 import net.minecraftforge.common.Tags;
 import ovh.corail.tombstone.capability.TBCapabilityProvider;
 import ovh.corail.tombstone.config.SharedConfigTombstone;
@@ -20,29 +21,31 @@ import javax.annotation.Nullable;
 public class RecipeFamiliarReceptacle extends ShapedRecipe {
 
     public RecipeFamiliarReceptacle(ResourceLocation rl) {
-        this(rl, 3, 3, getAdditionalIngredients());
+        this(rl, 3, 3, NonNullList.withSize(1, Ingredient.EMPTY));
     }
 
     public RecipeFamiliarReceptacle(ResourceLocation rl, int width, int height, NonNullList<Ingredient> ingredients) {
         super(rl, "familiar_receptacle", width, height, ingredients, new ItemStack(ModItems.familiar_receptacle));
     }
 
-    private static NonNullList<Ingredient> getAdditionalIngredients() {
-        NonNullList<Ingredient> ingredients = NonNullList.create();
-        Ingredient tear = Ingredient.fromStacks(new ItemStack(Items.GHAST_TEAR));
-        Ingredient iron = Ingredient.fromTag(Tags.Items.INGOTS_IRON);
-        ingredients.add(tear);
-        ingredients.add(iron);
-        ingredients.add(tear);
-
-        ingredients.add(iron);
-        ingredients.add(Ingredient.fromStacks(new ItemStack(ModItems.impregnated_diamond)));
-        ingredients.add(iron);
-
-        ingredients.add(tear);
-        ingredients.add(iron);
-        ingredients.add(tear);
-        return ingredients;
+    @Override
+    public boolean matches(CraftingInventory inv, World world) {
+        NonNullList<Ingredient> ing = getIngredients();
+        if (ing.size() == 1 && ing.get(0) == Ingredient.EMPTY) {
+            ing.clear();
+            Ingredient tear = Ingredient.fromStacks(new ItemStack(Items.GHAST_TEAR));
+            Ingredient iron = Ingredient.fromTag(Tags.Items.INGOTS_IRON);
+            ing.add(tear);
+            ing.add(iron);
+            ing.add(tear);
+            ing.add(iron);
+            ing.add(Ingredient.fromStacks(new ItemStack(ModItems.impregnated_diamond)));
+            ing.add(iron);
+            ing.add(tear);
+            ing.add(iron);
+            ing.add(tear);
+        }
+        return super.matches(inv, world);
     }
 
     @Override

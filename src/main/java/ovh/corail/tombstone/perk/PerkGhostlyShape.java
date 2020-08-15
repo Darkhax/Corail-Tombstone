@@ -1,5 +1,6 @@
 package ovh.corail.tombstone.perk;
 
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -38,13 +39,13 @@ public class PerkGhostlyShape extends Perk {
     @OnlyIn(Dist.CLIENT)
     public String getTooltip(int level, int actualLevel, int levelWithBonus) {
         if (level == 1) {
-            return "effect.tombstone.feather_fall";
+            return I18n.format("effect.tombstone.feather_fall");
         } else if (level == 2) {
             return LangKey.MESSAGE_BREATHING.getClientTranslation();
         } else if (level == 3) {
-            return "effect.tombstone.purification";
+            return I18n.format("effect.tombstone.purification");
         } else if (level == 4) {
-            return "effect.tombstone.true_sight";
+            return I18n.format("effect.tombstone.true_sight");
         } else if (level == 5) {
             return LangKey.MESSAGE_INVULNERABLE.getClientTranslation();
         }

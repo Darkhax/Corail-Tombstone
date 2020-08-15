@@ -93,10 +93,11 @@ public class BlockDecorativeGrave extends BlockGraveBase<TileEntityDecorativeGra
         return 0;
     }
 
-    @Override
+    // TODO disabled
+    /*@Override
     public float getBlockHardness(BlockState state, IBlockReader world, BlockPos pos) {
         return SharedConfigTombstone.decorative_grave.unbreakableDecorativeGrave.get() ? -1f : blockHardness;
-    }
+    }*/
 
     @Override
     public boolean canEntityDestroy(BlockState state, IBlockReader world, BlockPos pos, Entity entity) {

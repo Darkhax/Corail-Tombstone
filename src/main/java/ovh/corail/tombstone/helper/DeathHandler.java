@@ -68,9 +68,10 @@ public class DeathHandler {
             if (!s.isEmpty()) {
                 String[] res = s.split(",");
                 if (res.length == 5) {
-                    if (new Location(Integer.valueOf(res[0].trim()), Integer.valueOf(res[1].trim()), Integer.valueOf(res[2].trim()), Integer.valueOf(res[3].trim())).isInRangeAndDimension(location, Integer.valueOf(res[4].trim()))) {
+                    // TODO disabled
+                    /*if (new Location(Integer.valueOf(res[0].trim()), Integer.valueOf(res[1].trim()), Integer.valueOf(res[2].trim()), Integer.valueOf(res[3].trim())).isInRangeAndDimension(location, Integer.valueOf(res[4].trim()))) {
                         return true;
-                    }
+                    }*/
                 } else if (res.length == 1 && Integer.valueOf(res[0].trim()).equals(location.dim)) {
                     return true;
                 }

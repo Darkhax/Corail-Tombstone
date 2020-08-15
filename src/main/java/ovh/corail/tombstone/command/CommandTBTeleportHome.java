@@ -58,7 +58,9 @@ public class CommandTBTeleportHome extends TombstoneCommand {
     }
 
     public static Pair<World, BlockPos> getRespawnPoint(PlayerEntity player) {
-        BlockPos pos = player.getBedLocation(Helper.getDimensionType(player));
+        // TODO disabled
+        return Pair.of(player.world, player.getBedPosition().orElse(player.getPosition()));
+        /*BlockPos pos = player.getBedLocation(player.world.func_234923_W_());
         if (pos != null) {
             return Pair.of(player.world, pos);
         }
@@ -67,6 +69,6 @@ public class CommandTBTeleportHome extends TombstoneCommand {
         if (pos == null) {
             pos = spawnWorld.getSpawnPoint();
         }
-        return Pair.of(spawnWorld, pos);
+        return Pair.of(spawnWorld, pos);*/
     }
 }

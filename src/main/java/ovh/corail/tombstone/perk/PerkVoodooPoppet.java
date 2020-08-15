@@ -1,5 +1,6 @@
 package ovh.corail.tombstone.perk;
 
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -37,15 +38,15 @@ public class PerkVoodooPoppet extends Perk {
     @OnlyIn(Dist.CLIENT)
     public String getTooltip(int level, int actualLevel, int levelWithBonus) {
         if (level == 1) {
-            return "tombstone.item.voodoo_poppet.suffocation";
+            return I18n.format("tombstone.item.voodoo_poppet.suffocation");
         } else if (level == 2) {
-            return "tombstone.item.voodoo_poppet.burn";
+            return I18n.format("tombstone.item.voodoo_poppet.burn");
         } else if (level == 3) {
-            return "tombstone.item.voodoo_poppet.lightning";
+            return I18n.format("tombstone.item.voodoo_poppet.lightning");
         } else if (level == 4) {
-            return "tombstone.item.voodoo_poppet.fall";
+            return I18n.format("tombstone.item.voodoo_poppet.fall");
         } else if (level == 5) {
-            return "tombstone.item.voodoo_poppet.degeneration";
+            return I18n.format("tombstone.item.voodoo_poppet.degeneration");
         }
         return "";
     }
