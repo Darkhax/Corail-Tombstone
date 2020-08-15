@@ -224,7 +224,7 @@ public class CommandTBRecovery extends TombstoneCommand {
             if (!nbt.keySet().isEmpty()) {
                 player.read(nbt);
                 try {
-                    methodWritePlayerData.invoke(sender.getServer(), player);
+                    methodWritePlayerData.invoke(sender.getServer().getPlayerList(), player);
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     e.printStackTrace();
                 }
