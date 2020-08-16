@@ -32,7 +32,6 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
-import net.minecraft.util.concurrent.ThreadTaskExecutor;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -88,7 +87,6 @@ import ovh.corail.tombstone.command.CommandTBRecovery;
 import ovh.corail.tombstone.compatibility.CompatibilityMinecolonies;
 import ovh.corail.tombstone.config.ConfigTombstone;
 import ovh.corail.tombstone.config.SharedConfigTombstone;
-import ovh.corail.tombstone.helper.CallbackHandler;
 import ovh.corail.tombstone.helper.CooldownHandler;
 import ovh.corail.tombstone.spawner.CustomPhantomSpawner;
 import ovh.corail.tombstone.spawner.CustomVillageSiege;
@@ -140,16 +138,9 @@ public class EventHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLootTableLoad(LootTableLoadEvent event) {
         if (event.getName().equals(LootTables.GAMEPLAY_FISHING_JUNK)) {
-            CallbackHandler.addCallback(0, () -> {
-                ThreadTaskExecutor server = Helper.getServer();
-                if (server == null) {
-                    LOGGER.warn("A mod called the LootTableLoadEvent from the client side");
-                } else {
-                    LootHelper.addLostEntries(event.getTable());
-                    LootHelper.addChestEntries(event.getLootTableManager());
-                }
-            });
-
+            LootHelper.addLostEntries(event.getTable());
+        } else if (ConfigTombstone.loot.treasureLootTable.get().contains(event.getName().toString())) {
+            LootHelper.addChestEntries(event.getTable());
         }
     }
 
@@ -663,7 +654,7 @@ public class EventHandler {
             needAccess = false;
         }
         (hasGrave ? LangKey.MESSAGE_EXISTING_GRAVE : LangKey.MESSAGE_NEW_GRAVE).sendMessage(player, StyleType.MESSAGE_SPECIAL,
-                LangKey.MESSAGE_JOURNEYMAP.getText(StyleType.TOOLTIP_DESC, LangKey.MESSAGE_LAST_GRAVE.getText(), spawnPos.x, spawnPos.y, spawnPos.z, spawnPos.dim),
+                LangKey.MESSAGE_JOURNEYMAP.getText(StyleType.TOOLTIP_DESC, LangKey.MESSAGE_LAST_GRAVE.getText(), spawnPos.x, spawnPos.y, spawnPos.z, spawnPos.dim.func_240901_a_().toString()),
                 (needAccess ? LangKey.MESSAGE_LOCKED : LangKey.MESSAGE_UNLOCKED).getText(needAccess && SharedConfigTombstone.player_death.decayTime.get() > 0 ? SharedConfigTombstone.player_death.decayTime.get() + " min" : "").setStyle(needAccess ? StyleType.COLOR_OFF : StyleType.COLOR_ON)
         );
         if (ConfigTombstone.player_death.playerGraveAccess.get()) {

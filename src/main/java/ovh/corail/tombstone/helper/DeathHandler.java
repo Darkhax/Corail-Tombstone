@@ -59,24 +59,25 @@ public class DeathHandler {
         }
         lastGraveList.put(player.getGameProfile().getName(), new Location(x, y, z, dim));
         if (ConfigTombstone.player_death.logPlayerGrave.get()) {
-            LOGGER.info("A new grave of the player " + player.getGameProfile().getName() + " was created at position [x:" + x + ", y:" + y + ", z:" + z + ", dim:" + dim + "]");
+            LOGGER.info("A new grave of the player " + player.getGameProfile().getName() + " was created at position [x:" + x + ", y:" + y + ", z:" + z + ", dim:" + dim.func_240901_a_().toString() + "]");
         }
     }
 
     public boolean isNoGraveLocation(Location location) {
-        for (String s : ConfigTombstone.player_death.noGraveLocation.get()) {
+        // TODO disabled
+        /*for (String s : ConfigTombstone.player_death.noGraveLocation.get()) {
             if (!s.isEmpty()) {
                 String[] res = s.split(",");
                 if (res.length == 5) {
-                    // TODO disabled
-                    /*if (new Location(Integer.valueOf(res[0].trim()), Integer.valueOf(res[1].trim()), Integer.valueOf(res[2].trim()), Integer.valueOf(res[3].trim())).isInRangeAndDimension(location, Integer.valueOf(res[4].trim()))) {
+
+                    if (new Location(Integer.valueOf(res[0].trim()), Integer.valueOf(res[1].trim()), Integer.valueOf(res[2].trim()), Integer.valueOf(res[3].trim())).isInRangeAndDimension(location, Integer.valueOf(res[4].trim()))) {
                         return true;
-                    }*/
+                    }
                 } else if (res.length == 1 && Integer.valueOf(res[0].trim()).equals(location.dim)) {
                     return true;
                 }
             }
-        }
+        }*/
         return false;
     }
 

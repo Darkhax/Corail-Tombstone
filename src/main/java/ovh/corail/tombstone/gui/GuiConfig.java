@@ -394,6 +394,6 @@ public class GuiConfig extends TBScreen {
                 PROXY.markConfigDirty();
             }
         }
-        onClose();
+        closeScreen();
     }
 }

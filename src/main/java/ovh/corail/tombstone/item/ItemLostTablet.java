@@ -15,7 +15,6 @@ import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.items.ItemHandlerHelper;
 import ovh.corail.tombstone.config.ConfigTombstone;
 import ovh.corail.tombstone.config.SharedConfigTombstone;
@@ -151,14 +150,6 @@ public class ItemLostTablet extends ItemGraveMagic {
                 String structureId = NBTStackHelper.getString(stack, STRUCTURE_ID_NBT_STRING);
                 if (!structureId.isEmpty()) {
                     return structureId;
-                } else if (tag.contains("structureType", Constants.NBT.TAG_INT)) {
-                    // TODO retrocompat to remove later
-                    int ordinal = NBTStackHelper.getInteger(stack, "structureType");
-                    if (ordinal < SupportStructures.values().length) {
-                        structureId = SupportStructures.values()[ordinal].getId();
-                        NBTStackHelper.setString(stack, STRUCTURE_ID_NBT_STRING, structureId);
-                        return structureId;
-                    }
                 }
             }
         }

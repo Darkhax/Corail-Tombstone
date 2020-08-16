@@ -26,9 +26,9 @@ public class PerkAlchemist extends Perk {
     @Override
     public String getTooltip(int level, int actualLevel, int levelWithBonus) {
         if (level == actualLevel || (actualLevel == 0 && level == 1) || level == levelWithBonus) {
-            return "+" + (level * 10) + "%% " + I18n.format("tombstone.perk.alchemist.desc");
+            return "+" + (level * 10) + "% " + I18n.format("tombstone.perk.alchemist.desc");
         } else if (level == actualLevel + 1) {
-            return "+" + (level * 10) + "%%";
+            return "+" + (level * 10) + "%";
         }
         return "";
     }

@@ -108,15 +108,11 @@ public enum SupportStructures {
 
     @Nullable
     public static Structure<?> getStructure(String name) {
-    	
     	for (Structure<?> structure : ForgeRegistries.STRUCTURE_FEATURES) {
-
-    		if (name.equalsIgnoreCase(structure.getRegistryName().toString().replace("minecraft:", ""))) {
-    			
+    		if (name.equalsIgnoreCase(structure.getRegistryName().toString())) {
     			return structure;
     		}
     	}
-    	
         return null;
     }
 

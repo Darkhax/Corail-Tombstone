@@ -47,7 +47,7 @@ public class ConfigTombstone {
             logPlayerGrave = builder.add("log_player_grave", "Whether to log the positions of players' graves [false/true|default:true]", true);
             playerGraveAccess = builder.add("player_grave_access", "Whether to require a Grave's Key to access graves [false/true|default:true]", true);
             snifferRange = builder.add("sniffer_range", "The radius in which items should be collected when a grave is spawned [1..10|default:5]", 5, 1, 10);
-            noGraveLocation = builder.add("no_grave_location", "Graveless Areas", Lists.newArrayList("0, 0, 0, -10000, 20"));
+            noGraveLocation = builder.add("no_grave_location", "Graveless Areas", Lists.newArrayList("0, -300, 0, minecraft:overworld, 20"));
             chanceMobOnGraveRecovery = builder.add("chance_mob_on_grave_recovery", "The chance that creatures appear after the contents of a grave are retrieved [0..100|default:0]", 0, 0, 100);
             pvpMode = builder.add("pvp_mode", "Enables PvP mode, which allows players to open graves of players they kill [false/true|default:false]", false);
             knowledgeLoss = builder.add("knowledge_loss", "Knowledge of Death loss why dying [0..500|default:0]", 0, 0, 500);

@@ -61,6 +61,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.Heightmap;
+import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -125,10 +126,7 @@ public class Helper {
     private static ContributorStore CONTRIBUTORS = ContributorStore.of();
 
     public static boolean isContributor(PlayerEntity player) {
-        if (player.world.isRemote) {
-            return isContributor;
-        }
-        return CONTRIBUTORS.contains(player);
+        return player.world.isRemote ? isContributor : CONTRIBUTORS.contains(player);
     }
 
     public static boolean isDisabledPerk(@Nullable Perk perk, @Nullable PlayerEntity player) {
@@ -223,9 +221,12 @@ public class Helper {
         BlockPos startingPos = pos;
         for (int nbTry = 0; nbTry < 5; nbTry++) {
             startingPos = getCloserValidPos(world, startingPos.add(nbTry * random.nextGaussian() * 2000, 0d, nbTry * random.nextGaussian() * 2000));
-            final BlockPos foundPos = world.func_241117_a_(SupportStructures.getStructure(structureName), startingPos, 100, unexplored);
-            if (foundPos != null && isValidPos(world, foundPos)) {
-                return new Location(foundPos.getX(), y, foundPos.getZ(), world);
+            Structure<?> structure = SupportStructures.getStructure(structureName);
+            if (structure != null) {
+                final BlockPos foundPos = world.func_241117_a_(structure, startingPos, 100, unexplored);
+                if (foundPos != null && isValidPos(world, foundPos)) {
+                    return new Location(foundPos.getX(), y, foundPos.getZ(), world);
+                }
             }
         }
         return Location.ORIGIN;
