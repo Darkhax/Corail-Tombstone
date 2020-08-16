@@ -1,6 +1,6 @@
 package ovh.corail.tombstone.helper;
 
-import net.minecraft.client.Minecraft;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
 
@@ -15,5 +15,5 @@ public class StyleType {
     public static final Style TOOLTIP_ITEM = Style.EMPTY.applyFormatting(TextFormatting.YELLOW).setItalic(false).setBold(false);
     public static final Style COLOR_ON = Style.EMPTY.applyFormatting(TextFormatting.GREEN).setItalic(false).setBold(false);
     public static final Style COLOR_OFF = Style.EMPTY.applyFormatting(TextFormatting.RED).setItalic(false).setBold(false);
-    public static final Style STANDARD_GALACTIC = Style.EMPTY.setFontId(Minecraft.standardGalacticFontRenderer);
+    public static final Style STANDARD_GALACTIC = Style.EMPTY.setFontId(new ResourceLocation("minecraft", "alt"));
 }
