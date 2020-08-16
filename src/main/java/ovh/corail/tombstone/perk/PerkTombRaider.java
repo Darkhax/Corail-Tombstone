@@ -1,8 +1,10 @@
 package ovh.corail.tombstone.perk;
 
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import ovh.corail.tombstone.api.capability.Perk;
 import ovh.corail.tombstone.capability.TBCapabilityProvider;
 import ovh.corail.tombstone.config.SharedConfigTombstone;
@@ -25,11 +27,11 @@ public class PerkTombRaider extends Perk {
     }
 
     @Override
-    public String getTooltip(int level, int actualLevel, int levelWithBonus) {
+    public ITextComponent getTooltip(int level, int actualLevel, int levelWithBonus) {
         if (level == 1) {
-            return I18n.format("tombstone.perk.tomb_raider.desc");
+            return new TranslationTextComponent("tombstone.perk.tomb_raider.desc");
         }
-        return "";
+        return StringTextComponent.EMPTY;
     }
 
     @Override

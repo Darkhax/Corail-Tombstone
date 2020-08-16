@@ -6,8 +6,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 import ovh.corail.tombstone.api.TombstoneAPIProps;
 
@@ -29,8 +27,7 @@ public abstract class Perk extends ForgeRegistryEntry<Perk> implements Comparabl
         return false;
     }
 
-    @OnlyIn(Dist.CLIENT)
-    public abstract String getTooltip(int level, int actualLevel, int levelWithBonus);
+    public abstract ITextComponent getTooltip(int level, int actualLevel, int levelWithBonus);
 
     public abstract int getCost(int level);
 

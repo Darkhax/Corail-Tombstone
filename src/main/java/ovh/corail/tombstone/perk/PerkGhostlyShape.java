@@ -1,10 +1,10 @@
 package ovh.corail.tombstone.perk;
 
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import ovh.corail.tombstone.api.capability.Perk;
 import ovh.corail.tombstone.config.SharedConfigTombstone;
 import ovh.corail.tombstone.helper.Helper;
@@ -36,20 +36,19 @@ public class PerkGhostlyShape extends Perk {
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
-    public String getTooltip(int level, int actualLevel, int levelWithBonus) {
+    public ITextComponent getTooltip(int level, int actualLevel, int levelWithBonus) {
         if (level == 1) {
-            return I18n.format("effect.tombstone.feather_fall");
+            return new TranslationTextComponent("effect.tombstone.feather_fall");
         } else if (level == 2) {
-            return LangKey.MESSAGE_BREATHING.getClientTranslation();
+            return LangKey.MESSAGE_BREATHING.getText();
         } else if (level == 3) {
-            return I18n.format("effect.tombstone.purification");
+            return new TranslationTextComponent("effect.tombstone.purification");
         } else if (level == 4) {
-            return I18n.format("effect.tombstone.true_sight");
+            return new TranslationTextComponent("effect.tombstone.true_sight");
         } else if (level == 5) {
-            return LangKey.MESSAGE_INVULNERABLE.getClientTranslation();
+            return LangKey.MESSAGE_INVULNERABLE.getText();
         }
-        return "";
+        return StringTextComponent.EMPTY;
     }
 
     @Override

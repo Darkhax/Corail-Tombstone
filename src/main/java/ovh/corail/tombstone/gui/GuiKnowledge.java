@@ -20,6 +20,7 @@ import ovh.corail.tombstone.api.capability.ITBCapability;
 import ovh.corail.tombstone.api.capability.Perk;
 import ovh.corail.tombstone.helper.Helper;
 import ovh.corail.tombstone.helper.LangKey;
+import ovh.corail.tombstone.helper.StyleType;
 import ovh.corail.tombstone.network.PacketHandler;
 import ovh.corail.tombstone.network.UpgradePerkServerMessage;
 import ovh.corail.tombstone.perk.PerkRegistry;
@@ -220,11 +221,11 @@ public class GuiKnowledge extends TBScreen {
                 list.add(specialInfo);
             }
             IntStream.rangeClosed(1, this.hoveredIcon.perk.getLevelMax()).forEach(i -> {
-                String tooltip = this.hoveredIcon.perk.getTooltip(i, this.hoveredPerkLevel, levelWithBonus);
-                ITextComponent info = tooltip.isEmpty() ? StringTextComponent.EMPTY : new StringTextComponent(tooltip);
+                ITextComponent info = this.hoveredIcon.perk.getTooltip(i, this.hoveredPerkLevel, levelWithBonus);
                 if (info != StringTextComponent.EMPTY) {
                     TextFormatting formatting = this.hoveredPerkLevel >= i ? TextFormatting.WHITE : (hoveredIcon.perk.isEncrypted() ? levelWithBonus >= i : levelWithBonus == i) ? TextFormatting.DARK_PURPLE : TextFormatting.DARK_GRAY;
-                    list.add(new StringTextComponent(i + " -> ").append(info).mergeStyle(formatting));
+                    boolean isEncrypted = hoveredIcon.perk.isEncrypted() && levelWithBonus < i - 1;
+                    list.add(new StringTextComponent(i + " -> ").append(isEncrypted?info.copyRaw().setStyle(StyleType.STANDARD_GALACTIC):info).mergeStyle(formatting));
                 }
             });
             if (this.hoveredPerkLevel < this.hoveredIcon.perk.getLevelMax()) {
@@ -235,7 +236,6 @@ public class GuiKnowledge extends TBScreen {
             } else {
                 list.add(LangKey.MESSAGE_MAX.getText(TextFormatting.GOLD));
             }
-            // TODO re-add the encrypted text for tooltip (perk.isEncrypted())
             GuiUtils.drawHoveringText(matrixStack, list, this.hoveredIcon.minX + 10, this.hoveredIcon.minY + 10, this.width, this.height, 200, this.font);
         }
     }
