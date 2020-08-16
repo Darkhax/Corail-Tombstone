@@ -17,11 +17,19 @@ import ovh.corail.tombstone.helper.Helper;
 import ovh.corail.tombstone.registry.ModItems;
 
 import javax.annotation.Nullable;
+import java.util.stream.IntStream;
 
 public class RecipeFamiliarReceptacle extends ShapedRecipe {
+    private boolean setTag = false;
 
     public RecipeFamiliarReceptacle(ResourceLocation rl) {
-        this(rl, 3, 3, NonNullList.withSize(1, Ingredient.EMPTY));
+        this(rl, 3, 3, getIngredientList());
+    }
+
+    private static NonNullList<Ingredient> getIngredientList() {
+        Ingredient tear = Ingredient.fromStacks(new ItemStack(Items.GHAST_TEAR));
+        Ingredient iron = Ingredient.fromItems(Items.IRON_INGOT);
+        return NonNullList.from(Ingredient.EMPTY, tear, iron, tear, iron, Ingredient.fromStacks(new ItemStack(ModItems.impregnated_diamond)), iron, tear, iron, tear);
     }
 
     public RecipeFamiliarReceptacle(ResourceLocation rl, int width, int height, NonNullList<Ingredient> ingredients) {
@@ -30,20 +38,12 @@ public class RecipeFamiliarReceptacle extends ShapedRecipe {
 
     @Override
     public boolean matches(CraftingInventory inv, World world) {
-        NonNullList<Ingredient> ing = getIngredients();
-        if (ing.size() == 1 && ing.get(0) == Ingredient.EMPTY) {
-            ing.clear();
-            Ingredient tear = Ingredient.fromStacks(new ItemStack(Items.GHAST_TEAR));
-            Ingredient iron = Ingredient.fromTag(Tags.Items.INGOTS_IRON);
-            ing.add(tear);
-            ing.add(iron);
-            ing.add(tear);
-            ing.add(iron);
-            ing.add(Ingredient.fromStacks(new ItemStack(ModItems.impregnated_diamond)));
-            ing.add(iron);
-            ing.add(tear);
-            ing.add(iron);
-            ing.add(tear);
+        if (!this.setTag) {
+            Ingredient ironTag = Ingredient.fromTag(Tags.Items.INGOTS_IRON);
+            NonNullList<Ingredient> ing = getIngredients();
+            ItemStack ironStack = new ItemStack(Items.IRON_INGOT);
+            IntStream.range(0, getIngredients().size()).filter(i -> ing.get(i).test(ironStack)).forEach(i -> ing.set(i, ironTag));
+            this.setTag = true;
         }
         return super.matches(inv, world);
     }

@@ -9,7 +9,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -34,16 +33,10 @@ public class ItemTabletOfAssistance extends ItemTablet {
     }
 
     @Override
-    public ITextComponent getDisplayName(ItemStack stack) {
-        ITextComponent name = new TranslationTextComponent(getTranslationKey(stack));
-        return isEnchanted(stack) ? LangKey.MESSAGE_ENCHANTED_ITEM.getText(name) : name;
-    }
-
-    @Override
     @OnlyIn(Dist.CLIENT)
     public void addInformation(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flag) {
         if (list.size() > 0) {
-            list.set(0, list.get(0).copyRaw().setStyle(StyleType.MESSAGE_SPECIAL));
+            list.get(0).getStyle().mergeStyle(StyleType.MESSAGE_SPECIAL);
         }
         if (Helper.canShowTooltip(world, stack)) {
             if (!isEnchanted(stack)) {

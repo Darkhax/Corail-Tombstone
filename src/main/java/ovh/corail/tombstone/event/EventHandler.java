@@ -88,6 +88,7 @@ import ovh.corail.tombstone.command.CommandTBRecovery;
 import ovh.corail.tombstone.compatibility.CompatibilityMinecolonies;
 import ovh.corail.tombstone.config.ConfigTombstone;
 import ovh.corail.tombstone.config.SharedConfigTombstone;
+import ovh.corail.tombstone.helper.CallbackHandler;
 import ovh.corail.tombstone.helper.CooldownHandler;
 import ovh.corail.tombstone.spawner.CustomPhantomSpawner;
 import ovh.corail.tombstone.spawner.CustomVillageSiege;
@@ -139,15 +140,16 @@ public class EventHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLootTableLoad(LootTableLoadEvent event) {
         if (event.getName().equals(LootTables.GAMEPLAY_FISHING_JUNK)) {
-            ThreadTaskExecutor server = Helper.getServer();
-            if (server == null) {
-                LOGGER.warn("A mod called the LootTableLoadEvent from the client side");
-            } else {
-                server.deferTask(() -> {
+            CallbackHandler.addCallback(0, () -> {
+                ThreadTaskExecutor server = Helper.getServer();
+                if (server == null) {
+                    LOGGER.warn("A mod called the LootTableLoadEvent from the client side");
+                } else {
                     LootHelper.addLostEntries(event.getTable());
                     LootHelper.addChestEntries(event.getLootTableManager());
-                });
-            }
+                }
+            });
+
         }
     }
 

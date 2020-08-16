@@ -28,7 +28,7 @@ public class RecipeVoodooPoppetProtection extends ShapelessRecipe {
     }
 
     public RecipeVoodooPoppetProtection(ResourceLocation rl) {
-        super(rl, "voodoo_poppet_protection", new ItemStack(ModItems.voodoo_poppet), NonNullList.withSize(1, Ingredient.EMPTY));
+        super(rl, "voodoo_poppet_protection", new ItemStack(ModItems.voodoo_poppet), NonNullList.from(Ingredient.EMPTY, INGREDIENTS.get(0), INGREDIENTS.get(1), Ingredient.fromItems(Items.LILY_PAD, Items.MAGMA_CREAM, Items.STICK, Items.FEATHER, Items.POISONOUS_POTATO)));
     }
 
     @Override

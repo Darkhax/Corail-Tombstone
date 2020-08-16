@@ -9,6 +9,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
@@ -147,7 +148,7 @@ public class ItemGeneric extends Item implements IDisableable {
         ClientPlayerEntity player = Minecraft.getInstance().player;
         if (player != null && !location.isOrigin()) {
             BlockPos pos = player.getPosition();
-            list.add(LangKey.MESSAGE_DISTANCE.getText((int) Helper.getDistance(location.getPos(), pos), location.x, location.y, location.z, location.dim));
+            list.add(LangKey.MESSAGE_DISTANCE.getText(TextFormatting.BLUE, (int) Helper.getDistance(location.getPos(), pos), location.x, location.y, location.z, location.dim.func_240901_a_().toString()));
         }
     }
 
