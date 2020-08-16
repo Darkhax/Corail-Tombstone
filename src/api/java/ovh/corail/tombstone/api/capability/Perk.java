@@ -25,13 +25,8 @@ public abstract class Perk extends ForgeRegistryEntry<Perk> implements Comparabl
 
     public abstract int getLevelMax();
 
-    @Deprecated
-    public boolean isDisabled() {
-        return false;
-    }
-
     public boolean isDisabled(@Nullable PlayerEntity player) {
-        return isDisabled();
+        return false;
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -63,7 +58,6 @@ public abstract class Perk extends ForgeRegistryEntry<Perk> implements Comparabl
         return this.translation;
     }
 
-    @OnlyIn(Dist.CLIENT)
     public ITextComponent getSpecialInfo(int levelWithBonus) {
         return StringTextComponent.EMPTY;
     }
