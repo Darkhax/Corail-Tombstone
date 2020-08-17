@@ -38,7 +38,7 @@ public class DeathHandler {
     private final Map<UUID, Boolean> optionPriorizeToolOnHotbar = new HashMap<>();
     private final Map<UUID, Boolean> optionActivateGraveBySneaking = new HashMap<>();
     private final Map<String, Location> lastGraveList = new HashMap<>();
-    private final List<Predicate<Location>> no_grave_locations = new ArrayList<>();
+    private Predicate<Location> no_grave_locations = l -> false;
 
     private DeathHandler() {
     }
@@ -68,7 +68,7 @@ public class DeathHandler {
     }
 
     public boolean isNoGraveLocation(Location location) {
-        return this.no_grave_locations.stream().anyMatch(l -> l.test(location));
+        return this.no_grave_locations.test(location);
     }
 
     public void setLastDeathLocation(PlayerEntity player, Location location) {
@@ -157,12 +157,12 @@ public class DeathHandler {
     }
 
     public void updateNoGraveLocations() {
-        this.no_grave_locations.clear();
+        List<Predicate<Location>> list = new ArrayList<>();
         for (String s : ConfigTombstone.player_death.noGraveLocation.get()) {
             if (!s.isEmpty()) {
                 String[] res = s.split(",");
                 if (res.length == 1) {
-                    this.no_grave_locations.add(l -> l.isSameDimension(res[0].trim()));
+                    list.add(l -> l.isSameDimension(res[0].trim()));
                 } else if (res.length == 5) {
                     int x, y, z, range;
                     try {
@@ -174,11 +174,12 @@ public class DeathHandler {
                         LOGGER.warn("invalid number in noGraveLocations with provided string: " + s);
                         continue;
                     }
-                    this.no_grave_locations.add(l -> l.isSameDimension(res[3].trim()) && l.isInRange(x, y, z, range));
+                    list.add(l -> l.isSameDimension(res[3].trim()) && l.isInRange(x, y, z, range));
 
                 }
             }
         }
+        this.no_grave_locations = list.stream().reduce(Predicate::or).orElse(l -> false);
     }
 
     public void clear() {
@@ -188,7 +189,7 @@ public class DeathHandler {
         this.optionPriorizeToolOnHotbar.clear();
         this.optionActivateGraveBySneaking.clear();
         this.lastGraveList.clear();
-        this.no_grave_locations.clear();
+        this.no_grave_locations = l -> false;
         CooldownHandler.INSTANCE.clear();
     }
 }
