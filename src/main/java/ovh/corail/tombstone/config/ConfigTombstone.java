@@ -12,7 +12,6 @@ import ovh.corail.tombstone.block.BlockGraveMarble.MarbleType;
 import ovh.corail.tombstone.block.GraveModel;
 import ovh.corail.tombstone.helper.DeathHandler;
 import ovh.corail.tombstone.helper.Helper;
-import ovh.corail.tombstone.helper.Location;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -385,18 +384,7 @@ public class ConfigTombstone {
         public static void onReloadConfig(ModConfig.Reloading event) {
             if (event.getConfig().getModId().equals(MOD_ID)) {
                 if (event.getConfig().getType() == ModConfig.Type.COMMON) {
-                    List<Predicate<Location>> noGraveLoc = DeathHandler.INSTANCE.no_grave_locations;
-                    noGraveLoc.clear();
-                    for (String s : ConfigTombstone.player_death.noGraveLocation.get()) {
-                        if (!s.isEmpty()) {
-                            String[] res = s.split(",");
-                            if (res.length == 1) {
-                                noGraveLoc.add(l -> l.isSameDimension(res[0].trim()));
-                            } else if (res.length == 5) {
-                                noGraveLoc.add(l -> l.isSameDimension(res[3].trim()) && l.isInRange(Integer.valueOf(res[0]), Integer.valueOf(res[1]), Integer.valueOf(res[2]), Integer.valueOf(res[4])));
-                            }
-                        }
-                    }
+                    DeathHandler.INSTANCE.updateNoGraveLocations();
                 } else if (event.getConfig().getType() == ModConfig.Type.CLIENT || event.getConfig().getType() == ModConfig.Type.SERVER) {
                     ModTombstone.PROXY.markConfigDirty();
                 }

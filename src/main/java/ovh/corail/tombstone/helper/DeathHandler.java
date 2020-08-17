@@ -38,7 +38,7 @@ public class DeathHandler {
     private final Map<UUID, Boolean> optionPriorizeToolOnHotbar = new HashMap<>();
     private final Map<UUID, Boolean> optionActivateGraveBySneaking = new HashMap<>();
     private final Map<String, Location> lastGraveList = new HashMap<>();
-    public final List<Predicate<Location>> no_grave_locations = new ArrayList<>();
+    private final List<Predicate<Location>> no_grave_locations = new ArrayList<>();
 
     private DeathHandler() {
     }
@@ -156,6 +156,20 @@ public class DeathHandler {
         return this.optionActivateGraveBySneaking.getOrDefault(id, false);
     }
 
+    public void updateNoGraveLocations() {
+        this.no_grave_locations.clear();
+        for (String s : ConfigTombstone.player_death.noGraveLocation.get()) {
+            if (!s.isEmpty()) {
+                String[] res = s.split(",");
+                if (res.length == 1) {
+                    this.no_grave_locations.add(l -> l.isSameDimension(res[0].trim()));
+                } else if (res.length == 5) {
+                    this.no_grave_locations.add(l -> l.isSameDimension(res[3].trim()) && l.isInRange(Integer.valueOf(res[0]), Integer.valueOf(res[1]), Integer.valueOf(res[2]), Integer.valueOf(res[4])));
+                }
+            }
+        }
+    }
+
     public void clear() {
         this.optionFavoriteGrave.clear();
         this.optionEquipElytraInPriority.clear();
@@ -163,6 +177,7 @@ public class DeathHandler {
         this.optionPriorizeToolOnHotbar.clear();
         this.optionActivateGraveBySneaking.clear();
         this.lastGraveList.clear();
+        this.no_grave_locations.clear();
         CooldownHandler.INSTANCE.clear();
     }
 }
