@@ -164,7 +164,18 @@ public class DeathHandler {
                 if (res.length == 1) {
                     this.no_grave_locations.add(l -> l.isSameDimension(res[0].trim()));
                 } else if (res.length == 5) {
-                    this.no_grave_locations.add(l -> l.isSameDimension(res[3].trim()) && l.isInRange(Integer.valueOf(res[0]), Integer.valueOf(res[1]), Integer.valueOf(res[2]), Integer.valueOf(res[4])));
+                    int x, y, z, range;
+                    try {
+                        x = Integer.valueOf(res[0].trim());
+                        y = Integer.valueOf(res[1].trim());
+                        z = Integer.valueOf(res[2].trim());
+                        range = Integer.valueOf(res[4].trim());
+                    } catch (NumberFormatException e) {
+                        LOGGER.warn("invalid number in noGraveLocations with provided string: " + s);
+                        continue;
+                    }
+                    this.no_grave_locations.add(l -> l.isSameDimension(res[3].trim()) && l.isInRange(x, y, z, range));
+
                 }
             }
         }
