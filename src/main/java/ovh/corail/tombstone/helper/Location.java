@@ -39,8 +39,8 @@ public class Location {
         return new BlockPos(x, y, z);
     }
 
-    public boolean equals(Location pos) {
-        return pos.x == x && pos.y == y && pos.z == z && pos.dim == dim;
+    public boolean equals(Location location) {
+        return location.x == x && location.y == y && location.z == z && location.dim.equals(dim);
     }
 
     public boolean isOrigin() {
@@ -49,6 +49,10 @@ public class Location {
 
     public boolean isSameDimension(World world) {
         return this.dim.equals(world.func_234923_W_());
+    }
+
+    public boolean isSameDimension(String worldRL) {
+        return this.dim.func_240901_a_().toString().equals(worldRL);
     }
 
     public double getDistanceSq(Location location) {
@@ -63,7 +67,7 @@ public class Location {
     }
 
     public boolean isInRangeAndDimension(Location loc, int range) {
-        return isInRange(loc, range) && this.dim == loc.dim;
+        return isInRange(loc, range) && this.dim.equals(loc.dim);
     }
 
     public boolean isInRange(int x, int y, int z, int range) {

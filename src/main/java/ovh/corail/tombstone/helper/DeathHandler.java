@@ -15,11 +15,14 @@ import ovh.corail.tombstone.registry.ModEffects;
 import ovh.corail.tombstone.registry.ModPerks;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import static ovh.corail.tombstone.ModTombstone.LOGGER;
 
@@ -29,12 +32,13 @@ public class DeathHandler {
     public final String IS_PLAYER_DEAD_NBT_BOOL = "tb_is_player_dead";
     public final String PRESERVED_EFFECTS_NBT_LIST = "tb_preserved_effects";
     public final String LAST_DEATH_LOCATION_NBT_TAG = "tb_last_death_location";
-    private final HashMap<UUID, Pair<GraveModel, MarbleType>> optionFavoriteGrave = new HashMap<>();
-    private final HashMap<UUID, Boolean> optionEquipElytraInPriority = new HashMap<>();
-    private final HashMap<UUID, Boolean> optionKnowledgeMessage = new HashMap<>();
-    private final HashMap<UUID, Boolean> optionPriorizeToolOnHotbar = new HashMap<>();
-    private final HashMap<UUID, Boolean> optionActivateGraveBySneaking = new HashMap<>();
-    private final HashMap<String, Location> lastGraveList = new HashMap<>();
+    private final Map<UUID, Pair<GraveModel, MarbleType>> optionFavoriteGrave = new HashMap<>();
+    private final Map<UUID, Boolean> optionEquipElytraInPriority = new HashMap<>();
+    private final Map<UUID, Boolean> optionKnowledgeMessage = new HashMap<>();
+    private final Map<UUID, Boolean> optionPriorizeToolOnHotbar = new HashMap<>();
+    private final Map<UUID, Boolean> optionActivateGraveBySneaking = new HashMap<>();
+    private final Map<String, Location> lastGraveList = new HashMap<>();
+    public final List<Predicate<Location>> no_grave_locations = new ArrayList<>();
 
     private DeathHandler() {
     }
@@ -64,23 +68,7 @@ public class DeathHandler {
     }
 
     public boolean isNoGraveLocation(Location location) {
-        String rl = location.dim.func_240901_a_().toString();
-        for (String s : ConfigTombstone.player_death.noGraveLocation.get()) {
-            if (!s.isEmpty()) {
-                String[] res = s.split(",");
-                if (res.length == 1) {
-                    if (rl.equals(res[0].trim())) {
-                        return true;
-                    }
-                } else if (res.length == 5 && rl.equals(res[3].trim())) {
-                    int x = Integer.valueOf(res[0]), y = Integer.valueOf(res[1]), z = Integer.valueOf(res[2]), range = Integer.valueOf(res[4]);
-                    if (location.isInRange(x, y, z, range)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
+        return this.no_grave_locations.stream().anyMatch(l -> l.test(location));
     }
 
     public void setLastDeathLocation(PlayerEntity player, Location location) {
