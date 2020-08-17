@@ -64,20 +64,22 @@ public class DeathHandler {
     }
 
     public boolean isNoGraveLocation(Location location) {
-        // TODO disabled
-        /*for (String s : ConfigTombstone.player_death.noGraveLocation.get()) {
+        String rl = location.dim.func_240901_a_().toString();
+        for (String s : ConfigTombstone.player_death.noGraveLocation.get()) {
             if (!s.isEmpty()) {
                 String[] res = s.split(",");
-                if (res.length == 5) {
-
-                    if (new Location(Integer.valueOf(res[0].trim()), Integer.valueOf(res[1].trim()), Integer.valueOf(res[2].trim()), Integer.valueOf(res[3].trim())).isInRangeAndDimension(location, Integer.valueOf(res[4].trim()))) {
+                if (res.length == 1) {
+                    if (rl.equals(res[0].trim())) {
                         return true;
                     }
-                } else if (res.length == 1 && Integer.valueOf(res[0].trim()).equals(location.dim)) {
-                    return true;
+                } else if (res.length == 5 && rl.equals(res[3].trim())) {
+                    int x = Integer.valueOf(res[0]), y = Integer.valueOf(res[1]), z = Integer.valueOf(res[2]), range = Integer.valueOf(res[4]);
+                    if (location.isInRange(x, y, z, range)) {
+                        return true;
+                    }
                 }
             }
-        }*/
+        }
         return false;
     }
 
