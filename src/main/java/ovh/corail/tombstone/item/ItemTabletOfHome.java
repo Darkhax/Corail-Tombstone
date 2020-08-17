@@ -5,6 +5,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
@@ -50,17 +51,14 @@ public class ItemTabletOfHome extends ItemTablet {
 
     @Override
     protected boolean doEffects(World world, ServerPlayerEntity player, ItemStack stack) {
-        Pair<World, BlockPos> respawnPoint = CommandTBTeleportHome.getRespawnPoint(player);
-        if (respawnPoint.getLeft() == null || respawnPoint.getRight() == null) {
-            LangKey.MESSAGE_TELEPORT_FAILED.sendMessage(player);
-            return false;
-        }
-        boolean isSameDim = respawnPoint.getLeft() == world;
-        if (!isSameDim && !ConfigTombstone.general.teleportDim.get()) {
+        MinecraftServer server = player.getServer();
+        assert server != null;
+        Pair<ServerWorld, BlockPos> respawnPoint = CommandTBTeleportHome.getRespawnPoint(server, player);
+        if (!ConfigTombstone.general.teleportDim.get() && !respawnPoint.getLeft().func_234923_W_().equals(world.func_234923_W_())) {
             LangKey.MESSAGE_TELEPORT_SAME_DIMENSION.sendMessage(player);
             return false;
         }
-        Location location = new SpawnHelper((ServerWorld) respawnPoint.getLeft(), respawnPoint.getRight()).findSpawnPlace(false);
+        Location location = new SpawnHelper(respawnPoint.getLeft(), respawnPoint.getRight()).findSpawnPlace(false);
         if (location.isOrigin()) {
             LangKey.MESSAGE_TELEPORT_FAILED.sendMessage(player);
             return false;
