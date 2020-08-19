@@ -189,7 +189,6 @@ public class DeathHandler {
         this.optionPriorizeToolOnHotbar.clear();
         this.optionActivateGraveBySneaking.clear();
         this.lastGraveList.clear();
-        this.no_grave_locations = l -> false;
         CooldownHandler.INSTANCE.clear();
     }
 }
