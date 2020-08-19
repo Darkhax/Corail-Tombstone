@@ -7,7 +7,7 @@ license="LGPL v2.1"
 modId="tombstone"
 version="${file.jarVersion}"
 displayName="Corail Tombstone"
-updateJSONURL="https://updates.blamejared.com/get?n=tombstone&gv=1.15.2"
+updateJSONURL="https://updates.blamejared.com/get?n=tombstone&gv=1.16.1"
 displayURL="https://www.curseforge.com/minecraft/mc-mods/corail-tombstone/"
 #logoFile="logo.png" #optional
 credits="Special thanks to Gegy1000, Barteks2X, Paul Fulham, and Darkhax"
@@ -26,7 +26,7 @@ Corail Tombstone keeps you from losing your belongings on death, with many featu
 [[dependencies.tombstone]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.16,)"
+    versionRange="[1.16.1]"
     ordering="NONE"
     side="BOTH"
 	

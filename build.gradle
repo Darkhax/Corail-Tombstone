@@ -18,7 +18,7 @@ if (project.hasProperty('secretFile')) {
     loadSecrets(new File((String) findProperty('secretFile')))
 }
 
-version = '4.5.' + getBuildNumber();
+version = '5.0.' + getBuildNumber();
 group = 'ovh.corail'
 archivesBaseName = 'tombstone'
 
