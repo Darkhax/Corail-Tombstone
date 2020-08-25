@@ -213,7 +213,7 @@ public class CommandTBRecovery extends TombstoneCommand {
         return saveFolder;
     }
 
-    private static final Method methodWritePlayerData = ObfuscationReflectionHelper.findMethod(PlayerList.class, "func_75753_a", ServerPlayerEntity.class);
+    private static final Method methodWritePlayerData = ObfuscationReflectionHelper.findMethod(PlayerList.class, "func_72391_b", ServerPlayerEntity.class);
 
     private int recoverPlayerOffline(CommandSource sender, GameProfile profil, String fileString) {
         PlayerList playerList = sender.getServer().getPlayerList();

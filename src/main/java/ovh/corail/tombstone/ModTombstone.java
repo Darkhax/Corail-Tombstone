@@ -57,12 +57,12 @@ public class ModTombstone {
     public static final String MOD_ID = "tombstone";
     public static final String MOD_NAME = "Corail Tombstone";
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
-    public static final IProxy PROXY = DistExecutor.runForDist(() -> ClientProxy::new, () -> ServerProxy::new);
+    public static final IProxy PROXY = DistExecutor.unsafeRunForDist(() -> ClientProxy::new, () -> ServerProxy::new);
     
     public static LootConditionType OPEN_WATER;
 
-    @SuppressWarnings("UnstableApiUsage")
     public ModTombstone() {
+    	
         TombstoneAPIProps.COOLDOWN_HANDLER = CooldownHandler.INSTANCE;
         Reflection.initialize(PerkRegistry.class, PacketHandler.class, ModTriggers.class, ModTabs.class);
         ModLoadingContext context = ModLoadingContext.get();
