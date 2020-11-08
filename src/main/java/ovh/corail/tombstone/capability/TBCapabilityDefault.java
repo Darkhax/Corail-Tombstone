@@ -53,11 +53,11 @@ public class TBCapabilityDefault implements ITBCapability {
             int oldPerkPoints = getTotalPerkPoints();
             this.knowledge += points;
             if (DeathHandler.INSTANCE.getOptionKnowledgeMessage(player.getUniqueID())) {
-                player.sendMessage(LangKey.MESSAGE_EARN_KNOWLEDGE.getTranslationWithStyle(StyleType.MESSAGE_SPELL, LangKey.MESSAGE_YOUR_KNOWLEDGE.getTranslation(), points));
+                LangKey.MESSAGE_EARN_KNOWLEDGE.sendMessage(player, StyleType.MESSAGE_SPELL, LangKey.MESSAGE_YOUR_KNOWLEDGE.getText(), points);
                 int newPerkPoints = getTotalPerkPoints();
                 int adjust = newPerkPoints - oldPerkPoints;
                 if (adjust > 0) {
-                    player.sendMessage(LangKey.MESSAGE_ACCESS_GUI.getTranslationWithStyle(StyleType.MESSAGE_SPECIAL, adjust, LangKey.createComponentCommand(player, "/tbgui", LangKey.MESSAGE_HERE)));
+                    LangKey.MESSAGE_ACCESS_GUI.sendMessage(player, StyleType.MESSAGE_SPECIAL, adjust, LangKey.createComponentCommand(player, "/tbgui", LangKey.MESSAGE_HERE));
                     if (oldPerkPoints == 0) {
                         ModTriggers.FIRST_KNOWLEDGE.trigger(player);
                     }
@@ -99,7 +99,7 @@ public class TBCapabilityDefault implements ITBCapability {
                 PacketHandler.sendToPlayer(new SyncCapClientMessage(SyncCapClientMessage.SyncType.KNOWLEDGE, this.knowledge), player);
             }
             if (DeathHandler.INSTANCE.getOptionKnowledgeMessage(player.getUniqueID())) {
-                player.sendMessage(LangKey.MESSAGE_LOSE_KNOWLEDGE.getTranslationWithStyle(StyleType.MESSAGE_SPELL, LangKey.MESSAGE_YOUR_KNOWLEDGE.getTranslation(), points));
+                LangKey.MESSAGE_LOSE_KNOWLEDGE.sendMessage(player, StyleType.MESSAGE_SPELL, LangKey.MESSAGE_YOUR_KNOWLEDGE.getText(), points);
             }
         }
         return this;

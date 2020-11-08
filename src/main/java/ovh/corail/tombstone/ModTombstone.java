@@ -8,7 +8,8 @@ import com.google.common.reflect.Reflection;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.enchantment.EnchantmentType;
-import net.minecraft.world.storage.loot.conditions.LootConditionManager;
+import net.minecraft.loot.LootConditionType;
+import net.minecraft.loot.conditions.LootConditionManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -56,10 +57,12 @@ public class ModTombstone {
     public static final String MOD_ID = "tombstone";
     public static final String MOD_NAME = "Corail Tombstone";
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
-    public static final IProxy PROXY = DistExecutor.runForDist(() -> ClientProxy::new, () -> ServerProxy::new);
+    public static final IProxy PROXY = DistExecutor.unsafeRunForDist(() -> ClientProxy::new, () -> ServerProxy::new);
+    
+    public static LootConditionType OPEN_WATER;
 
-    @SuppressWarnings("UnstableApiUsage")
     public ModTombstone() {
+    	
         TombstoneAPIProps.COOLDOWN_HANDLER = CooldownHandler.INSTANCE;
         Reflection.initialize(PerkRegistry.class, PacketHandler.class, ModTriggers.class, ModTabs.class);
         ModLoadingContext context = ModLoadingContext.get();
@@ -91,12 +94,13 @@ public class ModTombstone {
         CapabilityManager.INSTANCE.register(ISoulConsumer.class, Helper.getNullStorage(), TBSoulConsumerProvider::getDefault);
         PROXY.preInit();
         MinecraftForge.EVENT_BUS.register(Helper.buildKnowledgeFunction());
-        LootConditionManager.registerCondition(InOpenWaterCondition.SERIALIZER);
+        OPEN_WATER = LootConditionManager.register(MOD_ID + ":in_open_water", InOpenWaterCondition.SERIALIZER);
     }
 
     private void clientSetup(final FMLClientSetupEvent event) {
         ModBlocks.decorative_graves.values().forEach(block -> RenderTypeLookup.setRenderLayer(block, RenderType.getCutout()));
         ModBlocks.graves.values().forEach(block -> RenderTypeLookup.setRenderLayer(block, RenderType.getCutout()));
+        Helper.initModelProperties();
     }
 
     private void onServerStarting(FMLServerStartingEvent event) {
@@ -108,7 +112,6 @@ public class ModTombstone {
         if (SupportMods.COSMETIC_ARMOR.isLoaded()) {
             MinecraftForge.EVENT_BUS.register(CompatibilityCosmeticArmor.instance);
         }
-        Helper.initCommands(event.getCommandDispatcher());
         MinecraftForge.EVENT_BUS.register(new CallbackHandler());
     }
 
@@ -118,5 +121,5 @@ public class ModTombstone {
     }
 
     @SuppressWarnings("deprecation")
-    public static final EnchantmentType TYPE_TOMBSTONE_ALL = Helper.addEnchantmentType("type_tombstone_all", p -> p != null && (p.getItemEnchantability() > 0 || p.getMaxStackSize() == 1), EnchantmentType.ALL);
+    public static final EnchantmentType TYPE_TOMBSTONE_ALL = EnchantmentType.create("type_tombstone_all", p -> p != null && (p.getItemEnchantability() > 0 || p.getMaxStackSize() == 1));
 }

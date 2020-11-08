@@ -12,7 +12,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.util.Util;
+import net.minecraft.world.storage.FolderName;
 import net.minecraftforge.items.CapabilityItemHandler;
 import ovh.corail.tombstone.ModTombstone;
 import ovh.corail.tombstone.helper.LangKey;
@@ -77,9 +78,9 @@ public class CommandTBReviveFamiliar extends TombstoneCommand {
         }
         boolean success = ModItems.familiar_receptacle.revive(player, player.getPosition(), receptacle);
         LangKey langKey = success ? LangKey.MESSAGE_BRING_BACK_TO_LIFE : LangKey.MESSAGE_CANT_REVIVE_FAMILIAR;
-        player.sendMessage(langKey.getTranslationWithStyle(success ? StyleType.MESSAGE_SPELL : StyleType.COLOR_OFF, LangKey.MESSAGE_YOUR_FAMILIAR.getTranslation()));
+        player.sendMessage(langKey.getText(success ? StyleType.MESSAGE_SPELL : StyleType.COLOR_OFF, LangKey.MESSAGE_YOUR_FAMILIAR.getText()), Util.DUMMY_UUID);
         if (!player.equals(sender.getEntity())) {
-            sendMessage(sender, langKey.getTranslationWithStyle(success ? StyleType.MESSAGE_SPELL : StyleType.COLOR_OFF, LangKey.MESSAGE_FAMILIAR_OF.getTranslation(player.getName())), false);
+            sendMessage(sender, langKey.getText(success ? StyleType.MESSAGE_SPELL : StyleType.COLOR_OFF, LangKey.MESSAGE_FAMILIAR_OF.getText(player.getName())), false);
         }
         receptacle.shrink(1);
         player.container.detectAndSendChanges();
@@ -88,7 +89,7 @@ public class CommandTBReviveFamiliar extends TombstoneCommand {
 
     @Nullable
     private CompoundNBT getLastSave(CommandSource sender, PlayerEntity player) {
-        File saveFolder = new File(sender.getServer().getWorld(DimensionType.OVERWORLD).getSaveHandler().getWorldDirectory(), MOD_ID + "/saved_familiars/" + player.getUniqueID());
+        File saveFolder = new File(sender.getServer().func_240776_a_(SAVE_FOLDER).toFile(), player.getUniqueID().toString());
         if (!saveFolder.exists()) {
             return null;
         }
@@ -111,7 +112,7 @@ public class CommandTBReviveFamiliar extends TombstoneCommand {
     }
 
     public static void saveFamiliar(MinecraftServer server, UUID ownerId, CompoundNBT tag, String saveName) {
-        File saveFolder = new File(server.getWorld(DimensionType.OVERWORLD).getSaveHandler().getWorldDirectory(), MOD_ID + "/saved_familiars/" + ownerId);
+        File saveFolder = new File(server.func_240776_a_(SAVE_FOLDER).toFile(), ownerId.toString());
         if (!saveFolder.exists() && !saveFolder.mkdirs()) {
             ModTombstone.LOGGER.info("The backup folder for familiars cannot be created");
             return;
@@ -142,4 +143,6 @@ public class CommandTBReviveFamiliar extends TombstoneCommand {
             return false;
         });
     }
+
+    private static final FolderName SAVE_FOLDER = new FolderName(MOD_ID + "/saved_familiars");
 }

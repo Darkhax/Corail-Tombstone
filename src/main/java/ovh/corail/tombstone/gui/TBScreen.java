@@ -1,5 +1,6 @@
 package ovh.corail.tombstone.gui;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.ResourceLocation;
@@ -40,11 +41,11 @@ public abstract class TBScreen extends Screen {
     }
 
     @Override
-    public void renderBackground() {
-        super.renderBackground();
-        fill(this.guiLeft - 3, this.guiTop - 3, this.guiLeft + this.xSize + 3, this.guiTop + this.ySize + 3, this.borderColor);
+    public void renderBackground(MatrixStack matrixStack) {
+        super.renderBackground(matrixStack);
+        fill(matrixStack, this.guiLeft - 3, this.guiTop - 3, this.guiLeft + this.xSize + 3, this.guiTop + this.ySize + 3, this.borderColor);
         RenderSystem.color4f(1f, 1f, 1f, 1f);
         getMinecraft().textureManager.bindTexture(GUI_BACKGROUND);
-        blit(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize, this.xSize, this.ySize);
+        blit(matrixStack, this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize, this.xSize, this.ySize);
     }
 }

@@ -20,6 +20,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.CooldownTracker;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.IWorld;
@@ -64,7 +65,7 @@ public class ItemAnkhOfPray extends ItemGeneric implements ISoulConsumer {
 
     @Override
     public ITextComponent getDisplayName(ItemStack stack) {
-        return super.getDisplayName(stack).setStyle(StyleType.MESSAGE_SPECIAL);
+        return super.getDisplayName(stack).copyRaw().setStyle(StyleType.MESSAGE_SPECIAL);
     }
 
     @Override
@@ -79,7 +80,7 @@ public class ItemAnkhOfPray extends ItemGeneric implements ISoulConsumer {
                         int cd = CooldownHandler.INSTANCE.getCooldown(player, CooldownType.NEXT_PRAY) / 20;
                         if (cd > 0) {
                             long hour = cd / 3600;
-                            StringBuilder timeString = new StringBuilder(StyleType.TOOLTIP_DESC.getFormattingCode()).append("[");
+                            StringBuilder timeString = new StringBuilder(Helper.getFormattingCode(StyleType.TOOLTIP_DESC)).append("[");
                             if (hour > 0) {
                                 cd -= hour * 3600;
                                 timeString.append(String.format("%02d", hour)).append(":");
@@ -114,7 +115,7 @@ public class ItemAnkhOfPray extends ItemGeneric implements ISoulConsumer {
     }
 
     @Override
-    public boolean itemInteractionForEntity(ItemStack stack, PlayerEntity playerIn, LivingEntity target, Hand hand) {
+    public ActionResultType itemInteractionForEntity(ItemStack stack, PlayerEntity playerIn, LivingEntity target, Hand hand) {
         if (EntityHelper.isValidPlayer(playerIn) && hand == Hand.MAIN_HAND && playerIn.getHeldItemMainhand().getItem() == this && !EntityHelper.hasCooldown(playerIn, this)) {
             if (target instanceof ZombieVillagerEntity) {
                 ZombieVillagerEntity villager = (ZombieVillagerEntity) target;
@@ -136,14 +137,14 @@ public class ItemAnkhOfPray extends ItemGeneric implements ISoulConsumer {
                         EntityHelper.addKnowledge(player, 3);
                         EntityHelper.addAlignment(player, ConfigTombstone.alignment.pointsExorcismZombieVillager.get());
                         Helper.damageItem(player.getHeldItemMainhand(), 3, player, Hand.MAIN_HAND);
-                        player.sendMessage(LangKey.MESSAGE_EXORCISM.getTranslationWithStyle(StyleType.MESSAGE_SPECIAL));
+                        LangKey.MESSAGE_EXORCISM.sendMessage(player, StyleType.MESSAGE_SPECIAL);
                         ModTriggers.EXORCISM.trigger(player);
                     }
                 }
-                return true;
+                return ActionResultType.SUCCESS;
             }
         }
-        return false;
+        return ActionResultType.FAIL;
     }
 
     @Override
@@ -156,14 +157,14 @@ public class ItemAnkhOfPray extends ItemGeneric implements ISoulConsumer {
                     ItemStack offhand = player.getHeldItemOffhand();
                     if (ModItems.familiar_receptacle.containSoul(offhand)) {
                         if (ModItems.familiar_receptacle.getDurabilityForDisplay(offhand) != 0f) {
-                            failedMessage = LangKey.MESSAGE_RECOVERING_RECEPTACLE.getTranslationWithStyle(StyleType.COLOR_OFF);
+                            failedMessage = LangKey.MESSAGE_RECOVERING_RECEPTACLE.getText(StyleType.COLOR_OFF);
                         } else if (cap.getTotalPerkPoints() < 10) {
-                            failedMessage = LangKey.MESSAGE_KNOWLEDGE_REQUIRED.getTranslationWithStyle(StyleType.COLOR_OFF, 10);
+                            failedMessage = LangKey.MESSAGE_KNOWLEDGE_REQUIRED.getText(StyleType.COLOR_OFF, 10);
                         }
                         if (failedMessage != null) {
                             player.getCooldownTracker().setCooldown(this, 10);
                             if (!player.world.isRemote) {
-                                player.sendMessage(failedMessage);
+                                player.sendMessage(failedMessage, Util.DUMMY_UUID);
                             }
                             return ActionResultType.FAIL;
                         }
@@ -204,23 +205,23 @@ public class ItemAnkhOfPray extends ItemGeneric implements ISoulConsumer {
                         if (offhandStack.getItem() == ModItems.familiar_receptacle) {
                             if (ModItems.familiar_receptacle.containSoul(offhandStack)) {
                                 if (ModItems.familiar_receptacle.getDurabilityForDisplay(offhandStack) > 0d) {
-                                    player.sendMessage(LangKey.MESSAGE_RECOVERING_RECEPTACLE.getTranslationWithStyle(StyleType.COLOR_OFF));
+                                    LangKey.MESSAGE_RECOVERING_RECEPTACLE.sendMessage(player, StyleType.COLOR_OFF);
                                 } else if (ModItems.familiar_receptacle.revive(player, gravePos, offhandStack)) {
                                     CooldownHandler.INSTANCE.resetCooldown(player, CooldownType.NEXT_PRAY);
                                     cap.addKnowledgeAndSync(player, 5);
                                     Helper.damageItem(stack, 1, player, Hand.MAIN_HAND);
                                     ModTriggers.REVIVE_FAMILIAR.trigger(player);
-                                    player.sendMessage(LangKey.MESSAGE_REVIVE_FAMILIAR.getTranslation(LangKey.MESSAGE_YOUR_FAMILIAR.getTranslation()));
+                                    LangKey.MESSAGE_REVIVE_FAMILIAR.sendMessage(player, LangKey.MESSAGE_YOUR_FAMILIAR.getText());
                                     offhandStack.shrink(1);
                                 } else {
                                     CompoundNBT tag = offhandStack.getTag();
                                     if (tag != null) {
                                         tag.remove("dead_pet");
                                     }
-                                    player.sendMessage(LangKey.MESSAGE_CANT_REVIVE_FAMILIAR.getTranslationWithStyle(StyleType.COLOR_OFF, LangKey.MESSAGE_YOUR_FAMILIAR.getTranslation()));
+                                    LangKey.MESSAGE_CANT_REVIVE_FAMILIAR.sendMessage(player, StyleType.COLOR_OFF, LangKey.MESSAGE_YOUR_FAMILIAR.getText());
                                 }
                             } else {
-                                player.sendMessage(LangKey.MESSAGE_EMPTY_RECEPTACLE.getTranslationWithStyle(StyleType.COLOR_OFF));
+                                LangKey.MESSAGE_EMPTY_RECEPTACLE.sendMessage(player, StyleType.COLOR_OFF);
                             }
                         } else {
                             // TODO new results
@@ -231,7 +232,7 @@ public class ItemAnkhOfPray extends ItemGeneric implements ISoulConsumer {
                             if (Helper.isAprilFoolsDay()) {
                                 EffectHelper.addEffect(player, Effects.BAD_OMEN, TimeHelper.tickFromDay(1));
                             } else if (EffectHelper.clearEffect(player, Effects.BAD_OMEN)) {
-                                player.sendMessage(LangKey.MESSAGE_DISPEL_BAD_OMEN.getTranslationWithStyle(StyleType.MESSAGE_SPELL));
+                                LangKey.MESSAGE_DISPEL_BAD_OMEN.sendMessage(player, StyleType.MESSAGE_SPELL);
                             }
                             int res = Helper.getRandom(1, 100);
                             if (res == 100 || (Helper.isAprilFoolsDay() && res < 50)) {
@@ -249,7 +250,7 @@ public class ItemAnkhOfPray extends ItemGeneric implements ISoulConsumer {
                         }
                     });
                 } else {
-                    player.sendMessage(LangKey.MESSAGE_CANT_PRAY.getTranslationWithStyle(StyleType.COLOR_OFF));
+                    LangKey.MESSAGE_CANT_PRAY.sendMessage(player, StyleType.COLOR_OFF);
                 }
                 EntityHelper.setCooldown(player, this, 10);
             }
@@ -309,7 +310,7 @@ public class ItemAnkhOfPray extends ItemGeneric implements ISoulConsumer {
 
     @Override
     public ITextComponent getEnchantSuccessMessage(PlayerEntity player) {
-        return LangKey.MESSAGE_PERK_RESET_SUCCESS.getTranslation();
+        return LangKey.MESSAGE_PERK_RESET_SUCCESS.getText();
     }
 
     @Override
@@ -322,12 +323,12 @@ public class ItemAnkhOfPray extends ItemGeneric implements ISoulConsumer {
                     if (min > 0) {
                         cd -= min * 1200;
                     }
-                    return LangKey.MESSAGE_PERK_RESET_IN_COOLDOWN.getTranslation(min, cd / 20);
+                    return LangKey.MESSAGE_PERK_RESET_IN_COOLDOWN.getText(min, cd / 20);
                 }
-                return LangKey.MESSAGE_PERK_RESET_FAILED.getTranslation();
-            }).orElse(LangKey.MESSAGE_PERK_RESET_FAILED.getTranslation());
+                return LangKey.MESSAGE_PERK_RESET_FAILED.getText();
+            }).orElse(LangKey.MESSAGE_PERK_RESET_FAILED.getText());
         }
-        return LangKey.MESSAGE_PERK_RESET_FAILED.getTranslation();
+        return LangKey.MESSAGE_PERK_RESET_FAILED.getText();
     }
 
     @Override

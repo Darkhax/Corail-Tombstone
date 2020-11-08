@@ -53,8 +53,8 @@ public class EnchantmentMagicSiphon extends WeaponEnchantment {
             }
             attacker.addPotionEffect(effectCopy);
             EffectHelper.clearEffect(target, effectInstance.getPotion());
-            if (effectInstance.field_230115_j_ != null) {
-                target.addPotionEffect(effectInstance.field_230115_j_);
+            if (effectInstance.hiddenEffects != null) {
+                target.addPotionEffect(effectInstance.hiddenEffects);
             }
             if (target.getHealth() > target.getMaxHealth()) {
                 target.setHealth(target.getMaxHealth());

@@ -8,17 +8,14 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.loot.EmptyLootEntry;
+import net.minecraft.loot.ItemLootEntry;
+import net.minecraft.loot.LootPool;
+import net.minecraft.loot.LootTable;
+import net.minecraft.loot.functions.SetNBT;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
-import net.minecraft.world.storage.loot.EmptyLootEntry;
-import net.minecraft.world.storage.loot.ItemLootEntry;
-import net.minecraft.world.storage.loot.LootPool;
-import net.minecraft.world.storage.loot.LootTable;
-import net.minecraft.world.storage.loot.LootTableManager;
-import net.minecraft.world.storage.loot.functions.SetNBT;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import ovh.corail.tombstone.block.ItemBlockGrave;
 import ovh.corail.tombstone.config.ConfigTombstone;
 import ovh.corail.tombstone.config.SharedConfigTombstone;
@@ -31,13 +28,11 @@ import ovh.corail.tombstone.registry.ModItems;
 import ovh.corail.tombstone.registry.ModPerks;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Random;
 import java.util.function.Consumer;
 
 public class LootHelper {
-    private static final Field fieldIsFrozen = ObfuscationReflectionHelper.findField(LootTable.class, "isFrozen");
 
     private static void addEntry(LootPool.Builder builder, Item item, int weight, Consumer<CompoundNBT> consumer) {
         builder.addEntry(ItemLootEntry.builder(item).quality(-2).weight(weight).acceptFunction(SetNBT.builder(Util.make(new CompoundNBT(), consumer))));
@@ -76,17 +71,11 @@ public class LootHelper {
             if (lostTabletChance < 1000) {
                 builder.addEntry(EmptyLootEntry.func_216167_a().quality(-2).weight(1000 - lostTabletChance));
             }
-            try {
-                fieldIsFrozen.set(table, false);
-                table.addPool(builder.build());
-                fieldIsFrozen.set(table, true);
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
+            table.addPool(builder.build());
         }
     }
 
-    public static void addChestEntries(LootTableManager lootTableManager) {
+    public static void addChestEntries(LootTable table) {
         // adds loots in structure chests
         LootPool.Builder builder = new LootPool.Builder().name("tombstone:chest_treasure");
         int weight = 0;
@@ -112,19 +101,7 @@ public class LootHelper {
             return;
         }
         builder.addEntry(EmptyLootEntry.func_216167_a().weight(100 - weight));
-        LootPool chestTreasure = builder.build();
-        for (String targetTableString : ConfigTombstone.loot.treasureLootTable.get()) {
-            LootTable currentTable = lootTableManager.getLootTableFromLocation(new ResourceLocation(targetTableString));
-            if (currentTable != LootTable.EMPTY_LOOT_TABLE) {
-                try {
-                    fieldIsFrozen.set(currentTable, false);
-                    currentTable.addPool(chestTreasure);
-                    fieldIsFrozen.set(currentTable, true);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        table.addPool(builder.build());
     }
 
     public static void handleMobDrops(Collection<ItemEntity> drops, LivingEntity entity, @Nullable DamageSource damageSource) {

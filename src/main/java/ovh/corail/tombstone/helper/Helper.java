@@ -1,33 +1,10 @@
 package ovh.corail.tombstone.helper;
 
-import static ovh.corail.tombstone.ModTombstone.MOD_ID;
-
-import java.time.LocalDate;
-import java.time.temporal.ChronoField;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.IntStream;
-
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-import org.apache.commons.lang3.tuple.Pair;
-import org.lwjgl.opengl.GL11;
-
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.CommandDispatcher;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -44,7 +21,6 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.command.CommandSource;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -54,7 +30,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.SnowballEntity;
 import net.minecraft.item.EnchantedBookItem;
-import net.minecraft.item.Item;
+import net.minecraft.item.FishingRodItem;
+import net.minecraft.item.ItemModelsProperties;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
@@ -65,34 +42,43 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.util.text.Color;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.gen.Heightmap;
+import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.LogicalSidedProvider;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.network.NetworkEvent;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.commons.lang3.tuple.Pair;
+import org.lwjgl.opengl.GL11;
 import ovh.corail.tombstone.api.capability.Perk;
 import ovh.corail.tombstone.api.magic.ISoulConsumer;
+import ovh.corail.tombstone.block.ItemBlockGrave;
 import ovh.corail.tombstone.command.CommandTBAcceptTeleport;
 import ovh.corail.tombstone.command.CommandTBBind;
 import ovh.corail.tombstone.command.CommandTBKnownledge;
@@ -110,8 +96,26 @@ import ovh.corail.tombstone.command.CommandTBTeleportGrave;
 import ovh.corail.tombstone.command.CommandTBTeleportHome;
 import ovh.corail.tombstone.config.ConfigTombstone;
 import ovh.corail.tombstone.config.SharedConfigTombstone;
+import ovh.corail.tombstone.registry.ModBlocks;
 import ovh.corail.tombstone.registry.ModEnchantments;
+import ovh.corail.tombstone.registry.ModItems;
 import ovh.corail.tombstone.registry.ModTriggers;
+
+import javax.annotation.Nullable;
+import java.time.LocalDate;
+import java.time.temporal.ChronoField;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
+import java.util.Set;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import static ovh.corail.tombstone.ModTombstone.MOD_ID;
 
 @SuppressWarnings({ "WeakerAccess", "unused" })
 public class Helper {
@@ -122,10 +126,7 @@ public class Helper {
     private static ContributorStore CONTRIBUTORS = ContributorStore.of();
 
     public static boolean isContributor(PlayerEntity player) {
-        if (player.world.isRemote) {
-            return isContributor;
-        }
-        return CONTRIBUTORS.contains(player);
+        return player.world.isRemote ? isContributor : CONTRIBUTORS.contains(player);
     }
 
     public static boolean isDisabledPerk(@Nullable Perk perk, @Nullable PlayerEntity player) {
@@ -171,20 +172,8 @@ public class Helper {
         return list;
     }
 
-    public static int getDimensionId(Entity entity) {
-        return getDimensionType(entity).getId();
-    }
-
-    public static int getDimensionId(IWorld world) {
-        return getDimensionType(world).getId();
-    }
-
-    public static DimensionType getDimensionType(Entity entity) {
-        return getDimensionType(entity.world);
-    }
-
-    public static DimensionType getDimensionType(IWorld world) {
-        return world.getDimension().getType();
+    public static RegistryKey<World> getDimensionType(World world) {
+        return world.getDimensionKey();
     }
 
     public static BlockPos getCloserValidPos(World world, BlockPos pos) {
@@ -200,18 +189,17 @@ public class Helper {
             z = Math.min(Math.max(pos.getZ(), (int) border.minZ()), (int) border.maxZ());
         }
         if (!validY) {
-            y = Math.max(Math.min(pos.getY(), world.getDimension().getActualHeight()), 0);
+            y = Math.max(Math.min(pos.getY(), world.getDimensionType().getLogicalHeight()), 0);
         }
         return new BlockPos(x, y, z);
     }
 
-    public static boolean isValidPos(World world, BlockPos pos) {
-        return world.getWorldBorder().contains(pos) && !World.isOutsideBuildHeight(pos);
+    public static boolean isValidPos(@Nullable World world, BlockPos pos) {
+        return world != null && world.getWorldBorder().contains(pos) && !World.isOutsideBuildHeight(pos);
     }
 
-    @SuppressWarnings("deprecation")
-    public static boolean isInvalidDimension(int dimId) {
-        return DimensionManager.getRegistry().stream().noneMatch(dim -> dim.getId() == dimId);
+    public static boolean isInvalidDimension(MinecraftServer server, RegistryKey<World> key) {
+    	return server.getWorld(key) == null;
     }
 
     @Nullable
@@ -233,9 +221,12 @@ public class Helper {
         BlockPos startingPos = pos;
         for (int nbTry = 0; nbTry < 5; nbTry++) {
             startingPos = getCloserValidPos(world, startingPos.add(nbTry * random.nextGaussian() * 2000, 0d, nbTry * random.nextGaussian() * 2000));
-            final BlockPos foundPos = world.findNearestStructure(SupportStructures.getStructureNameForSearch(structureName), startingPos, 100, unexplored);
-            if (foundPos != null && isValidPos(world, foundPos)) {
-                return new Location(foundPos.getX(), y, foundPos.getZ(), world);
+            Structure<?> structure = SupportStructures.getStructure(structureName);
+            if (structure != null) {
+                final BlockPos foundPos = world.func_241117_a_(structure, startingPos, 100, unexplored);
+                if (foundPos != null && isValidPos(world, foundPos)) {
+                    return new Location(foundPos.getX(), y, foundPos.getZ(), world);
+                }
             }
         }
         return Location.ORIGIN;
@@ -265,9 +256,9 @@ public class Helper {
         if (!entity.world.isRemote) {
             MinecraftServer server = entity.getServer();
             if (server != null) {
-                DimensionType dimType = DimensionType.getById(loc.dim);
-                if (dimType != null) {
-                    TeleportationHandler.teleportEntity(entity, dimType, (double) loc.x + 0.5d, (double) loc.y + 0.1d, (double) loc.z + 0.5d);
+                ServerWorld targetWorld = server.getWorld(loc.dim);
+                if (targetWorld != null) {
+                    TeleportationHandler.teleportEntity(entity, targetWorld, (double) loc.x + 0.5d, (double) loc.y + 0.1d, (double) loc.z + 0.5d);
                 }
             }
         }
@@ -354,7 +345,7 @@ public class Helper {
             if (state.getOpacity(world, pos) != oldOpacity || state.getLightValue(world, pos) != oldLight || state.isTransparent() || blockstate.isTransparent()) {
                 world.getChunkProvider().getLightManager().checkBlock(pos);
             }
-            world.markAndNotifyBlock(pos, chunk, blockstate, state, 3);
+            world.markAndNotifyBlock(pos, chunk, blockstate, state, 3, 512);
         }
     }
 
@@ -402,22 +393,22 @@ public class Helper {
     }
 
     public static void handleAprilFoolsDayGrave(World world, BlockPos pos) {
-        final Vec3d centerVec = new Vec3d(pos).add(0.5d, 1d, 0.5d);
+        final Vector3d centerVec = new Vector3d(pos.getX(), pos.getY(), pos.getZ()).add(0.5d, 1d, 0.5d);
         final PlayerEntity closestPlayer = world.getClosestPlayer(centerVec.x, centerVec.y, centerVec.z, 20d, false);
         if (closestPlayer != null) {
             final SnowballEntity snowballentity = new SnowballEntity(world, centerVec.x, centerVec.y, centerVec.z);
             if (canSeeEntity(closestPlayer, centerVec)) {
                 snowballentity.setItem(new ItemStack(Items.BONE));
                 snowballentity.getPersistentData().putBoolean(APRIL_FOOLS_DAY_SLOWNESS_NBT_BOOL, true);
-                Vec3d vec = closestPlayer.getPositionVec().add(0d, closestPlayer.getEyeHeight(), 0d).subtract(snowballentity.getPositionVec());
+                Vector3d vec = closestPlayer.getPositionVec().add(0d, closestPlayer.getEyeHeight(), 0d).subtract(snowballentity.getPositionVec());
                 snowballentity.shoot(vec.x, vec.y, vec.z, 1.5f, 1f);
                 world.addEntity(snowballentity);
             }
         }
     }
 
-    public static boolean canSeeEntity(Entity entity, Vec3d vec3d) {
-        Vec3d vec3d1 = entity.getPositionVec().add(0d, entity.getEyeHeight(), 0d);
+    public static boolean canSeeEntity(Entity entity, Vector3d vec3d) {
+        Vector3d vec3d1 = entity.getPositionVec().add(0d, entity.getEyeHeight(), 0d);
         return entity.world.rayTraceBlocks(new RayTraceContext(vec3d, vec3d1, RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, entity)).getType() == RayTraceResult.Type.MISS;
     }
 
@@ -434,7 +425,7 @@ public class Helper {
     }
 
     public static boolean isNight(World world) {
-        float angle = world.getCelestialAngle(0.0f);
+        float angle = world.getCelestialAngleRadians(0.0f);
         return angle >= 0.245f && angle <= 0.755f;
     }
 
@@ -518,7 +509,7 @@ public class Helper {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void fillGradient(int left, int top, int right, int bottom, int color1, int color2, int zLevel, boolean isHorizontal) {
+    public static void fillGradient(Matrix4f matrix, int left, int top, int right, int bottom, int color1, int color2, int zLevel, boolean isHorizontal) {
         float[] argb1 = getRGBColor4F(color1);
         float[] argb2 = getRGBColor4F(color2);
 
@@ -530,10 +521,10 @@ public class Helper {
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuffer();
         bufferbuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-        makeVertex(bufferbuilder, right, top, zLevel, isHorizontal ? argb2 : argb1);
-        makeVertex(bufferbuilder, left, top, zLevel, argb1);
-        makeVertex(bufferbuilder, left, bottom, zLevel, isHorizontal ? argb1 : argb2);
-        makeVertex(bufferbuilder, right, bottom, zLevel, argb2);
+        makeVertex(matrix, bufferbuilder, right, top, zLevel, isHorizontal ? argb2 : argb1);
+        makeVertex(matrix, bufferbuilder, left, top, zLevel, argb1);
+        makeVertex(matrix, bufferbuilder, left, bottom, zLevel, isHorizontal ? argb1 : argb2);
+        makeVertex(matrix, bufferbuilder, right, bottom, zLevel, argb2);
         tessellator.draw();
         RenderSystem.shadeModel(GL11.GL_FLAT);
         RenderSystem.disableBlend();
@@ -596,13 +587,8 @@ public class Helper {
     }
 
     @OnlyIn(Dist.CLIENT)
-    private static void makeVertex(BufferBuilder bufferbuilder, int x, int y, int zLevel, float[] colorArray) {
-        bufferbuilder.pos(x, y, zLevel).color(colorArray[0], colorArray[1], colorArray[2], colorArray[3]).endVertex();
-    }
-
-    public static EnchantmentType addEnchantmentType(String name, Predicate<Item> predic, EnchantmentType fallback) {
-        EnchantmentType enchantType = EnchantmentType.create(name, predic);
-        return enchantType == null ? fallback : enchantType;
+    private static void makeVertex(Matrix4f matrix, BufferBuilder bufferbuilder, int x, int y, int zLevel, float[] colorArray) {
+        bufferbuilder.pos(matrix, x, y, zLevel).color(colorArray[0], colorArray[1], colorArray[2], colorArray[3]).endVertex();
     }
 
     public static Set<Enchantment> getTombstoneEnchantments(ItemStack stack) {
@@ -631,10 +617,15 @@ public class Helper {
         if (!entityTypeString.isEmpty()) {
             ResourceLocation resourceLocation = ResourceLocation.tryCreate(entityTypeString);
             if (resourceLocation != null) {
-                return TAMEABLE.computeIfAbsent(resourceLocation, rl -> Registry.ENTITY_TYPE.getValue(rl).map(entry -> {
+                return TAMEABLE.computeIfAbsent(resourceLocation, rl -> {
+                    final EntityType<?> entry = Registry.ENTITY_TYPE.getValueForKey(RegistryKey.getOrCreateKey(Registry.ENTITY_TYPE_KEY, rl));
+                    if (entry == null)
+                    {
+                        return false;
+                    }
                     Entity entity = entry.create(world);
                     return isTameable(entity);
-                }).orElse(false));
+                });
             }
         }
         return false;
@@ -644,15 +635,15 @@ public class Helper {
         return entity instanceof TameableEntity || entity instanceof AbstractHorseEntity;
     }
 
-    public static double getDistance(Vec3i vec1, Vec3i vec2) {
+    public static double getDistance(Vector3i vec1, Vector3i vec2) {
         return Math.sqrt(getDistanceSq(vec1, vec2));
     }
 
-    public static double getDistanceSq(Vec3i vec1, Vec3i vec2) {
+    public static double getDistanceSq(Vector3i vec1, Vector3i vec2) {
         return getDistanceSq(vec1, vec2.getX(), vec2.getY(), vec2.getZ());
     }
 
-    public static double getDistanceSq(Vec3i vec1, int x2, int y2, int z2) {
+    public static double getDistanceSq(Vector3i vec1, int x2, int y2, int z2) {
         return vec1.distanceSq(x2, y2, z2, false);
     }
 
@@ -662,6 +653,36 @@ public class Helper {
 
     public static boolean isPacketToServer(NetworkEvent.Context ctx) {
         return ctx.getDirection().getOriginationSide() == LogicalSide.CLIENT && ctx.getDirection().getReceptionSide() == LogicalSide.SERVER;
+    }
+
+    public static String getFormattingCode(Style style) {
+        if (style.isEmpty()) {
+            return "";
+        }
+        StringBuilder stringbuilder = new StringBuilder();
+        if (style.getColor() != null) {
+            fromColor(style.getColor()).ifPresent(stringbuilder::append);
+        }
+        if (style.getBold()) {
+            stringbuilder.append(TextFormatting.BOLD);
+        }
+        if (style.getItalic()) {
+            stringbuilder.append(TextFormatting.ITALIC);
+        }
+        if (style.getUnderlined()) {
+            stringbuilder.append(TextFormatting.UNDERLINE);
+        }
+        if (style.getObfuscated()) {
+            stringbuilder.append(TextFormatting.OBFUSCATED);
+        }
+        if (style.getStrikethrough()) {
+            stringbuilder.append(TextFormatting.STRIKETHROUGH);
+        }
+        return stringbuilder.toString();
+    }
+
+    public static Optional<TextFormatting> fromColor(Color color) {
+        return Stream.of(TextFormatting.values()).filter(f -> f.getColor() != null && f.getColor().equals(color.getColor())).findFirst();
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -709,5 +730,30 @@ public class Helper {
         new CommandTBRequestTeleport(commandDispatcher).registerCommand();
         new CommandTBTeleportDeath(commandDispatcher).registerCommand();
         new CommandTBBind(commandDispatcher).registerCommand();
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public static void initModelProperties() {
+        for (Block decorativeGrave : ModBlocks.decorative_graves.values()) {
+            ItemModelsProperties.registerProperty(decorativeGrave.asItem(), new ResourceLocation("model_texture"), (stack, world, entity) -> (ItemBlockGrave.isEngraved(stack) ? 0.1f : 0f) + (ItemBlockGrave.getModelTexture(stack) == 1 ? 0.01f : 0f));
+        }
+        ItemModelsProperties.registerProperty(ModItems.bone_needle, new ResourceLocation("filled"), (stack, world, entity) -> ModItems.bone_needle.getEntityType(stack).isEmpty() ? 0f : 1f);
+        ItemModelsProperties.registerProperty(ModItems.lost_tablet, new ResourceLocation("structure"), (stack, world, player) -> {
+            String structureId = ModItems.lost_tablet.getStructureId(stack);
+            return structureId != null ? SupportStructures.VILLAGE.is(structureId) ? 0.5f : 1f : 0f;
+        });
+        ItemModelsProperties.registerProperty(ModItems.tablet_of_home, new ResourceLocation("ancient"), (stack, worldIn, entityIn) -> ModItems.tablet_of_home.isAncient(stack) ? 1f : 0f);
+        ItemModelsProperties.registerProperty(ModItems.tablet_of_recall, new ResourceLocation("ancient"), (stack, worldIn, entityIn) -> ModItems.tablet_of_recall.isAncient(stack) ? 1f : 0f);
+        ItemModelsProperties.registerProperty(ModItems.fishing_rod_of_misadventure, new ResourceLocation("cast"), (stack, world, entity) -> {
+            if (entity == null) {
+                return 0f;
+            }
+            boolean isMainHand = entity.getHeldItemMainhand() == stack;
+            boolean isOffhand = entity.getHeldItemOffhand() == stack;
+            if (entity.getHeldItemMainhand().getItem() instanceof FishingRodItem) {
+                isOffhand = false;
+            }
+            return (isMainHand || isOffhand) && entity instanceof PlayerEntity && ((PlayerEntity)entity).fishingBobber != null ? 1f : 0f;
+        });
     }
 }

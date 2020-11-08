@@ -4,9 +4,9 @@ import net.minecraft.client.particle.IAnimatedSprite;
 import net.minecraft.client.particle.IParticleFactory;
 import net.minecraft.client.particle.IParticleRenderType;
 import net.minecraft.client.particle.Particle;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.particles.BasicParticleType;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import ovh.corail.tombstone.config.ConfigTombstone;
@@ -20,13 +20,13 @@ public class ParticleGraveSmoke extends TransparentParticle {
     protected final float alphaStep;
     private final float rotIncrement;
 
-    private ParticleGraveSmoke(IAnimatedSprite spriteSet, World world, double x, double y, double z, double motionX, double motionY, double motionZ) {
+    private ParticleGraveSmoke(IAnimatedSprite spriteSet, ClientWorld world, double x, double y, double z, double motionX, double motionY, double motionZ) {
         super(world, x, y + 0.1d, z);
         this.motionX = motionX;
         this.motionY = motionY;
         this.motionZ = motionZ;
         this.particleAlpha = 0f;
-        multipleParticleScaleBy(4f);
+        multiplyParticleScaleBy(4f);
         this.particleAngle = (float) (Math.PI * 2) * world.rand.nextFloat();
         this.rotIncrement = (float) (Math.PI * (world.rand.nextFloat() - 0.5f) * 0.01d);
         setMaxAge(80);
@@ -74,7 +74,7 @@ public class ParticleGraveSmoke extends TransparentParticle {
         }
 
         @Override
-        public Particle makeParticle(BasicParticleType type, World world, double x, double y, double z, double motionX, double motionY, double motionZ) {
+        public Particle makeParticle(BasicParticleType type, ClientWorld world, double x, double y, double z, double motionX, double motionY, double motionZ) {
             return new ParticleGraveSmoke(this.spriteSet, world, x, y + 0.4d, z, (world.rand.nextFloat() - 0.5f) * 0.03d, 0d, (world.rand.nextFloat() - 0.5f) * 0.03d);
         }
     }

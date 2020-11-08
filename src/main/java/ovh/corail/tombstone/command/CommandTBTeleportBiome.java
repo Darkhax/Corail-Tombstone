@@ -1,14 +1,17 @@
 package ovh.corail.tombstone.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
+import net.minecraft.command.arguments.DimensionArgument;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.command.arguments.ResourceLocationArgument;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.Biomes;
 import net.minecraft.world.biome.provider.BiomeProvider;
@@ -40,8 +43,8 @@ public class CommandTBTeleportBiome extends TombstoneCommand {
                         .executes(c -> showUsage(c.getSource()))
                         .then(Commands.argument(BIOME_PARAM, ResourceLocationArgument.resourceLocation()).suggests(SUGGESTION_BIOME)
                                 .executes(c -> teleportBiome(c.getSource(), EntityArgument.getEntity(c, TARGET_PARAM), getOrThrowBiome(c, BIOME_PARAM)))
-                                .then(Commands.argument(DIM_PARAM, IntegerArgumentType.integer()).suggests(SUGGESTION_DIM_IDS)
-                                        .executes(c -> teleportBiome(c.getSource(), EntityArgument.getEntity(c, TARGET_PARAM), getOrThrowBiome(c, BIOME_PARAM), c.getSource().getServer().getWorld(getOrThrowDimensionType(IntegerArgumentType.getInteger(c, DIM_PARAM)))))
+                                .then(Commands.argument(DIM_PARAM, DimensionArgument.getDimension())
+                                        .executes(c -> teleportBiome(c.getSource(), EntityArgument.getEntity(c, TARGET_PARAM), getOrThrowBiome(c, BIOME_PARAM), DimensionArgument.getDimensionArgument(c, DIM_PARAM)))
                                 )));
         return builder;
     }
@@ -54,7 +57,7 @@ public class CommandTBTeleportBiome extends TombstoneCommand {
         checkAlive(target);
         checkNotSpectator(target);
 
-        if (biome == Biomes.MOUNTAIN_EDGE) {
+        if (biome.getRegistryName().equals(Biomes.MOUNTAIN_EDGE.getLocation())) {
             throw LangKey.MESSAGE_NO_BIOME_FOR_DIMENSION.asCommandException();
         }
 
@@ -76,9 +79,9 @@ public class CommandTBTeleportBiome extends TombstoneCommand {
         }
         runNextTick(() -> {
             Entity newEntity = Helper.teleportEntity(target, spawnLoc);
-            sendMessage(sender, LangKey.MESSAGE_TELEPORT_TARGET_TO_LOCATION.getTranslation(newEntity.getName(), LangKey.MESSAGE_HERE.getTranslation(), spawnLoc.x, spawnLoc.y, spawnLoc.z, spawnLoc.dim), false);
+            sendMessage(sender, LangKey.MESSAGE_TELEPORT_TARGET_TO_LOCATION.getText(newEntity.getName(), LangKey.MESSAGE_HERE.getText(), spawnLoc.x, spawnLoc.y, spawnLoc.z, spawnLoc.dim.getLocation().toString()), false);
             if (EntityHelper.isValidPlayer(newEntity)) {
-                newEntity.sendMessage(LangKey.MESSAGE_TELEPORT_SUCCESS.getTranslationWithStyle(StyleType.MESSAGE_SPELL));
+                LangKey.MESSAGE_TELEPORT_SUCCESS.sendMessage((PlayerEntity) newEntity, StyleType.MESSAGE_SPELL);
             }
         });
         return 1;
@@ -86,7 +89,7 @@ public class CommandTBTeleportBiome extends TombstoneCommand {
 
     private Location findNearestBiome(ServerWorld world, int x, int y, int z, int radius, int radiusStep, Biome biome, Random random, boolean onionSearch) {
         BiomeProvider biomeProvider = world.getChunkProvider().getChunkGenerator().getBiomeProvider();
-        int dimId = Helper.getDimensionId(world);
+        RegistryKey<World> dimId = world.getDimensionKey();
         int xMin = x >> 2;
         int zMin = z >> 2;
         int radiusMax = radius >> 2;
@@ -106,7 +109,7 @@ public class CommandTBTeleportBiome extends TombstoneCommand {
                     }
                     int xBiomeChunk = xMin + biomeStepX;
                     int zBiomeChunk = zMin + biomeStepZ;
-                    if (biome.equals(biomeProvider.getNoiseBiome(xBiomeChunk, yBiomeChunk, zBiomeChunk))) {
+                    if (biome.getRegistryName().equals(biomeProvider.getNoiseBiome(xBiomeChunk, yBiomeChunk, zBiomeChunk).getRegistryName())) {
                         if (biomePos.isOrigin() || random.nextInt(count + 1) == 0) {
                             biomePos = new Location(xBiomeChunk << 2, y, zBiomeChunk << 2, dimId);
                             if (onionSearch) {

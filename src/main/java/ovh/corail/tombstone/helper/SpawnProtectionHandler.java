@@ -1,7 +1,9 @@
 package ovh.corail.tombstone.helper;
 
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 
 public class SpawnProtectionHandler {
     private static final SpawnProtectionHandler instance = new SpawnProtectionHandler();
@@ -26,8 +28,8 @@ public class SpawnProtectionHandler {
         return isActive;
     }
 
-    public boolean isBlockProtected(int dimension, BlockPos currentPos) {
-        if (!isActive || dimension != 0) {
+    public boolean isBlockProtected(RegistryKey<World> dimension, BlockPos currentPos) {
+        if (!isActive || !dimension.equals(World.OVERWORLD)) {
             return false;
         }
         int i = MathHelper.abs(currentPos.getX() - spawnPos.getX());

@@ -88,19 +88,19 @@ public class BlockGrave extends BlockGraveBase<TileEntityGrave> {
             }
         } else if (tile.canPlunder(player)) {
             if (!tile.isAbandoned(player)) {
-                player.sendMessage(LangKey.MESSAGE_TOMB_RAIDER_NOT_ABANDONED.getTranslation());
+            	LangKey.MESSAGE_TOMB_RAIDER_NOT_ABANDONED.sendMessage(player);
             } else if (tile.wasPlunderedBy(player)) {
-                player.sendMessage(LangKey.MESSAGE_TOMB_RAIDER_VISITED.getTranslation());
+            	LangKey.MESSAGE_TOMB_RAIDER_VISITED.sendMessage(player);
             } else if (tile.plunder(player)) {
-                player.sendMessage(LangKey.MESSAGE_TOMB_RAIDER_SUCCESS.getTranslation());
+            	LangKey.MESSAGE_TOMB_RAIDER_SUCCESS.sendMessage(player);
                 return true;
             } else {
-                player.sendMessage(LangKey.MESSAGE_TOMB_RAIDER_FAILED.getTranslation());
+            	LangKey.MESSAGE_TOMB_RAIDER_FAILED.sendMessage(player);
             }
         } else if (ModItems.grave_key.countKeyInInventory(player) > 0) {
-            player.sendMessage(LangKey.MESSAGE_OPEN_GRAVE_WRONG_KEY.getTranslation());
+        	LangKey.MESSAGE_OPEN_GRAVE_WRONG_KEY.sendMessage(player);
         } else {
-            player.sendMessage(LangKey.MESSAGE_OPEN_GRAVE_NEED_KEY.getTranslation());
+        	LangKey.MESSAGE_OPEN_GRAVE_NEED_KEY.sendMessage(player);
         }
         return valid;
     }
@@ -124,7 +124,7 @@ public class BlockGrave extends BlockGraveBase<TileEntityGrave> {
         if (Helper.isDateAroundHalloween()) {
             mob.setItemStackToSlot(EquipmentSlotType.HEAD, new ItemStack(Blocks.PUMPKIN));
         }
-        mob.onInitialSpawn(world, world.getDifficultyForLocation(new BlockPos(mob)), SpawnReason.TRIGGERED, null, null);
+        mob.onInitialSpawn(world, world.getDifficultyForLocation(new BlockPos(mob.getPositionVec())), SpawnReason.TRIGGERED, null, null);
         mob.setLocationAndAngles(spawnPos.x, spawnPos.y, spawnPos.z, world.rand.nextFloat() * 360f, 0f);
         world.addEntity(mob);
     }
@@ -146,7 +146,7 @@ public class BlockGrave extends BlockGraveBase<TileEntityGrave> {
     }
 
     private static Properties getBuilder() {
-        return Properties.create(Material.ROCK).hardnessAndResistance(-1f, 18000000f).lightValue(6).sound(SoundType.STONE);
+        return Properties.create(Material.ROCK).hardnessAndResistance(-1f, 18000000f).setLightLevel(l -> 6).sound(SoundType.STONE);
     }
 
     public ItemStack asDecorativeStack() {

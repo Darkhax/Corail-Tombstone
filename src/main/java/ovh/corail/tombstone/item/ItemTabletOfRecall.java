@@ -8,6 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
@@ -32,7 +33,6 @@ public class ItemTabletOfRecall extends ItemTablet {
 
     public ItemTabletOfRecall() {
         super("tablet_of_recall", SharedConfigTombstone.allowed_magic_items.allowTabletOfRecall::get);
-        addPropertyOverride(ANCIENT_PROPERTY, (stack, worldIn, entityIn) -> isAncient(stack) ? 1f : 0f);
     }
 
     @Override
@@ -92,7 +92,7 @@ public class ItemTabletOfRecall extends ItemTablet {
 
     @Override
     public ITextComponent getEnchantSuccessMessage(PlayerEntity player) {
-        return LangKey.MESSAGE_ITEM_BOUND_TO_PLACE.getTranslation();
+        return LangKey.MESSAGE_ITEM_BOUND_TO_PLACE.getText();
     }
 
     @Override
@@ -100,7 +100,7 @@ public class ItemTabletOfRecall extends ItemTablet {
         if (!world.isRemote && isEnchanted(stack) && TimeHelper.atInterval(player.ticksExisted, 20)) {
             setTombPos(stack, new Location(gravePos, world));
             player.getCooldownTracker().setCooldown(this, 100);
-            player.sendMessage(getEnchantSuccessMessage(player).setStyle(StyleType.MESSAGE_NORMAL));
+            player.sendMessage(getEnchantSuccessMessage(player).copyRaw().setStyle(StyleType.MESSAGE_NORMAL), Util.DUMMY_UUID);
         }
     }
 
@@ -117,11 +117,11 @@ public class ItemTabletOfRecall extends ItemTablet {
         Location location = getTombPos(stack);
         boolean isSameDim = location.isSameDimension(world);
         if (isSameDim && location.isInRange(player.getPosition(), 10)) {
-            player.sendMessage(LangKey.MESSAGE_TELEPORT_TOO_CLOSE_FROM_GRAVE.getTranslation());
+            LangKey.MESSAGE_TELEPORT_TOO_CLOSE_FROM_GRAVE.sendMessage(player);
             return false;
         }
         if (!isSameDim && !ConfigTombstone.general.teleportDim.get()) {
-            player.sendMessage(LangKey.MESSAGE_TELEPORT_SAME_DIMENSION.getTranslation());
+            LangKey.MESSAGE_TELEPORT_SAME_DIMENSION.sendMessage(player);
             return false;
         }
         CallbackHandler.addCallback(1, () -> {
@@ -132,7 +132,7 @@ public class ItemTabletOfRecall extends ItemTablet {
                 List<Entity> entities = world.getEntitiesWithinAABBExcludingEntity(player, area);
                 entities.forEach(entity -> Helper.teleportEntity(entity, new Location(newPlayer)));
             }
-            newPlayer.sendMessage(LangKey.MESSAGE_TELEPORT_SUCCESS.getTranslation());
+            LangKey.MESSAGE_TELEPORT_SUCCESS.sendMessage(newPlayer);
             ModTriggers.USE_RECALL.trigger(player);
         });
         return true;

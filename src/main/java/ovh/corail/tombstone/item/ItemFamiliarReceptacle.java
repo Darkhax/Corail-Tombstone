@@ -49,7 +49,7 @@ public class ItemFamiliarReceptacle extends ItemGeneric {
 
     @Override
     public ITextComponent getDisplayName(ItemStack stack) {
-        return super.getDisplayName(stack).setStyle(StyleType.MESSAGE_SPECIAL);
+        return super.getDisplayName(stack).copyRaw().setStyle(StyleType.MESSAGE_SPECIAL);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class ItemFamiliarReceptacle extends ItemGeneric {
                 String id = NBTStackHelper.getString(stack, "capturable_type");
                 if (!id.isEmpty()) {
                     EntityType<?> entityType = EntityType.byKey(id).orElse(null);
-                    list.add(LangKey.MESSAGE_IMPREGNATE.getTranslationWithStyle(StyleType.MESSAGE_SPECIAL, (entityType == null ? LangKey.MESSAGE_UNKNOWN.getTranslation() : entityType.getName()).setStyle(StyleType.TOOLTIP_ITEM)));
+                    list.add(LangKey.MESSAGE_IMPREGNATE.getText(StyleType.MESSAGE_SPECIAL, (entityType == null ? LangKey.MESSAGE_UNKNOWN.getText() : entityType.getName().copyRaw()).setStyle(StyleType.TOOLTIP_ITEM)));
                 }
             } else {
                 assert stack.getTag() != null;
@@ -75,7 +75,7 @@ public class ItemFamiliarReceptacle extends ItemGeneric {
                 if (tagPet.contains("id", Constants.NBT.TAG_STRING)) {
                     String id = tagPet.getString("id");
                     EntityType<?> entityType = EntityType.byKey(id).orElse(null);
-                    addItemDesc(list, "2", (entityType == null ? LangKey.MESSAGE_UNKNOWN.getTranslation() : entityType.getName()).setStyle(StyleType.TOOLTIP_ITEM));
+                    addItemDesc(list, "2", (entityType == null ? LangKey.MESSAGE_UNKNOWN.getText() : entityType.getName().copyRaw()).setStyle(StyleType.TOOLTIP_ITEM));
                     addItemUse(list, getDurabilityForDisplay(stack) == 0f ? "2" : "1");
                 }
             }
@@ -153,7 +153,7 @@ public class ItemFamiliarReceptacle extends ItemGeneric {
                         entity.setHealth(entity.getMaxHealth());
                         entity.removed = false;
                         entity.setPosition(gravePos.getX() + 0.5d, gravePos.getY() + 0.5d, gravePos.getZ() + 0.5d);
-                        entity.dimension = player.dimension;
+                        //entity.dimension = player.dimension;
                         if (entity instanceof TameableEntity) {
                             TameableEntity pet = (TameableEntity) entity;
                             pet.setTamedBy(player);
@@ -240,7 +240,7 @@ public class ItemFamiliarReceptacle extends ItemGeneric {
                     }
                     receptacle.getOrCreateTag().put("dead_pet", pet_tag);
                     assert owner != null;
-                    owner.sendMessage(LangKey.MESSAGE_CAPTURE_FAMILIAR.getTranslationWithStyle(StyleType.MESSAGE_SPECIAL, entity.getName()));
+                    LangKey.MESSAGE_CAPTURE_FAMILIAR.sendMessage(owner, StyleType.MESSAGE_SPECIAL, entity.getName());
                     ModTriggers.CAPTURE_SOUL.trigger(owner);
                     return true;
                 }

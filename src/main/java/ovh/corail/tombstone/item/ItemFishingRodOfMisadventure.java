@@ -10,11 +10,11 @@ import net.minecraft.stats.Stats;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -37,13 +37,12 @@ public class ItemFishingRodOfMisadventure extends FishingRodItem implements ISou
 
     public ItemFishingRodOfMisadventure() {
         super(new Properties().group(ModTabs.mainTab).maxStackSize(1).defaultMaxDamage(32)); // half durability
-        addPropertyOverride(new ResourceLocation("custom_model_data"), (stack, worldIn, entityIn) -> 0f);
     }
 
     @Override
     public ITextComponent getDisplayName(ItemStack stack) {
         ITextComponent name = super.getDisplayName(stack);
-        return (isEnchanted(stack) ? LangKey.MESSAGE_ENCHANTED_ITEM.getTranslation(name) : name).setStyle(StyleType.MESSAGE_SPECIAL);
+        return (isEnchanted(stack) ? LangKey.MESSAGE_ENCHANTED_ITEM.getText(name) : name.copyRaw()).setStyle(StyleType.MESSAGE_SPECIAL);
     }
 
     public String getSimpleName() {
@@ -55,10 +54,10 @@ public class ItemFishingRodOfMisadventure extends FishingRodItem implements ISou
     public void addInformation(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flag) {
         if (Helper.canShowTooltip(world, stack)) {
             int id = isEnchanted(stack) ? 2 : 1;
-            list.add(LangKey.makeTranslationWithStyle(StyleType.TOOLTIP_DESC, getTranslationKey(stack) + ".desc" + id));
-            list.add(LangKey.makeTranslationWithStyle(StyleType.TOOLTIP_USE, getTranslationKey(stack) + ".use" + id));
+            list.add(new TranslationTextComponent(getTranslationKey(stack) + ".desc" + id).setStyle(StyleType.TOOLTIP_DESC));
+            list.add(new TranslationTextComponent(getTranslationKey(stack) + ".use" + id).setStyle(StyleType.TOOLTIP_USE));
         } else {
-            list.add(LangKey.TOOLTIP_MORE_INFO.getTranslationWithStyle(StyleType.TOOLTIP_DESC));
+            list.add(LangKey.TOOLTIP_MORE_INFO.getText(StyleType.TOOLTIP_DESC));
         }
         super.addInformation(stack, world, list, flag);
     }
@@ -130,12 +129,12 @@ public class ItemFishingRodOfMisadventure extends FishingRodItem implements ISou
 
     @Override
     public ITextComponent getEnchantSuccessMessage(PlayerEntity player) {
-        return LangKey.MESSAGE_ENCHANT_FISHING_ROD_SUCCESS.getTranslation();
+        return LangKey.MESSAGE_ENCHANT_FISHING_ROD_SUCCESS.getText();
     }
 
     @Override
     public ITextComponent getEnchantFailedMessage(PlayerEntity player) {
-        return LangKey.MESSAGE_ENCHANT_ITEM_FAILED.getTranslation();
+        return LangKey.MESSAGE_ENCHANT_ITEM_FAILED.getText();
     }
 
     @Override

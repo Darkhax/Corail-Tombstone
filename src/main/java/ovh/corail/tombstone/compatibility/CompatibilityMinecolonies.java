@@ -19,7 +19,7 @@ public class CompatibilityMinecolonies {
 
     public boolean applyKillResult(ServerPlayerEntity player, EntityType<?> type) {
         ResourceLocation typeRL = type.getRegistryName();
-        if (SupportMods.MINECOLONIES.isLoaded() && typeRL != null && typeRL.getNamespace().equals(SupportMods.MINECOLONIES.getName())) {
+        if (SupportMods.MINECOLONIES.isLoaded() && typeRL != null && typeRL.getNamespace().equals(SupportMods.MINECOLONIES.getString())) {
             if (typeRL.getPath().equals("citizen")) {
                 EntityHelper.addAlignment(player, ConfigTombstone.alignment.pointsKillVillager.get());
             } else if (RAIDERS.contains(typeRL.getPath())) {

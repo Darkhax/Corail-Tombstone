@@ -2,31 +2,29 @@ package ovh.corail.tombstone.helper;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
-
-import javax.annotation.Nullable;
 
 public class Location {
-    public int x, y, z, dim;
+    public int x, y, z;
+    public RegistryKey<World> dim;
     static final BlockPos ORIGIN_POS = new BlockPos(0, Integer.MIN_VALUE, 0);
-    public static final Location ORIGIN = new Location(ORIGIN_POS, Integer.MIN_VALUE);
+    public static final Location ORIGIN = new Location(ORIGIN_POS, World.OVERWORLD);
 
-    public Location(BlockPos pos, int dim) {
+    public Location(BlockPos pos, RegistryKey<World> dim) {
         this(pos.getX(), pos.getY(), pos.getZ(), dim);
     }
 
-    public Location(BlockPos pos, IWorld world) {
+    public Location(BlockPos pos, World world) {
         this(pos.getX(), pos.getY(), pos.getZ(), world);
     }
 
-    public Location(int x, int y, int z, IWorld world) {
-        this(x, y, z, Helper.getDimensionId(world));
+    public Location(int x, int y, int z, World world) {
+        this(x, y, z, world.getDimensionKey());
     }
 
-    public Location(int x, int y, int z, int dim) {
+    public Location(int x, int y, int z, RegistryKey<World> dim) {
         this.x = x;
         this.y = y;
         this.z = z;
@@ -41,13 +39,8 @@ public class Location {
         return new BlockPos(x, y, z);
     }
 
-    @Nullable
-    public DimensionType getDimensionType() {
-        return DimensionType.getById(dim);
-    }
-
-    public boolean equals(Location pos) {
-        return pos.x == x && pos.y == y && pos.z == z && pos.dim == dim;
+    public boolean equals(Location location) {
+        return location.x == x && location.y == y && location.z == z && location.dim.equals(dim);
     }
 
     public boolean isOrigin() {
@@ -55,7 +48,11 @@ public class Location {
     }
 
     public boolean isSameDimension(World world) {
-        return this.dim == Helper.getDimensionId(world);
+        return this.dim.equals(world.getDimensionKey());
+    }
+
+    public boolean isSameDimension(String worldRL) {
+        return this.dim.getLocation().toString().equals(worldRL);
     }
 
     public double getDistanceSq(Location location) {
@@ -70,7 +67,7 @@ public class Location {
     }
 
     public boolean isInRangeAndDimension(Location loc, int range) {
-        return isInRange(loc, range) && this.dim == loc.dim;
+        return isInRange(loc, range) && this.dim.equals(loc.dim);
     }
 
     public boolean isInRange(int x, int y, int z, int range) {

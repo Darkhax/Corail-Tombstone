@@ -1,7 +1,10 @@
 package ovh.corail.tombstone.proxy;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.PointOfView;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
@@ -47,12 +50,13 @@ public class ClientProxy implements IProxy {
     @Override
     public void produceShadowStep(LivingEntity entity) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player != null && mc.player.equals(entity) && mc.gameSettings.thirdPersonView == 0) {
+        if (mc.player != null && mc.player.equals(entity) && mc.gameSettings.getPointOfView() == PointOfView.FIRST_PERSON) {
             return;
         }
-        if (!entity.isPassenger() && !entity.isSleeping()) {
+        ClientWorld world = mc.world;
+        if (world != null && !entity.isPassenger() && !entity.isSleeping()) {
             for (double i = 0d; i < 1d; i += 0.15d) {
-                mc.particles.addEffect(new ParticleShadowStep(entity, i));
+                mc.particles.addEffect(new ParticleShadowStep(mc.world, entity, i));
             }
         }
     }
@@ -65,18 +69,19 @@ public class ClientProxy implements IProxy {
     @Override
     public void produceParticleCasting(LivingEntity caster, Predicate<LivingEntity> predic) {
         Minecraft mc = Minecraft.getInstance();
-        if (caster != null) {
+        ClientWorld world = mc.world;
+        if (caster != null && world != null) {
             ParticleCasting particle;
             for (int i = 1; i <= 2; i++) {
-                particle = new ParticleCasting(caster.world, caster, predic, 0d, i * 0.5d);
+                particle = new ParticleCasting(world, caster, predic, 0d, i * 0.5d);
                 mc.particles.addEffect(particle);
-                particle = new ParticleCasting(caster.world, caster, predic, 0.5d, (i + 1) * 0.5d);
+                particle = new ParticleCasting(world, caster, predic, 0.5d, (i + 1) * 0.5d);
                 mc.particles.addEffect(particle);
-                particle = new ParticleCasting(caster.world, caster, predic, 1d, i * 0.5d);
+                particle = new ParticleCasting(world, caster, predic, 1d, i * 0.5d);
                 mc.particles.addEffect(particle);
-                particle = new ParticleCasting(caster.world, caster, predic, 1.5d, (i + 1) * 0.5d);
+                particle = new ParticleCasting(world, caster, predic, 1.5d, (i + 1) * 0.5d);
                 mc.particles.addEffect(particle);
-                particle = new ParticleCasting(caster.world, caster, predic, 2d, i * 0.5d);
+                particle = new ParticleCasting(world, caster, predic, 2d, i * 0.5d);
                 mc.particles.addEffect(particle);
             }
         }
@@ -140,7 +145,7 @@ public class ClientProxy implements IProxy {
                     changed = true;
                 }
                 if (changed) {
-                    Minecraft.getInstance().player.sendMessage(new StringTextComponent("Syncing Preferences on Server"));
+                    Minecraft.getInstance().player.sendMessage(new StringTextComponent("Syncing Preferences on Server"), Util.DUMMY_UUID);
                     PacketHandler.sendToServer(new UpdateServerMessage(ConfigTombstone.client.favoriteGrave.get(), ConfigTombstone.client.favoriteGraveMarble.get(), ConfigTombstone.client.equipElytraInPriority.get(), ConfigTombstone.client.displayKnowledgeMessage.get(), ConfigTombstone.client.priorizeToolOnHotbar.get(), ConfigTombstone.client.activateGraveBySneaking.get(), false));
                 }
             }

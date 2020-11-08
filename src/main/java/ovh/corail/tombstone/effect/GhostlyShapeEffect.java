@@ -16,7 +16,7 @@ public class GhostlyShapeEffect extends Effect {
 
     @Override
     public void performEffect(LivingEntity entity, int amplifier) {
-        if (!EntityHelper.isValidPlayer(entity) || ConfigTombstone.general.nerfGhostlyShape.get() && entity.collided && entity.world.getEntitiesInAABBexcluding(entity, entity.getBoundingBox(), p -> p != null && !p.isOnSameTeam(entity)).size() > 0) {
+        if (!EntityHelper.isValidPlayer(entity) || ConfigTombstone.general.nerfGhostlyShape.get() && (entity.collidedHorizontally || entity.collidedVertically) && entity.world.getEntitiesInAABBexcluding(entity, entity.getBoundingBox(), p -> p != null && !p.isOnSameTeam(entity)).size() > 0) {
             entity.removePotionEffect(this);
             return;
         }

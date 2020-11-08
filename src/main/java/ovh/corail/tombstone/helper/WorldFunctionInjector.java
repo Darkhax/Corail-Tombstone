@@ -51,7 +51,7 @@ public final class WorldFunctionInjector {
     }
 
     private static void inject(FunctionManager manager, ImmutableMap<ResourceLocation, CommandFunction> functions) {
-        Map<ResourceLocation, FunctionObject> delegate = manager.getFunctions();
+        Map<ResourceLocation, FunctionObject> delegate = manager.reloader.func_240931_a_();
         ImmutableMap.Builder<ResourceLocation, CommandFunction> builder = ImmutableMap.builder();
         for (Map.Entry<ResourceLocation, CommandFunction> entry : functions.entrySet()) {
             if (!delegate.containsKey(entry.getKey())) {
@@ -60,7 +60,7 @@ public final class WorldFunctionInjector {
         }
         ImmutableMap<ResourceLocation, CommandFunction> uniqueFunctions = builder.build();
         if (!uniqueFunctions.isEmpty()) {
-            manager.functions = new WorldFunctionInjector.InjectionMap(delegate, uniqueFunctions, Maps.newHashMap());
+            manager.reloader.field_240927_d_ = new WorldFunctionInjector.InjectionMap(delegate, uniqueFunctions, Maps.newHashMap());
         }
     }
 

@@ -99,7 +99,7 @@ public class ItemScrollBuff extends ItemScroll {
     @Override
     protected boolean doEffects(World world, ServerPlayerEntity player, ItemStack stack) {
         EffectHelper.addEffect(player, this.spellBuff.potion, MathHelper.floor(SharedConfigTombstone.general.scrollDuration.get() * (1f + EntityHelper.getPerkLevelWithBonus(player, ModPerks.scribe) / 10f)), this.spellBuff.amplifier);
-        player.sendMessage(LangKey.MESSAGE_SPELL_CAST_ON_YOU.getTranslation(new TranslationTextComponent(this.spellBuff.potion.getName()).setStyle(StyleType.MESSAGE_SPECIAL)).setStyle(StyleType.MESSAGE_SPELL));
+        LangKey.MESSAGE_SPELL_CAST_ON_YOU.sendMessage(player, StyleType.MESSAGE_SPELL, new TranslationTextComponent(this.spellBuff.potion.getName()).setStyle(StyleType.MESSAGE_SPECIAL));
         ModTriggers.SPELL_BUFF.get(this.spellBuff).trigger(player);
         return true;
     }

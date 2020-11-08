@@ -13,19 +13,11 @@ public class ParticleDataTwoInt implements IParticleData {
     public static final IDeserializer<ParticleDataTwoInt> DESERIALIZER = new IDeserializer<ParticleDataTwoInt>() {
         @Override
         public ParticleDataTwoInt deserialize(ParticleType<ParticleDataTwoInt> particleType, StringReader reader) throws CommandSyntaxException {
-            if (reader.canRead()) {
-                reader.expect(' ');
-            }
+            reader.expect(' ');
             int oneInt = 0xffffff, twoInt = 0xffffff;
-            if (reader.canRead()) {
-                oneInt = reader.readInt();
-            }
-            if (reader.canRead()) {
-                reader.expect(' ');
-            }
-            if (reader.canRead()) {
-                twoInt = reader.readInt();
-            }
+            oneInt = reader.readInt();
+            reader.expect(' ');
+            twoInt = reader.readInt();
             return new ParticleDataTwoInt(particleType, oneInt, twoInt);
         }
 

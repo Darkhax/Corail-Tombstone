@@ -5,10 +5,10 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.particle.IParticleRenderType;
 import net.minecraft.client.particle.SpriteTexturedParticle;
 import net.minecraft.client.renderer.ActiveRenderInfo;
-import net.minecraft.world.World;
+import net.minecraft.client.world.ClientWorld;
 
 public class TransparentParticle extends SpriteTexturedParticle {
-    protected TransparentParticle(World world, double x, double y, double z) {
+    protected TransparentParticle(ClientWorld world, double x, double y, double z) {
         super(world, x, y, z);
     }
 

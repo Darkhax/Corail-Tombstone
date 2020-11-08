@@ -1,29 +1,31 @@
 package ovh.corail.tombstone.registry;
 
+import static ovh.corail.tombstone.ModTombstone.MOD_ID;
+
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ITag.INamedTag;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.Tag;
 import net.minecraft.util.ResourceLocation;
-
-import static ovh.corail.tombstone.ModTombstone.MOD_ID;
 
 public class ModTags {
     public static class Blocks {
-        public static final Tag<Block> graves = tag("graves");
-        public static final Tag<Block> player_graves = tag("player_graves");
-        public static final Tag<Block> decorative_graves = tag("decorative_graves");
-        public static final Tag<Block> grave_marbles = tag("grave_marbles");
+        public static final INamedTag<Block> graves = tag("graves");
+        public static final INamedTag<Block> player_graves = tag("player_graves");
+        public static final INamedTag<Block> decorative_graves = tag("decorative_graves");
+        public static final INamedTag<Block> grave_marbles = tag("grave_marbles");
 
-        private static Tag<Block> tag(String name) {
-            return new BlockTags.Wrapper(new ResourceLocation(MOD_ID, name));
+        private static INamedTag<Block> tag(String name) {
+            return BlockTags.makeWrapperTag(new ResourceLocation(MOD_ID, name).toString());
         }
     }
 
     public static class Items {
-        private static Tag<Item> tag(String name) {
-            return new ItemTags.Wrapper(new ResourceLocation(MOD_ID, name));
+        public static final INamedTag<Item> VOODOO_POPPET_INGREDIENTS = tag("voodoo_poppet_ingredients");
+
+        private static INamedTag<Item> tag(String name) {
+            return ItemTags.makeWrapperTag(new ResourceLocation(MOD_ID, name).toString());
         }
     }
 }

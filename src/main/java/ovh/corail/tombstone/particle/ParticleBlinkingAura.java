@@ -4,7 +4,7 @@ import net.minecraft.client.particle.IAnimatedSprite;
 import net.minecraft.client.particle.IParticleFactory;
 import net.minecraft.client.particle.IParticleRenderType;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.world.World;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import ovh.corail.tombstone.helper.Helper;
@@ -16,11 +16,11 @@ public class ParticleBlinkingAura extends TransparentParticle {
     private final float[] colorCodeMin;
     private final float[] colorCodeMax;
 
-    private ParticleBlinkingAura(IAnimatedSprite spriteSet, World world, double x, double y, double z, int colorMin, int colorMax) {
+    private ParticleBlinkingAura(IAnimatedSprite spriteSet, ClientWorld world, double x, double y, double z, int colorMin, int colorMax) {
         super(world, x, y, z);
         this.motionX = this.motionY = this.motionZ = 0d;
         setAlphaF(0.15f);
-        multipleParticleScaleBy(Helper.getRandom(0.6f, 0.8f));
+        multiplyParticleScaleBy(Helper.getRandom(0.6f, 0.8f));
         setMaxAge(7);
         this.canCollide = false;
         this.colorCodeMin = Helper.getRGBColor3F(colorMin);
@@ -59,7 +59,7 @@ public class ParticleBlinkingAura extends TransparentParticle {
         }
 
         @Override
-        public Particle makeParticle(ParticleDataTwoInt type, World world, double x, double y, double z, double motionX, double motionY, double motionZ) {
+        public Particle makeParticle(ParticleDataTwoInt type, ClientWorld world, double x, double y, double z, double motionX, double motionY, double motionZ) {
             return new ParticleBlinkingAura(this.spriteSet, world, x, y, z, type.oneInt, type.twoInt);
         }
     }

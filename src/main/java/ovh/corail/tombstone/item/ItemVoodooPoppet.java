@@ -9,6 +9,7 @@ import net.minecraft.potion.Effects;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -68,7 +69,7 @@ public class ItemVoodooPoppet extends ItemGeneric implements ISoulConsumer {
     @Override
     public ITextComponent getDisplayName(ItemStack stack) {
         ITextComponent name = super.getDisplayName(stack);
-        return (isEnchanted(stack) ? LangKey.MESSAGE_ENCHANTED_ITEM.getTranslation(name) : name).setStyle(StyleType.MESSAGE_SPECIAL);
+        return (isEnchanted(stack) ? LangKey.MESSAGE_ENCHANTED_ITEM.getText(name) : name.copyRaw()).setStyle(StyleType.MESSAGE_SPECIAL);
     }
 
     @Override
@@ -85,13 +86,13 @@ public class ItemVoodooPoppet extends ItemGeneric implements ISoulConsumer {
             boolean hasProt = false;
             for (PoppetProtections prot : PoppetProtections.values()) {
                 if (hasProtection(stack, prot)) {
-                    list.add(LangKey.makeTranslationWithStyle(StyleType.TOOLTIP_ITEM, getTranslationKey() + "." + prot.getName()));
+                    list.add(new TranslationTextComponent(getTranslationKey() + "." + prot.getName()).mergeStyle(StyleType.TOOLTIP_ITEM));
                     hasProt = true;
                 }
             }
             addItemUse(list, isEnchanted(stack) ? "3" : hasProt ? "2" : "1");
             if (EntityHelper.getPerkLevelWithBonus(Minecraft.getInstance().player, ModPerks.voodoo_poppet) <= 0) {
-                addWarn(list, LangKey.MESSAGE_PERK_REQUIRED, LangKey.makeTranslationWithStyle(StyleType.TOOLTIP_ITEM, ModPerks.voodoo_poppet.getTranslationKey()));
+                addWarn(list, LangKey.MESSAGE_PERK_REQUIRED, ModPerks.voodoo_poppet.getTranslation().copyRaw().mergeStyle(StyleType.TOOLTIP_ITEM));
             }
         } else {
             addInfoShowTooltip(list);
@@ -106,12 +107,12 @@ public class ItemVoodooPoppet extends ItemGeneric implements ISoulConsumer {
 
     @Override
     public ITextComponent getEnchantSuccessMessage(PlayerEntity player) {
-        return LangKey.MESSAGE_ENCHANT_ITEM_SUCCESS.getTranslation();
+        return LangKey.MESSAGE_ENCHANT_ITEM_SUCCESS.getText();
     }
 
     @Override
     public ITextComponent getEnchantFailedMessage(PlayerEntity player) {
-        return LangKey.MESSAGE_NO_PROTECTION_TO_SEAL.getTranslation();
+        return LangKey.MESSAGE_NO_PROTECTION_TO_SEAL.getText();
     }
 
     @Override

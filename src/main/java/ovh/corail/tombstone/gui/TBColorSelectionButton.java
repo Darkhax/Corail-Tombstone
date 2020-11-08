@@ -1,5 +1,6 @@
 package ovh.corail.tombstone.gui;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.GameSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.OptionSlider;
@@ -24,21 +25,21 @@ public class TBColorSelectionButton extends OptionSlider {
     }
 
     @Override
-    protected void renderBg(Minecraft minecraft, int x, int y) {
+    protected void renderBg(MatrixStack matrixStack, Minecraft minecraft, int x, int y) {
         minecraft.getTextureManager().bindTexture(WIDGETS_LOCATION);
-        fill(this.x - 1, this.y - 1, this.x + this.width + 1, this.y + this.height + 1, 0xff000000);
-        Helper.fillGradient(this.x, this.y, this.x + this.width, this.y + this.height, this.intSupplier1.getAsInt() + 0xff000000, this.intSupplier2.getAsInt() + 0xff000000, getBlitOffset(), true);
-        fillGradient(this.x + (int) (this.width * this.value) - 1, this.y, this.x + (int) (this.width * this.value) + 1, this.y + this.height, 0xffc0c0c0, 0xff000000);
+        fill(matrixStack, this.x - 1, this.y - 1, this.x + this.width + 1, this.y + this.height + 1, 0xff000000);
+        Helper.fillGradient(matrixStack.getLast().getMatrix(), this.x, this.y, this.x + this.width, this.y + this.height, this.intSupplier1.getAsInt() + 0xff000000, this.intSupplier2.getAsInt() + 0xff000000, getBlitOffset(), true);
+        fillGradient(matrixStack, this.x + (int) (this.width * this.sliderValue) - 1, this.y, this.x + (int) (this.width * this.sliderValue) + 1, this.y + this.height, 0xffc0c0c0, 0xff000000);
     }
 
     @Override
-    public void renderButton(int x, int y, float partialTicks) {
-        renderBg(Minecraft.getInstance(), x, y);
+    public void renderButton(MatrixStack matrixStack, int x, int y, float partialTicks) {
+        renderBg(matrixStack, Minecraft.getInstance(), x, y);
     }
 
     @Override
-    protected void applyValue() {
-        super.applyValue();
+    protected void func_230972_a_() {
+        super.func_230972_a_();
         this.dirty.accept(true);
     }
 }

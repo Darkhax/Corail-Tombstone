@@ -7,6 +7,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Food;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -39,9 +40,9 @@ public class ItemLollipop extends ItemGeneric {
     @OnlyIn(Dist.CLIENT)
     public void addInformation(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flag) {
         if (Helper.canShowTooltip(world, stack)) {
-            list.add(LangKey.makeTranslationWithStyle(StyleType.TOOLTIP_DESC, getTranslationKey(stack) + ".desc"));
+            list.add(new TranslationTextComponent(getTranslationKey(stack) + ".desc").setStyle(StyleType.TOOLTIP_DESC));
         } else {
-            list.add(LangKey.TOOLTIP_MORE_INFO.getTranslationWithStyle(StyleType.TOOLTIP_DESC));
+            list.add(LangKey.TOOLTIP_MORE_INFO.getText(StyleType.TOOLTIP_DESC));
         }
         super.addInformation(stack, world, list, flag);
     }

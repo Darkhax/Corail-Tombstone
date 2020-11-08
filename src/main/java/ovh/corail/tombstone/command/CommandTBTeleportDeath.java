@@ -5,8 +5,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import ovh.corail.tombstone.api.cooldown.CooldownType;
 import ovh.corail.tombstone.config.ConfigTombstone;
@@ -55,11 +55,10 @@ public class CommandTBTeleportDeath extends TombstoneCommand {
         int cd = CooldownHandler.INSTANCE.getCooldown(player, CooldownType.TELEPORT_DEATH);
         if (cd > 0) {
             int[] timeArray = TimeHelper.getTimeArray(cd);
-            player.sendMessage(LangKey.MESSAGE_COMMAND_IN_COOLDOWN.getTranslation(timeArray[0], timeArray[1], timeArray[2]));
+            LangKey.MESSAGE_COMMAND_IN_COOLDOWN.sendMessage(player, timeArray[0], timeArray[1], timeArray[2]);
             return 0;
         }
-        DimensionType dimensionType = getOrThrowDimensionType(lastDeathLocation.dim);
-        ServerWorld world = sender.getServer().getWorld(dimensionType);
+        ServerWorld world = getOrThrowWorld(sender.getServer(), lastDeathLocation.dim);
         Location location = new SpawnHelper(world, lastDeathLocation.getPos()).findSpawnPlace(false);
         if (location.isOrigin()) {
             throw LangKey.MESSAGE_NO_SPAWN.asCommandException();
@@ -67,9 +66,9 @@ public class CommandTBTeleportDeath extends TombstoneCommand {
         CooldownHandler.INSTANCE.resetCooldown(player, CooldownType.TELEPORT_DEATH);
         Entity newEntity = Helper.teleportEntity(player, location);
         if (EntityHelper.isValidPlayer(newEntity)) {
-            newEntity.sendMessage(LangKey.MESSAGE_TELEPORT_SUCCESS.getTranslationWithStyle(StyleType.MESSAGE_SPELL));
+            LangKey.MESSAGE_TELEPORT_SUCCESS.sendMessage((PlayerEntity) newEntity, StyleType.MESSAGE_SPELL);
         }
-        sendMessage(sender, LangKey.MESSAGE_TELEPORT_TARGET_TO_LOCATION.getTranslation(newEntity.getName(), LangKey.MESSAGE_HERE.getTranslation(), location.x, location.y, location.z, location.dim), false);
+        sendMessage(sender, LangKey.MESSAGE_TELEPORT_TARGET_TO_LOCATION.getText(newEntity.getName(), LangKey.MESSAGE_HERE.getText(), location.x, location.y, location.z, location.dim.getLocation().toString()), false);
         return 1;
     }
 }

@@ -54,8 +54,8 @@ public class CommandTBAcceptTeleport extends TombstoneCommand {
         if (valid) {
             Location spawnLoc = new SpawnHelper(player.getServerWorld(), player.getPosition()).findSafePlace(3, true);
             ServerPlayerEntity newPlayer = Helper.teleportEntity(target, spawnLoc.isOrigin() ? new Location(player) : spawnLoc);
-            newPlayer.sendMessage(LangKey.MESSAGE_TELEPORT_SUCCESS.getTranslationWithStyle(StyleType.MESSAGE_SPELL));
-            player.sendMessage(LangKey.MESSAGE_JOIN_YOU.getTranslationWithStyle(StyleType.MESSAGE_SPELL, newPlayer.getName()));
+            LangKey.MESSAGE_TELEPORT_SUCCESS.sendMessage(newPlayer, StyleType.MESSAGE_SPELL);
+            LangKey.MESSAGE_JOIN_YOU.sendMessage(player, StyleType.MESSAGE_SPELL, newPlayer.getName());
             return 1;
         } else {
             throw LangKey.MESSAGE_NO_TICKET.asCommandException();

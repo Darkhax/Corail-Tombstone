@@ -9,7 +9,6 @@ import mcp.mobius.waila.api.TooltipPosition;
 import mcp.mobius.waila.api.WailaPlugin;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
 import ovh.corail.tombstone.block.BlockGrave;
 
@@ -27,7 +26,7 @@ public class IntegrationHwyla implements IWailaPlugin {
 
             @Override
             public void appendHead(List<ITextComponent> tooltip, IDataAccessor accessor, IPluginConfig config) {
-                ITextComponent translation = accessor.getBlock().getNameTextComponent().setStyle(new Style().setColor(TextFormatting.WHITE));
+                ITextComponent translation = accessor.getBlock().getTranslatedName().mergeStyle(TextFormatting.WHITE);
                 if (tooltip.isEmpty()) {
                     tooltip.add(translation);
                 } else {

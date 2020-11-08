@@ -48,12 +48,12 @@ public class ItemScrollOfKnowledge extends ItemScroll {
 
     @Override
     public ITextComponent getEnchantSuccessMessage(PlayerEntity player) {
-        return LangKey.MESSAGE_LOSE_EXPERIENCE_SUCCESS.getTranslation();
+        return LangKey.MESSAGE_LOSE_EXPERIENCE_SUCCESS.getText();
     }
 
     @Override
     public ITextComponent getEnchantFailedMessage(PlayerEntity player) {
-        return LangKey.MESSAGE_LOSE_EXPERIENCE_FAILED.getTranslation();
+        return LangKey.MESSAGE_LOSE_EXPERIENCE_FAILED.getText();
     }
 
     @Override
@@ -71,11 +71,11 @@ public class ItemScrollOfKnowledge extends ItemScroll {
         int storedXp = getStoredXp(stack);
         int i = Integer.MAX_VALUE - player.experienceTotal;
         if (storedXp > i) {
-            player.sendMessage(LangKey.MESSAGE_EARN_EXPERIENCE_FAILED.getTranslation());
+            LangKey.MESSAGE_EARN_EXPERIENCE_FAILED.sendMessage(player);
             return false;
         }
         EntityHelper.setPlayerXp(player, EntityHelper.getPlayerTotalXp(player) + storedXp);
-        player.sendMessage(LangKey.MESSAGE_EARN_EXPERIENCE_SUCCESS.getTranslation());
+        LangKey.MESSAGE_EARN_EXPERIENCE_SUCCESS.sendMessage(player);
         ModTriggers.USE_KNOWLEDGE.trigger(player);
         return true;
     }

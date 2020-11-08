@@ -2,8 +2,9 @@ package ovh.corail.tombstone.perk;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import ovh.corail.tombstone.api.capability.Perk;
 import ovh.corail.tombstone.config.SharedConfigTombstone;
 import ovh.corail.tombstone.helper.Helper;
@@ -34,20 +35,19 @@ public class PerkVoodooPoppet extends Perk {
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
-    public String getTooltip(int level, int actualLevel, int levelWithBonus) {
+    public ITextComponent getTooltip(int level, int actualLevel, int levelWithBonus) {
         if (level == 1) {
-            return "tombstone.item.voodoo_poppet.suffocation";
+            return new TranslationTextComponent("tombstone.item.voodoo_poppet.suffocation");
         } else if (level == 2) {
-            return "tombstone.item.voodoo_poppet.burn";
+            return new TranslationTextComponent("tombstone.item.voodoo_poppet.burn");
         } else if (level == 3) {
-            return "tombstone.item.voodoo_poppet.lightning";
+            return new TranslationTextComponent("tombstone.item.voodoo_poppet.lightning");
         } else if (level == 4) {
-            return "tombstone.item.voodoo_poppet.fall";
+            return new TranslationTextComponent("tombstone.item.voodoo_poppet.fall");
         } else if (level == 5) {
-            return "tombstone.item.voodoo_poppet.degeneration";
+            return new TranslationTextComponent("tombstone.item.voodoo_poppet.degeneration");
         }
-        return "";
+        return StringTextComponent.EMPTY;
     }
 
     @Override

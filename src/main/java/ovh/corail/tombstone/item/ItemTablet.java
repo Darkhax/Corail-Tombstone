@@ -4,7 +4,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import ovh.corail.tombstone.config.SharedConfigTombstone;
 import ovh.corail.tombstone.helper.EntityHelper;
@@ -48,6 +47,4 @@ public abstract class ItemTablet extends ItemGraveMagic {
     public ItemStack createAncient() {
         return NBTStackHelper.setBoolean(new ItemStack(this), ANCIENT_NBT_BOOL, true);
     }
-
-    protected static final ResourceLocation ANCIENT_PROPERTY = new ResourceLocation(ANCIENT_NBT_BOOL);
 }

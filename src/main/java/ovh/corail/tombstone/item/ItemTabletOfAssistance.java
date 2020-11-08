@@ -33,16 +33,10 @@ public class ItemTabletOfAssistance extends ItemTablet {
     }
 
     @Override
-    public ITextComponent getDisplayName(ItemStack stack) {
-        ITextComponent name = LangKey.makeTranslation(getTranslationKey(stack));
-        return isEnchanted(stack) ? LangKey.MESSAGE_ENCHANTED_ITEM.getTranslation(name) : name;
-    }
-
-    @Override
     @OnlyIn(Dist.CLIENT)
     public void addInformation(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flag) {
         if (list.size() > 0) {
-            list.set(0, list.get(0).setStyle(StyleType.MESSAGE_SPECIAL));
+            list.get(0).getStyle().mergeStyle(StyleType.MESSAGE_SPECIAL);
         }
         if (Helper.canShowTooltip(world, stack)) {
             if (!isEnchanted(stack)) {
@@ -52,7 +46,7 @@ public class ItemTabletOfAssistance extends ItemTablet {
                 String engraved_name = getEngravedName(stack);
                 if (engraved_name.isEmpty()) {
                     addItemDesc(list);
-                    addItemUse(list, "2", StyleType.TOOLTIP_ITEM.getFormattingCode() + "[" + I18n.format(ModItems.grave_dust.getTranslationKey(stack)).toLowerCase() + "]");
+                    addItemUse(list, "2", Helper.getFormattingCode(StyleType.TOOLTIP_ITEM) + "[" + I18n.format(ModItems.grave_dust.getTranslationKey(stack)).toLowerCase() + "]");
                 } else {
                     addInfo(list, LangKey.MESSAGE_ENGRAVED, '"' + engraved_name + '"');
                     addItemUse(list, "3");
@@ -93,31 +87,31 @@ public class ItemTabletOfAssistance extends ItemTablet {
     protected boolean doEffects(World world, ServerPlayerEntity player, ItemStack stack) {
         String engraved_name = NBTStackHelper.getString(stack, "engraved_name");
         if (engraved_name.equals(player.getName().getUnformattedComponentText())) {
-            player.sendMessage(LangKey.MESSAGE_TELEPORT_SAME_PLAYER.getTranslation());
+            LangKey.MESSAGE_TELEPORT_SAME_PLAYER.sendMessage(player);
             return false;
         }
         assert world.getServer() != null;
         if (Stream.of(world.getServer().getOnlinePlayerNames()).noneMatch(p -> p.equals(engraved_name))) {
             if (world.getServer().getPlayerProfileCache().usernameToProfileEntryMap.keySet().contains(engraved_name)) {
-                player.sendMessage(LangKey.MESSAGE_PLAYER_OFFLINE.getTranslation());
+                LangKey.MESSAGE_PLAYER_OFFLINE.sendMessage(player);
             } else {
-                player.sendMessage(LangKey.MESSAGE_PLAYER_INVALID.getTranslation());
+                LangKey.MESSAGE_PLAYER_INVALID.sendMessage(player);
             }
             return false;
         }
         ServerPlayerEntity receiver = world.getServer().getPlayerList().getPlayerByUsername(engraved_name);
         if (receiver == null) {
-            player.sendMessage(LangKey.MESSAGE_TELEPORT_FAILED.getTranslation());
+            LangKey.MESSAGE_TELEPORT_FAILED.sendMessage(player);
             return false;
         }
-        if (receiver.dimension != player.dimension && !ConfigTombstone.general.teleportDim.get()) {
-            player.sendMessage(LangKey.MESSAGE_TELEPORT_SAME_DIMENSION.getTranslation());
+        if (!receiver.world.getDimensionKey().equals(player.world.getDimensionKey()) && !ConfigTombstone.general.teleportDim.get()) {
+            LangKey.MESSAGE_TELEPORT_SAME_DIMENSION.sendMessage(player);
             return false;
         }
         ITextComponent hereClick = LangKey.createComponentCommand(receiver, "/tbacceptteleport " + player.getUniqueID(), LangKey.MESSAGE_HERE);
-        receiver.sendMessage(LangKey.MESSAGE_REQUEST_TO_JOIN_RECEIVER.getTranslation(hereClick, player.getName()).setStyle(StyleType.MESSAGE_SPECIAL));
+        LangKey.MESSAGE_REQUEST_TO_JOIN_RECEIVER.sendMessage(receiver, StyleType.MESSAGE_SPECIAL, hereClick, player.getName());
         CommandTBAcceptTeleport.addTicket(receiver, player, 120);
-        player.sendMessage(LangKey.MESSAGE_REQUEST_TO_JOIN_SENDER.getTranslation(receiver.getName()));
+        LangKey.MESSAGE_REQUEST_TO_JOIN_SENDER.sendMessage(player, receiver.getName());
         ModTriggers.USE_ASSISTANCE.trigger(player);
         return true;
     }

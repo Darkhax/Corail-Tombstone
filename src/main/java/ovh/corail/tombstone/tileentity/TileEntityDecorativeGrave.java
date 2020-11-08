@@ -1,8 +1,10 @@
 package ovh.corail.tombstone.tileentity;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.effect.LightningBoltEntity;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.util.math.vector.Vector3d;
 import ovh.corail.tombstone.ModTombstone;
 import ovh.corail.tombstone.block.BlockDecorativeGrave;
 import ovh.corail.tombstone.config.ConfigTombstone;
@@ -52,8 +54,11 @@ public class TileEntityDecorativeGrave extends TileEntityWritableGrave {
                 double chance = 1d - (Math.pow(1d - (ConfigTombstone.decorative_grave.chanceSoul.get() / 1000d), (double) count));
                 if (chance >= 1d || this.world.rand.nextDouble() <= chance) {
                     if (elapsedMinutes == ConfigTombstone.decorative_grave.timeSoul.get()) {
-                        //addWeatherEffect
-                        ((ServerWorld) this.world).addLightningBolt(new LightningBoltEntity(this.world, this.pos.getX(), this.pos.getY(), this.pos.getZ(), true));
+                    	
+                    	LightningBoltEntity lightning = EntityType.LIGHTNING_BOLT.create(this.world);
+                    	lightning.moveForced(Vector3d.copyCenteredHorizontally(this.pos));
+                    	lightning.setEffectOnly(true);
+                    	this.world.addEntity(lightning);
                     }
                     this.world.setBlockState(this.pos, getBlockState().with(BlockDecorativeGrave.HAS_SOUL, true), 3);
                 }
@@ -80,8 +85,8 @@ public class TileEntityDecorativeGrave extends TileEntityWritableGrave {
     }
 
     @Override
-    public void read(CompoundNBT compound) {
-        super.read(compound);
+    public void read(BlockState state, CompoundNBT compound) {
+        super.read(state, compound);
         if (compound.contains("lastCheckSoul")) {
             this.lastCheckSoul = compound.getLong("lastCheckSoul");
         }

@@ -1,5 +1,6 @@
 package ovh.corail.tombstone.enchantment;
 
+import net.minecraft.client.resources.I18n;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentType;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -7,6 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import ovh.corail.tombstone.helper.Helper;
 import ovh.corail.tombstone.helper.LangKey;
 import ovh.corail.tombstone.helper.StyleType;
 
@@ -54,7 +56,7 @@ public abstract class TombstoneEnchantment extends Enchantment {
     public List<String> getTooltipInfos(ItemStack stack) {
         List<String> infos = new ArrayList<>();
         if (stack.getItem() == Items.ENCHANTED_BOOK) {
-            infos.add(LangKey.getClientTranslationWithStyle(StyleType.TOOLTIP_ENCHANT, getName() + ".desc"));
+            infos.add(Helper.getFormattingCode(StyleType.TOOLTIP_ENCHANT) + I18n.format(getName() + ".desc"));
         }
         if (!isEnabled()) {
             infos.add(LangKey.MESSAGE_DISABLED.getClientTranslationWithStyle(StyleType.COLOR_OFF));

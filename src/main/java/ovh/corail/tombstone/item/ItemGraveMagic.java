@@ -49,7 +49,7 @@ public abstract class ItemGraveMagic extends ItemGeneric implements ISoulConsume
     @Override
     public ITextComponent getDisplayName(ItemStack stack) {
         ITextComponent name = super.getDisplayName(stack);
-        return (isAncient(stack) ? LangKey.MESSAGE_ANCIENT_ITEM.getTranslation(name) : isEnchanted(stack) ? LangKey.MESSAGE_ENCHANTED_ITEM.getTranslation(name) : name).setStyle(StyleType.MESSAGE_SPECIAL);
+        return (isAncient(stack) ? LangKey.MESSAGE_ANCIENT_ITEM.getText(name) : isEnchanted(stack) ? LangKey.MESSAGE_ENCHANTED_ITEM.getText(name) : name.copyRaw()).setStyle(StyleType.MESSAGE_SPECIAL);
     }
 
     public boolean isAncient(ItemStack stack) {
@@ -107,8 +107,8 @@ public abstract class ItemGraveMagic extends ItemGeneric implements ISoulConsume
     }
 
     @Override
-    public boolean itemInteractionForEntity(ItemStack stack, PlayerEntity player, LivingEntity target, Hand hand) {
-        return false;
+    public ActionResultType itemInteractionForEntity(ItemStack stack, PlayerEntity player, LivingEntity target, Hand hand) {
+        return ActionResultType.FAIL;
     }
 
     @Override
@@ -226,12 +226,12 @@ public abstract class ItemGraveMagic extends ItemGeneric implements ISoulConsume
 
     @Override
     public ITextComponent getEnchantSuccessMessage(PlayerEntity player) {
-        return LangKey.MESSAGE_ENCHANT_ITEM_SUCCESS.getTranslation();
+        return LangKey.MESSAGE_ENCHANT_ITEM_SUCCESS.getText();
     }
 
     @Override
     public ITextComponent getEnchantFailedMessage(PlayerEntity player) {
-        return LangKey.MESSAGE_ENCHANT_ITEM_FAILED.getTranslation();
+        return LangKey.MESSAGE_ENCHANT_ITEM_FAILED.getText();
     }
 
     @Override

@@ -55,7 +55,7 @@ public class CommandTBKnownledge extends TombstoneCommand {
     }
 
     private int showKnowledge(CommandSource sender, ServerPlayerEntity target) {
-        target.getCapability(TBCapabilityProvider.TB_CAPABILITY, null).ifPresent(cap -> sendMessage(sender, LangKey.MESSAGE_SHOW_KNOWLEDGE.getTranslationWithStyle(StyleType.MESSAGE_SPELL, target.getName(), cap.getKnowledge()), false));
+        target.getCapability(TBCapabilityProvider.TB_CAPABILITY, null).ifPresent(cap -> sendMessage(sender, LangKey.MESSAGE_SHOW_KNOWLEDGE.getText(StyleType.MESSAGE_SPELL, target.getName(), cap.getKnowledge()), false));
         return 1;
     }
 
@@ -78,7 +78,7 @@ public class CommandTBKnownledge extends TombstoneCommand {
         }
         EntityHelper.addKnowledge(target, amount);
         if (!target.equals(sender.getEntity()) || !DeathHandler.INSTANCE.getOptionKnowledgeMessage(target.getUniqueID())) {
-            sendMessage(sender, LangKey.MESSAGE_EARN_KNOWLEDGE.getTranslation(LangKey.MESSAGE_PLAYER_KNOWLEDGE.getTranslation(target.getName()), amount), false);
+            sendMessage(sender, LangKey.MESSAGE_EARN_KNOWLEDGE.getText(LangKey.MESSAGE_PLAYER_KNOWLEDGE.getText(target.getName()), amount), false);
         }
         return 1;
     }
@@ -89,7 +89,7 @@ public class CommandTBKnownledge extends TombstoneCommand {
         }
         EntityHelper.removeKnowledge(target, amount);
         if (!target.equals(sender.getEntity()) || !DeathHandler.INSTANCE.getOptionKnowledgeMessage(target.getUniqueID())) {
-            sendMessage(sender, LangKey.MESSAGE_LOSE_KNOWLEDGE.getTranslationWithStyle(StyleType.MESSAGE_SPELL, LangKey.MESSAGE_PLAYER_KNOWLEDGE.getTranslation(target.getName()), amount), false);
+            sendMessage(sender, LangKey.MESSAGE_LOSE_KNOWLEDGE.getText(StyleType.MESSAGE_SPELL, LangKey.MESSAGE_PLAYER_KNOWLEDGE.getText(target.getName()), amount), false);
         }
         return 1;
     }

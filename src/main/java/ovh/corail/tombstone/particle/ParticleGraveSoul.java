@@ -5,8 +5,8 @@ import net.minecraft.client.particle.IParticleFactory;
 import net.minecraft.client.particle.IParticleRenderType;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.SpriteTexturedParticle;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.particles.BasicParticleType;
-import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import ovh.corail.tombstone.particle.data.ParticleDataTwoInt;
@@ -18,7 +18,7 @@ public class ParticleGraveSoul extends SpriteTexturedParticle {
 
     private final double radius, centerX, centerZ;
 
-    private ParticleGraveSoul(IAnimatedSprite spriteSet, World world, double x, double y, double z, double radius) {
+    private ParticleGraveSoul(IAnimatedSprite spriteSet, ClientWorld world, double x, double y, double z, double radius) {
         super(world, x, y + 0.85d, z);
         this.maxAge = 100;
         this.particleScale = 0.03f;
@@ -64,7 +64,7 @@ public class ParticleGraveSoul extends SpriteTexturedParticle {
         }
 
         @Override
-        public Particle makeParticle(BasicParticleType type, World world, double x, double y, double z, double motionX, double motionY, double motionZ) {
+        public Particle makeParticle(BasicParticleType type, ClientWorld world, double x, double y, double z, double motionX, double motionY, double motionZ) {
             return new ParticleGraveSoul(this.spriteSet, world, x, y, z, 0.3d);
         }
     }

@@ -1,23 +1,27 @@
 package ovh.corail.tombstone.loot;
 
+import static ovh.corail.tombstone.ModTombstone.MOD_ID;
+
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
+
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
-import net.minecraft.fluid.IFluidState;
+import net.minecraft.fluid.FluidState;
+import net.minecraft.loot.ILootSerializer;
+import net.minecraft.loot.LootConditionType;
+import net.minecraft.loot.LootContext;
+import net.minecraft.loot.LootParameters;
+import net.minecraft.loot.conditions.ILootCondition;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.storage.loot.LootContext;
-import net.minecraft.world.storage.loot.LootParameters;
-import net.minecraft.world.storage.loot.conditions.ILootCondition;
+import ovh.corail.tombstone.ModTombstone;
 import ovh.corail.tombstone.config.ConfigTombstone;
 import ovh.corail.tombstone.helper.SpawnHelper;
-
-import static ovh.corail.tombstone.ModTombstone.MOD_ID;
 
 public class InOpenWaterCondition implements ILootCondition {
     private static final ResourceLocation RL = new ResourceLocation(MOD_ID, "in_open_water");
@@ -39,7 +43,7 @@ public class InOpenWaterCondition implements ILootCondition {
     @SuppressWarnings("deprecation")
     private boolean isOpenWater(World world, BlockPos pos, boolean inStillWater) {
         BlockState state = world.getBlockState(pos);
-        IFluidState fluidState = state.getFluidState();
+        FluidState fluidState = state.getFluidState();
         if (inStillWater) {
             return fluidState.isTagged(FluidTags.WATER) && fluidState.isSource() && (state.getBlock() != Blocks.BUBBLE_COLUMN && state.getCollisionShape(world, pos).isEmpty());
         }
@@ -55,19 +59,22 @@ public class InOpenWaterCondition implements ILootCondition {
         return () -> INSTANCE;
     }
 
-    private static class Serializer extends ILootCondition.AbstractSerializer<InOpenWaterCondition> {
+    private static class Serializer implements ILootSerializer<InOpenWaterCondition> {
 
-        private Serializer() {
-            super(RL, InOpenWaterCondition.class);
-        }
+		@Override
+		public void serialize(JsonObject p_230424_1_, InOpenWaterCondition p_230424_2_, JsonSerializationContext p_230424_3_) {
+		}
 
-        @Override
-        public void serialize(JsonObject json, InOpenWaterCondition value, JsonSerializationContext context) {
-        }
+		@Override
+		public InOpenWaterCondition deserialize(JsonObject p_230423_1_, JsonDeserializationContext p_230423_2_) {
 
-        @Override
-        public InOpenWaterCondition deserialize(JsonObject json, JsonDeserializationContext context) {
-            return INSTANCE;
-        }
+			return INSTANCE;
+		}
     }
+
+	@Override
+	public LootConditionType func_230419_b_() {
+
+		return ModTombstone.OPEN_WATER;
+	}
 }

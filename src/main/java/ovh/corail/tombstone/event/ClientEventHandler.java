@@ -11,11 +11,10 @@ import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.client.settings.PointOfView;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
@@ -25,7 +24,9 @@ import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -164,7 +165,7 @@ public class ClientEventHandler {
                     long time = mc.world.getGameTime();
                     if (nextGhostTime == -1 || time > nextGhostTime) {
                         if (nextGhostTime > -1 && CooldownHandler.INSTANCE.noCooldown(mc.player, CooldownType.NEXT_PRAY)) {
-                            Vec3d ghostVec = mc.player.getPositionVec().add(Helper.getRandom(-9d, 9d), 0d, Helper.getRandom(-9d, 9d));
+                            Vector3d ghostVec = mc.player.getPositionVec().add(Helper.getRandom(-9d, 9d), 0d, Helper.getRandom(-9d, 9d));
                             mc.particles.addParticle(ModParticleTypes.GHOST, ghostVec.x, ghostVec.y, ghostVec.z, 0d, 0d, 0d);
                         }
                         nextGhostTime = time + Helper.getRandom(60, 6000);
@@ -293,7 +294,7 @@ public class ClientEventHandler {
         } else {
             return;
         }
-        if (location.isOrigin() || location.dim != Helper.getDimensionId(player) || !World.isValid(location.getPos())) {
+        if (location.isOrigin() || !location.dim.equals(player.world.getDimensionKey()) || !World.isValid(location.getPos())) {
             return;
         }
         createBox(event.getMatrixStack(), location.x, location.y, location.z, 1f);
@@ -308,15 +309,15 @@ public class ClientEventHandler {
 
         RenderSystem.pushMatrix();
 
-        Vec3d projectedView = mc.gameRenderer.getActiveRenderInfo().getProjectedView();
+        Vector3d projectedView = mc.gameRenderer.getActiveRenderInfo().getProjectedView();
 
         long c = (TimeHelper.systemTime() / 15L) % 360L;
         float[] color = Helper.getHSBtoRGBF(c / 360f, 1f, 1f);
 
         matrixStack.push();
         // get a closer pos if too far
-        Vec3d vec = new Vec3d(x, y, z).subtract(projectedView);
-        if (vec.distanceTo(Vec3d.ZERO) > 200d) { // could be 300
+        Vector3d vec = new Vector3d(x, y, z).subtract(projectedView);
+        if (vec.distanceTo(Vector3d.ZERO) > 200d) { // could be 300
             vec = vec.normalize().scale(200d);
             x += vec.x;
             y += vec.y;
@@ -383,7 +384,7 @@ public class ClientEventHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void renderAuras(RenderWorldLastEvent event) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.gameSettings.thirdPersonView == 0 && mc.player != null && ConfigTombstone.client.showMagicCircle.get()) {
+        if (mc.gameSettings.getPointOfView() == PointOfView.FIRST_PERSON && mc.player != null && ConfigTombstone.client.showMagicCircle.get()) {
             Aura.addAura(mc.player);
         }
         if (!AURAS.isEmpty()) {
@@ -431,17 +432,17 @@ public class ClientEventHandler {
     }
 
     private static class Aura {
-        private final Vec3d position;
+        private final Vector3d position;
         private final AuraType auraType;
 
         private Aura(LivingEntity entity, AuraType auraType) {
             float partialTicks = Minecraft.getInstance().getRenderPartialTicks();
-            this.position = new Vec3d(MathHelper.lerp(partialTicks, entity.lastTickPosX, entity.getPosX()), MathHelper.lerp(partialTicks, entity.lastTickPosY, entity.getPosY()) + 0.1111d, MathHelper.lerp(partialTicks, entity.lastTickPosZ, entity.getPosZ()));
+            this.position = new Vector3d(MathHelper.lerp(partialTicks, entity.lastTickPosX, entity.getPosX()), MathHelper.lerp(partialTicks, entity.lastTickPosY, entity.getPosY()) + 0.1111d, MathHelper.lerp(partialTicks, entity.lastTickPosZ, entity.getPosZ()));
             this.auraType = auraType;
         }
 
         private Aura(double x, double y, double z) {
-            this.position = new Vec3d(x, y, z);
+            this.position = new Vector3d(x, y, z);
             this.auraType = AuraType.MARKER;
         }
 
@@ -473,8 +474,8 @@ public class ClientEventHandler {
         RenderSystem.disableCull();
         mc.getRenderManager().textureManager.bindTexture(AURA_TEXTURES[0]);
 
-        Vec3d projectedView = mc.gameRenderer.getActiveRenderInfo().getProjectedView();
-        Vec3d vec3 = aura.position.subtract(projectedView);
+        Vector3d projectedView = mc.gameRenderer.getActiveRenderInfo().getProjectedView();
+        Vector3d vec3 = aura.position.subtract(projectedView);
 
         matrixStack.push();
 
@@ -487,8 +488,8 @@ public class ClientEventHandler {
 
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuffer();
-        Vec3d vec1 = new Vec3d(vec3.x - aura.auraType.radius, vec3.y + 0.014625d, vec3.z - aura.auraType.radius);
-        Vec3d vec2 = new Vec3d(vec3.x + aura.auraType.radius, vec3.y + 0.014625d, vec3.z + aura.auraType.radius);
+        Vector3d vec1 = new Vector3d(vec3.x - aura.auraType.radius, vec3.y + 0.014625d, vec3.z - aura.auraType.radius);
+        Vector3d vec2 = new Vector3d(vec3.x + aura.auraType.radius, vec3.y + 0.014625d, vec3.z + aura.auraType.radius);
         bufferbuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR_NORMAL);
         bufferbuilder.pos(vec1.x, vec1.y, vec1.z).tex(0f, 0f).color(aura.auraType.r, aura.auraType.g, aura.auraType.b, aura.auraType.a).normal(0f, 1f, 0f).endVertex();
         bufferbuilder.pos(vec1.x, vec1.y, vec2.z).tex(0f, 1f).color(aura.auraType.r, aura.auraType.g, aura.auraType.b, aura.auraType.a).normal(0f, 1f, 0f).endVertex();

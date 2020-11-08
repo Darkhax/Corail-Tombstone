@@ -1,5 +1,6 @@
 package ovh.corail.tombstone.tileentity;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
@@ -18,7 +19,7 @@ public abstract class TileEntityWritableGrave extends TileEntity implements ITic
     protected long deathDate;
     public int countTicks = 0;
 
-    public TileEntityWritableGrave(TileEntityType tileType) {
+    public TileEntityWritableGrave(TileEntityType<?> tileType) {
         super(tileType);
     }
 
@@ -78,8 +79,9 @@ public abstract class TileEntityWritableGrave extends TileEntity implements ITic
     }
 
     @Override
-    public void read(CompoundNBT compound) {
-        super.read(compound);
+    public void read(BlockState state, CompoundNBT compound) {
+    	
+        super.read(state, compound);
         if (compound.contains("ownerName")) {
             this.ownerName = compound.getString("ownerName");
         }
@@ -108,7 +110,7 @@ public abstract class TileEntityWritableGrave extends TileEntity implements ITic
 
     @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        read(pkt.getNbtCompound());
+        read(this.world.getBlockState(pkt.getPos()), pkt.getNbtCompound());
     }
 
     @Override

@@ -1,11 +1,13 @@
 package ovh.corail.tombstone.gui;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.AbstractOption;
 import net.minecraft.client.GameSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.OptionButton;
-import net.minecraft.client.settings.AbstractOption;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -43,14 +45,14 @@ public abstract class IntegerConfigOption extends AbstractOption {
             this.dirty.accept(true);
         }) {
             @Override
-            public void renderButton(int mouseX, int mouseY, float partialTicks) {
+            public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
                 Minecraft minecraft = Minecraft.getInstance();
-                renderBg(minecraft, mouseX, mouseY);
+                renderBg(matrixStack, minecraft, mouseX, mouseY);
                 int j = isHovered() ? 0xff897235 : 0xffffffff;
-                drawCenteredString(minecraft.fontRenderer, getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, j | MathHelper.ceil(this.alpha * 255f) << 24);
+                drawCenteredString(matrixStack, minecraft.fontRenderer, getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, j | MathHelper.ceil(this.alpha * 255f) << 24);
             }
         };
     }
 
-    protected abstract String getOptionName();
+    protected abstract ITextComponent getOptionName();
 }

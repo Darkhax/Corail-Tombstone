@@ -1,11 +1,13 @@
 package ovh.corail.tombstone.gui;
 
-import net.minecraft.client.renderer.Rectangle2d;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import ovh.corail.tombstone.block.GraveModel;
@@ -30,14 +32,13 @@ public class GuiInfo extends TBScreen {
     private int linesByPage;
     private int pageCount;
     private int currentPage;
-    private String title;
-    private final List<String> contentLines = new ArrayList<>();
-    private final List<Rectangle2d> underlines = new ArrayList<>();
+    private String                           title;
+    private final List<IReorderingProcessor> contentLines = new ArrayList<>();
     private final List<InfoLink> infoLinks = new ArrayList<>();
     private ItemStack icon;
 
     GuiInfo(@Nullable Info currentInfo) {
-        super(LangKey.makeTranslation(MOD_ID + ".compendium.main.title"));
+        super(new TranslationTextComponent(MOD_ID + ".compendium.main.title"));
         this.currentInfo = this.lastInfo = currentInfo;
         this.currentPage = 0;
     }
@@ -75,18 +76,18 @@ public class GuiInfo extends TBScreen {
     @Override
     public void init() {
         super.init();
-        addButton(new TBGuiButton(this.halfWidth - 35, this.guiBottom - 25, 70, 15, LangKey.MESSAGE_BACK.getClientTranslation(), pressable -> {
+        addButton(new TBGuiButton(this.halfWidth - 35, this.guiBottom - 25, 70, 15, LangKey.MESSAGE_BACK.getText(), pressable -> {
             if (this.currentInfo == null) {
                 getMinecraft().player.closeScreen();
             } else {
                 this.currentInfo = null;
             }
         }));
-        addButton(new TBGuiButton(this.halfWidth - 75, this.guiBottom - 25, 20, 15, LangKey.getClientTranslation("<-"), pressable -> {
+        addButton(new TBGuiButton(this.halfWidth - 75, this.guiBottom - 25, 20, 15, new StringTextComponent("<-"), pressable -> {
             this.currentPage--;
             updateButtons();
         }));
-        addButton(new TBGuiButton(this.halfWidth + 55, this.guiBottom - 25, 20, 15, LangKey.getClientTranslation("->"), pressable -> {
+        addButton(new TBGuiButton(this.halfWidth + 55, this.guiBottom - 25, 20, 15, new StringTextComponent("->"), pressable -> {
             this.currentPage++;
             updateButtons();
         }));
@@ -95,23 +96,10 @@ public class GuiInfo extends TBScreen {
 
     private void updateContent(@Nullable Info currentInfo) {
         this.contentLines.clear();
-        this.underlines.clear();
         this.infoLinks.clear();
         this.icon = currentInfo == null ? new ItemStack(ModBlocks.decorative_graves.get(GraveModel.TOMBSTONE)) : currentInfo.icon.get();
-        String content = LangKey.getClientTranslation(currentInfo == null ? MOD_ID + ".compendium.main.desc" : currentInfo.getContent());
-        Arrays.stream(content.split("[\\r\\n]+")).filter(p -> p.length() > 0).forEach(c -> this.contentLines.addAll(this.font.listFormattedStringToWidth(c, this.xSize - 15)));
-        for (String line : this.contentLines) {
-            // only search the underlines at start of line
-            if (line.startsWith(TextFormatting.UNDERLINE.toString())) {
-                int endIndex = line.indexOf(TextFormatting.RESET.toString());
-                if (endIndex == -1) {
-                    endIndex = line.length() - 1;
-                }
-                this.underlines.add(new Rectangle2d(0, 0, this.font.getStringWidth(line.substring(2, endIndex)) - 2, 0));
-            } else {
-                this.underlines.add(null);
-            }
-        }
+        String content = I18n.format(currentInfo == null ? MOD_ID + ".compendium.main.desc" : currentInfo.getContent());
+        Arrays.stream(content.split("[\\r\\n]+")).filter(p -> p.length() > 0).forEach(c -> this.contentLines.addAll(this.font.trimStringToWidth(new StringTextComponent(c), this.xSize - 15)));
 
         int x = this.guiLeft + this.xSize + 5;
         int y = this.guiTop + 10;
@@ -120,7 +108,7 @@ public class GuiInfo extends TBScreen {
             infos = Arrays.stream(Info.values()).filter(p -> p.isMainEntry).collect(Collectors.toList());
         } else {
             infos = Info.getRelated(currentInfo);
-            infos.sort(Comparator.comparing(p -> Normalizer.normalize(LangKey.getClientTranslation(p.getTitle()), Normalizer.Form.NFD)));
+            infos.sort(Comparator.comparing(p -> Normalizer.normalize(I18n.format(p.getTitle()), Normalizer.Form.NFD)));
         }
         for (Info info : infos) {
             this.infoLinks.add(new InfoLink(info, x, y));
@@ -130,7 +118,7 @@ public class GuiInfo extends TBScreen {
 
     private void updatePage(@Nullable Info currentInfo) {
         this.lastInfo = currentInfo;
-        this.title = LangKey.getClientTranslation(currentInfo == null ? MOD_ID + ".compendium.main.title" : currentInfo.getTitle());
+        this.title = I18n.format(currentInfo == null ? MOD_ID + ".compendium.main.title" : currentInfo.getTitle());
         updateContent(currentInfo);
         this.linesByPage = 12;
         this.pageCount = MathHelper.ceil(this.contentLines.size() / (float) this.linesByPage);
@@ -144,40 +132,34 @@ public class GuiInfo extends TBScreen {
     }
 
     @Override
-    public void render(int mouseX, int mouseY, float partialTick) {
-        renderBackground();
+    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
+        renderBackground(matrixStack);
         this.hoveredInfo = null;
         if (this.currentInfo != this.lastInfo) {
             updatePage(this.currentInfo);
         }
         // draw title
-        fill(this.guiLeft + 5, this.guiTop + 5, this.guiLeft + this.xSize - 5, this.guiTop + 20 + this.font.FONT_HEIGHT, 0x55000000);
-        this.font.drawString(this.title, this.guiLeft + 30, this.guiTop + 15, this.textColor);
+        fill(matrixStack, this.guiLeft + 5, this.guiTop + 5, this.guiLeft + this.xSize - 5, this.guiTop + 20 + this.font.FONT_HEIGHT, 0x55000000);
+        this.font.drawString(matrixStack, this.title, this.guiLeft + 30, this.guiTop + 15, this.textColor);
         // draw page
         if (this.currentInfo != null) {
-            this.font.drawString((this.currentPage + 1) + "/" + this.pageCount, this.guiLeft + this.xSize - 30, this.guiTop + 6, this.textColor);
+            this.font.drawString(matrixStack, (this.currentPage + 1) + "/" + this.pageCount, this.guiLeft + this.xSize - 30, this.guiTop + 6, this.textColor);
         }
         // draw picture
         if (!this.icon.isEmpty()) {
-            fill(this.guiLeft + 7, this.guiTop + 7, this.guiLeft + 18 + this.font.FONT_HEIGHT, this.guiTop + 18 + this.font.FONT_HEIGHT, this.textColor);
+            fill(matrixStack, this.guiLeft + 7, this.guiTop + 7, this.guiLeft + 18 + this.font.FONT_HEIGHT, this.guiTop + 18 + this.font.FONT_HEIGHT, this.textColor);
             this.itemRenderer.renderItemAndEffectIntoGUI(this.icon, (int) ((this.guiLeft + 9) / 1f), (int) ((this.guiTop + 9) / 1f));
         }
         // draw content
         int indexStart = Math.min(this.currentPage * linesByPage, this.contentLines.size() - 1);
         int indexEnd = Math.min(indexStart + this.linesByPage - 1, this.contentLines.size() - 1);
         if (indexStart >= 0) {
-            fill(this.guiLeft + 5, this.guiTop + 34, this.guiLeft + this.xSize - 5, this.guiTop + 44 + (this.font.FONT_HEIGHT + 1) * (indexEnd - indexStart + 1), 0x55000000);
+            fill(matrixStack, this.guiLeft + 5, this.guiTop + 34, this.guiLeft + this.xSize - 5, this.guiTop + 44 + (this.font.FONT_HEIGHT + 1) * (indexEnd - indexStart + 1), 0x55000000);
             int count = 0;
             for (int i = indexStart; i <= indexEnd; i++) {
-                String line = this.contentLines.get(i);
+                IReorderingProcessor line = this.contentLines.get(i);
                 // draw text line
-                this.font.drawString(line, this.guiLeft + 10, this.guiTop + 39 + (count * (this.font.FONT_HEIGHT + 1)), this.textColor);
-                // draw underlines
-                Rectangle2d underline = this.underlines.get(i);
-                if (underline != null) {
-                    int startX = this.guiLeft + 10 + underline.getX();
-                    hLine(startX, startX + underline.getWidth(), this.guiTop + 39 + (count * (this.font.FONT_HEIGHT + 1)) + this.font.FONT_HEIGHT - 1, this.textColor);
-                }
+                this.font.func_238407_a_(matrixStack, line, this.guiLeft + 10, this.guiTop + 39 + (count * (this.font.FONT_HEIGHT + 1)), this.textColor);
                 count++;
             }
         }
@@ -185,12 +167,12 @@ public class GuiInfo extends TBScreen {
         for (InfoLink link : this.infoLinks) {
             if (this.hoveredInfo == null && link.isHovered(mouseX, mouseY)) {
                 this.hoveredInfo = link.info;
-                this.font.drawString(link.title, link.x, link.y, 0xff897235);
+                this.font.drawString(matrixStack, link.title, link.x, link.y, 0xff897235);
             } else {
-                this.font.drawString(link.title, link.x, link.y, this.textColor);
+                this.font.drawString(matrixStack, link.title, link.x, link.y, this.textColor);
             }
         }
-        super.render(mouseX, mouseY, partialTick);
+        super.render(matrixStack, mouseX, mouseY, partialTick);
     }
 
     enum Info {

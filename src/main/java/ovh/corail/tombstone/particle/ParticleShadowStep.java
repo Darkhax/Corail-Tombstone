@@ -1,5 +1,6 @@
 package ovh.corail.tombstone.particle;
 
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -12,8 +13,8 @@ import static ovh.corail.tombstone.ModTombstone.MOD_ID;
 public class ParticleShadowStep extends CustomParticle {
     private static final ResourceLocation COMMON_TEXTURE = new ResourceLocation(MOD_ID, "textures/particle/fake_fog.png");
 
-    public ParticleShadowStep(LivingEntity entity, double angle) {
-        super(entity.world, entity.getPosX(), entity.getPosY() + 0.3d, entity.getPosZ());
+    public ParticleShadowStep(ClientWorld world, LivingEntity entity, double angle) {
+        super(world, entity.getPosX(), entity.getPosY() + 0.3d, entity.getPosZ());
         this.motionX = this.motionY = this.motionZ = 0d;
         setAlphaF(0.5f);
         this.particleScale = 0.3f;

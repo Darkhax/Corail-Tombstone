@@ -1,21 +1,29 @@
 package ovh.corail.tombstone.command;
 
+import java.util.Iterator;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
+import java.util.stream.IntStream;
+
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.Util;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.Constants;
 import ovh.corail.tombstone.api.cooldown.CooldownType;
@@ -29,13 +37,6 @@ import ovh.corail.tombstone.helper.NBTStackHelper;
 import ovh.corail.tombstone.helper.SpawnHelper;
 import ovh.corail.tombstone.helper.StyleType;
 import ovh.corail.tombstone.helper.TimeHelper;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.function.BiPredicate;
-import java.util.function.Predicate;
-import java.util.stream.IntStream;
 
 public class CommandTBBind extends TombstoneCommand {
 
@@ -84,7 +85,7 @@ public class CommandTBBind extends TombstoneCommand {
         IntStream.range(0, locations.size()).forEach(i -> {
             Location location = locations.get(i);
             if (!location.isOrigin()) {
-                player.sendMessage(new StringTextComponent((i + 1) + " -> {" + location.x + ", " + location.y + ", " + location.z + ", " + location.dim + "}"));
+                player.sendMessage(new StringTextComponent((i + 1) + " -> {" + location.x + ", " + location.y + ", " + location.z + ", " + location.dim + "}"), Util.DUMMY_UUID);
             }
         });
         return 1;
@@ -100,11 +101,11 @@ public class CommandTBBind extends TombstoneCommand {
         int cd = CooldownHandler.INSTANCE.getCooldown(player, CooldownType.TELEPORT_BIND);
         if (cd > 0) {
             int[] timeArray = TimeHelper.getTimeArray(cd);
-            player.sendMessage(LangKey.MESSAGE_COMMAND_IN_COOLDOWN.getTranslation(String.format("%02d", timeArray[0]), String.format("%02d", timeArray[1]), String.format("%02d", timeArray[2])));
+            LangKey.MESSAGE_COMMAND_IN_COOLDOWN.sendMessage(player, String.format("%02d", timeArray[0]), String.format("%02d", timeArray[1]), String.format("%02d", timeArray[2]));
             return 0;
         }
-        DimensionType dimensionType = getOrThrowDimensionType(location.dim);
-        ServerWorld world = sender.getServer().getWorld(dimensionType);
+
+        ServerWorld world = sender.getServer().getWorld(location.dim);
         Location spawnPlace = new SpawnHelper(world, location.getPos()).findSpawnPlace(false);
         if (spawnPlace.isOrigin()) {
             throw LangKey.MESSAGE_NO_SPAWN.asCommandException();
@@ -112,9 +113,9 @@ public class CommandTBBind extends TombstoneCommand {
         CooldownHandler.INSTANCE.resetCooldown(player, CooldownType.TELEPORT_BIND);
         Entity newEntity = Helper.teleportEntity(player, spawnPlace);
         if (EntityHelper.isValidPlayer(newEntity)) {
-            newEntity.sendMessage(LangKey.MESSAGE_TELEPORT_SUCCESS.getTranslationWithStyle(StyleType.MESSAGE_SPELL));
+            LangKey.MESSAGE_TELEPORT_SUCCESS.sendMessage((PlayerEntity) newEntity, StyleType.MESSAGE_SPELL);
         }
-        sendMessage(sender, LangKey.MESSAGE_TELEPORT_TARGET_TO_LOCATION.getTranslation(newEntity.getName(), LangKey.MESSAGE_HERE.getTranslation(), spawnPlace.x, spawnPlace.y, spawnPlace.z, spawnPlace.dim), false);
+        sendMessage(sender, LangKey.MESSAGE_TELEPORT_TARGET_TO_LOCATION.getText(newEntity.getName(), LangKey.MESSAGE_HERE.getText(), spawnPlace.x, spawnPlace.y, spawnPlace.z, spawnPlace.dim.getLocation().toString()), false);
         return 1;
     }
 
@@ -142,7 +143,7 @@ public class CommandTBBind extends TombstoneCommand {
             setOrReplaceLocationInListNBT(locationList, location, bindId).putByte(BIND_LOCATION_ID_NBT_BYTE, (byte) bindId);
         }
         persistentTag.put(BIND_LOCATIONS_NBT_LIST, locationList);
-        player.sendMessage(LangKey.MESSAGE_BIND_LOCATION.getTranslation());
+        LangKey.MESSAGE_BIND_LOCATION.sendMessage(player);
         return 1;
     }
 
@@ -176,18 +177,26 @@ public class CommandTBBind extends TombstoneCommand {
     }
 
     private NonNullList<Location> getLocationList(ServerPlayerEntity player) {
+    	
         CompoundNBT persistentTag = EntityHelper.getPersistentTag(player);
         NonNullList<Location> locationInstances = NonNullList.withSize(5, Location.ORIGIN);
+        final MinecraftServer server = player.getServer();
+        
         if (persistentTag.contains(BIND_LOCATIONS_NBT_LIST, Constants.NBT.TAG_LIST)) {
+        	
             ListNBT locationList = persistentTag.getList(BIND_LOCATIONS_NBT_LIST, Constants.NBT.TAG_COMPOUND);
-            final Map<Integer, Boolean> dims = new HashMap<>();
             Iterator<INBT> it = locationList.iterator();
+            
             while (it.hasNext()) {
+            	
                 CompoundNBT data = (CompoundNBT) it.next();
                 Location location = NBTStackHelper.getLocation(data, BIND_LOCATION_NBT_TAG);
-                if (!location.isOrigin() && DimensionType.getById(location.dim) != null && !dims.computeIfAbsent(location.dim, Helper::isInvalidDimension)) {
+                
+                if (!location.isOrigin() && !Helper.isInvalidDimension(server, location.dim)) {
                     locationInstances.set(data.getByte(BIND_LOCATION_ID_NBT_BYTE) - 1, location);
-                } else {
+                } 
+                
+                else {
                     it.remove();
                 }
             }

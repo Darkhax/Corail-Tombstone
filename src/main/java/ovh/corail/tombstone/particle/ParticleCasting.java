@@ -1,9 +1,9 @@
 package ovh.corail.tombstone.particle;
 
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import ovh.corail.tombstone.config.ConfigTombstone;
@@ -27,7 +27,7 @@ public class ParticleCasting extends CustomParticle {
     private final float colorB;
     private boolean goUp;
 
-    public ParticleCasting(World world, LivingEntity caster, Predicate<LivingEntity> predic, double addY, double angle) {
+    public ParticleCasting(ClientWorld world, LivingEntity caster, Predicate<LivingEntity> predic, double addY, double angle) {
         super(world, caster.getPosX(), caster.getPosY() + addY, caster.getPosZ());
         this.motionX = this.motionY = this.motionZ = 0d;
         setAlphaF(1f);

@@ -11,7 +11,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -40,7 +40,7 @@ public class ItemDustOfVanishing extends ItemGeneric {
 
     @Override
     public ITextComponent getDisplayName(ItemStack stack) {
-        return super.getDisplayName(stack).setStyle(StyleType.MESSAGE_SPECIAL);
+        return super.getDisplayName(stack).copyRaw().setStyle(StyleType.MESSAGE_SPECIAL);
     }
 
     @Override
@@ -65,7 +65,7 @@ public class ItemDustOfVanishing extends ItemGeneric {
     public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
         ItemStack stack = player.getHeldItem(hand);
         if (!stack.isEmpty() && stack.getItem() == this && !EntityHelper.hasCooldown(player, this)) {
-            Vec3d pVec = player.getPositionVector();
+            Vector3d pVec = player.getPositionVec();
             if (!world.isRemote) {
                 world.playSound(null, pVec.x, pVec.y, pVec.z, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.PLAYERS, 0.5f, 0.5f);
                 Location spawnPos = findBackwardLocation((ServerWorld) world, player, 8d);
@@ -90,8 +90,8 @@ public class ItemDustOfVanishing extends ItemGeneric {
     }
 
     @Override
-    public boolean itemInteractionForEntity(ItemStack stack, PlayerEntity player, LivingEntity target, Hand hand) {
-        return false;
+    public ActionResultType itemInteractionForEntity(ItemStack stack, PlayerEntity player, LivingEntity target, Hand hand) {
+        return ActionResultType.FAIL;
     }
 
     @Override
@@ -103,6 +103,6 @@ public class ItemDustOfVanishing extends ItemGeneric {
     }
 
     private Location findBackwardLocation(ServerWorld world, PlayerEntity player, double range) {
-        return new SpawnHelper(world, new BlockPos(player.getPositionVector().subtract(player.getLookVec().x * range, 0, player.getLookVec().z * range))).findSafePlace(2, true);
+        return new SpawnHelper(world, new BlockPos(player.getPositionVec().subtract(player.getLookVec().x * range, 0, player.getLookVec().z * range))).findSafePlace(2, true);
     }
 }

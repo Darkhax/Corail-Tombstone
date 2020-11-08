@@ -5,10 +5,11 @@ import net.minecraft.client.particle.IParticleFactory;
 import net.minecraft.client.particle.IParticleRenderType;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.effect.LightningBoltEntity;
 import net.minecraft.particles.BasicParticleType;
 import net.minecraft.util.SoundCategory;
-import net.minecraft.world.World;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import ovh.corail.tombstone.ModTombstone;
@@ -20,16 +21,21 @@ public class ParticleGhost extends TransparentParticle {
     private final IAnimatedSprite spriteSet;
     private final double mX, mZ;
 
-    private ParticleGhost(IAnimatedSprite spriteSet, World world, double x, double y, double z, double motionX, double motionY, double motionZ) {
+    private ParticleGhost(IAnimatedSprite spriteSet, ClientWorld world, double x, double y, double z, double motionX, double motionY, double motionZ) {
         super(world, x, y + 1d, z);
         this.mX = motionX;
         this.mZ = motionZ;
         this.motionX = this.motionY = this.motionZ = 0d;
         setMaxAge(200);
         this.canCollide = false;
-        multipleParticleScaleBy(8f);
+        multiplyParticleScaleBy(8f);
         setColor(1f, 1f, 1f);
-        ((ClientWorld) world).addLightning(new LightningBoltEntity(world, x, y, z, true));
+        LightningBoltEntity bolt = EntityType.LIGHTNING_BOLT.create(this.world);
+        if (bolt != null) {
+            bolt.moveForced(new Vector3d(x, y, z));
+            bolt.setEffectOnly(true);
+            this.world.addEntity(bolt);
+        }
         world.playSound(x, y, z, Helper.getRandom(0, 3) == 0 ? ModSounds.GHOST_LAUGH : ModSounds.GHOST_HOWL, SoundCategory.VOICE, 1f, 1f, true);
         this.spriteSet = spriteSet;
         selectSpriteWithAge(this.spriteSet);
@@ -70,7 +76,7 @@ public class ParticleGhost extends TransparentParticle {
         }
 
         @Override
-        public Particle makeParticle(BasicParticleType type, World world, double x, double y, double z, double motionX, double motionY, double motionZ) {
+        public Particle makeParticle(BasicParticleType type, ClientWorld world, double x, double y, double z, double motionX, double motionY, double motionZ) {
             return new ParticleGhost(this.spriteSet, world, x, y, z, Helper.getRandom(-0.05d, 0.05d), 0d, Helper.getRandom(-0.05d, 0.05d));
         }
     }

@@ -5,10 +5,11 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.material.Material;
-import net.minecraft.fluid.IFluidState;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -52,7 +53,7 @@ public class SpawnHelper {
     public enum EnumSpawnType {NONE, MINIMAL, NORMAL, FIT, IDEAL}
 
     private final World world;
-    private final int dimId;
+    private final RegistryKey<World> dimId;
     private final int actualHeight;
     private final BlockPos initPos;
     private List<BlockPos> positions;
@@ -62,8 +63,8 @@ public class SpawnHelper {
 
     public SpawnHelper(ServerWorld world, BlockPos initPos) {
         this.world = world;
-        this.dimId = Helper.getDimensionId(world);
-        this.actualHeight = world.getActualHeight();
+        this.dimId = world.getDimensionKey();
+        this.actualHeight = world.getDimensionType().getLogicalHeight();
         this.initPos = Helper.getCloserValidPos(world, initPos);
     }
 
@@ -309,7 +310,7 @@ public class SpawnHelper {
             return EnumSpawnPlace.UNSAFE;
         }
 
-        IFluidState fluidState = state.getFluidState();
+        FluidState fluidState = state.getFluidState();
         if (!fluidState.isEmpty() && fluidState.getLevel() >= 8) {
             return fluidState.isTagged(FluidTags.WATER) && block != Blocks.BUBBLE_COLUMN && state.getCollisionShape(world, pos).isEmpty() ? EnumSpawnPlace.WATER : EnumSpawnPlace.UNSAFE;
         }
@@ -332,7 +333,7 @@ public class SpawnHelper {
         } else if (block.isIn(BlockTags.TRAPDOORS) || block.isIn(BlockTags.DOORS) || block.isIn(BlockTags.FENCES) || block.isIn(Tags.Blocks.FENCE_GATES)) {
             return EnumSpawnPlace.UNSAFE;
         } else {
-            return !mat.blocksMovement() ? EnumSpawnPlace.SAFE : (block.isNormalCube(state, world, pos) ? EnumSpawnPlace.GROUND : EnumSpawnPlace.UNSAFE);
+            return !mat.blocksMovement() ? EnumSpawnPlace.SAFE : (state.isNormalCube(world, pos) ? EnumSpawnPlace.GROUND : EnumSpawnPlace.UNSAFE);
         }
     }
 }

@@ -40,7 +40,7 @@ public class ModPerks extends Registrable {
 
     private static void registerPerks(IForgeRegistry<Perk> registry, Perk... perks) {
         for (Perk perk : perks) {
-            registerForgeEntry(registry, perk, perk.getName());
+            registerForgeEntry(registry, perk, perk.getString());
         }
     }
 }

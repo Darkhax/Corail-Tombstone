@@ -3,7 +3,7 @@ package ovh.corail.tombstone.network;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.fml.network.NetworkEvent;
 import ovh.corail.tombstone.ModTombstone;
 import ovh.corail.tombstone.helper.Helper;
@@ -34,7 +34,7 @@ public class SmokeColumnMessage {
                     public void run() {
                         Entity entity = Minecraft.getInstance().world != null ? Minecraft.getInstance().world.getEntityByID(msg.id) : null;
                         if (entity != null) {
-                            Vec3d pVec = entity.getPositionVector();
+                            Vector3d pVec = entity.getPositionVec();
                             ModTombstone.PROXY.produceSmokeColumn(Minecraft.getInstance().world, pVec.x, pVec.y, pVec.z);
                         }
                     }

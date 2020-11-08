@@ -12,21 +12,26 @@ import net.minecraft.command.Commands;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.WorldGenRegistries;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.dimension.DimensionType;
-import net.minecraftforge.common.DimensionManager;
-import net.minecraftforge.registries.GameData;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.registries.ForgeRegistries;
 import ovh.corail.tombstone.helper.CallbackHandler;
 import ovh.corail.tombstone.helper.EntityHelper;
 import ovh.corail.tombstone.helper.Helper;
 import ovh.corail.tombstone.helper.LangKey;
 import ovh.corail.tombstone.helper.StyleType;
+
+import javax.annotation.Nullable;
 
 @SuppressWarnings("deprecation")
 abstract class TombstoneCommand {
@@ -75,26 +80,31 @@ abstract class TombstoneCommand {
         }
     }
 
-    static void checkValidPos(World world, BlockPos pos) {
-        if (!Helper.isValidPos(world, pos)) {
+    static void checkValidPos(@Nullable World world, BlockPos pos) {
+        if (world != null && !Helper.isValidPos(world, pos)) {
             throw LangKey.MESSAGE_INVALID_LOCATION.asCommandException();
         }
     }
 
-    DimensionType getOrThrowDimensionType(int dim) {
-        DimensionType dimensionType = DimensionType.getById(dim);
-        if (dimensionType == null) {
+    ServerWorld getOrThrowWorld(MinecraftServer server, RegistryKey<World> dim) {
+        ServerWorld world = server.getWorld(dim);
+        if (world == null) {
             throw LangKey.MESSAGE_NO_DIMENSION.asCommandException();
         }
-        return dimensionType;
+        return world;
     }
 
     Biome getOrThrowBiome(CommandContext<CommandSource> context, String name) {
         ResourceLocation rl = context.getArgument(name, ResourceLocation.class);
-        return Registry.BIOME.getValue(rl).orElseThrow(LangKey.MESSAGE_INVALID_BIOME::asCommandException);
+        final Biome biome = WorldGenRegistries.BIOME.getValueForKey(RegistryKey.getOrCreateKey(Registry.BIOME_KEY, rl));
+        if (biome == null)
+        {
+            throw LangKey.MESSAGE_INVALID_BIOME.asCommandException();
+        }
+        return biome;
     }
 
-    protected void sendMessage(CommandSource source, ITextComponent message, boolean allowLogging) {
+    protected void sendMessage(CommandSource source, IFormattableTextComponent message, boolean allowLogging) {
         source.sendFeedback(message.setStyle(StyleType.TOOLTIP_DESC), allowLogging);
     }
 
@@ -103,11 +113,11 @@ abstract class TombstoneCommand {
     }
 
     private static CommandExceptionType createCommandExceptionType(LangKey langKey) {
-        return new SimpleCommandExceptionType(langKey.getTranslation());
+        return new SimpleCommandExceptionType(langKey.getText());
     }
 
     private static CommandExceptionType createDynamicCommandExceptionType(LangKey langKey) {
-        return new DynamicCommandExceptionType(langKey::getTranslation);
+        return new DynamicCommandExceptionType(langKey::getText);
     }
 
     static final String PLAYER_PARAM = "player";
@@ -117,8 +127,7 @@ abstract class TombstoneCommand {
     static final String STRUCTURE_PARAM = "structure";
     static final String DIM_PARAM = "dim";
     static final String AMOUNT_PARAM = "amount";
-    static final SuggestionProvider<CommandSource> SUGGESTION_STRUCTURE = (ctx, build) -> ISuggestionProvider.suggestIterable(GameData.getStructureFeatures().keySet(), build);
-    static final SuggestionProvider<CommandSource> SUGGESTION_BIOME = (ctx, build) -> ISuggestionProvider.suggestIterable(Registry.BIOME.keySet(), build);
-    static final SuggestionProvider<CommandSource> SUGGESTION_DIM_IDS = (ctx, build) -> ISuggestionProvider.suggest(DimensionManager.getRegistry().stream().map(dim -> String.valueOf(dim.getId())), build);
+    static final SuggestionProvider<CommandSource> SUGGESTION_STRUCTURE = (ctx, build) -> ISuggestionProvider.suggestIterable(ForgeRegistries.STRUCTURE_FEATURES.getKeys(), build);
+    static final SuggestionProvider<CommandSource> SUGGESTION_BIOME = (ctx, build) -> ISuggestionProvider.suggestIterable(WorldGenRegistries.BIOME.keySet(), build);
     static final SuggestionProvider<CommandSource> AMOUNT_SUGGESTION = (ctx, build) -> build.suggest(1, () -> "[0-MAX]").buildFuture();
 }

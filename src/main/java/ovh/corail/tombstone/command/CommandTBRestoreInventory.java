@@ -7,7 +7,6 @@ import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import ovh.corail.tombstone.helper.DeathHandler;
 import ovh.corail.tombstone.helper.LangKey;
@@ -49,16 +48,15 @@ public class CommandTBRestoreInventory extends TombstoneCommand {
             }
         }
 
-        DimensionType dimensionType = getOrThrowDimensionType(lastGrave.dim);
-        ServerWorld world = sender.getServer().getWorld(dimensionType);
+        ServerWorld world = getOrThrowWorld(sender.getServer(), lastGrave.dim);
         checkValidPos(world, lastGrave.getPos());
 
         TileEntity tile = world.getTileEntity(lastGrave.getPos());
         if (tile instanceof TileEntityGrave) {
             ModItems.grave_key.removeKeyForGraveInInventory(target, lastGrave);
             ((TileEntityGrave) tile).giveInventory(target);
-            target.sendMessage(LangKey.MESSAGE_RECOVER_LOST_ITEMS.getTranslationWithStyle(StyleType.MESSAGE_SPELL));
-            sendMessage(sender, LangKey.MESSAGE_OPEN_GRAVE_SUCCESS.getTranslation(), false);
+            LangKey.MESSAGE_RECOVER_LOST_ITEMS.sendMessage(target, StyleType.MESSAGE_SPELL);
+            sendMessage(sender, LangKey.MESSAGE_OPEN_GRAVE_SUCCESS.getText(), false);
         }
         return 1;
     }

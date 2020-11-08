@@ -54,7 +54,7 @@ public class EffectHelper {
     }
 
     private static boolean needCap(@Nullable EffectInstance effectInstance, int maxDuration) {
-        return effectInstance != null && (effectInstance.duration > maxDuration || needCap(effectInstance.field_230115_j_, maxDuration));
+        return effectInstance != null && (effectInstance.duration > maxDuration || needCap(effectInstance.hiddenEffects, maxDuration));
     }
 
     public static void addEffect(@Nullable LivingEntity entity, @Nullable Effect potion, int duration) {
@@ -82,16 +82,16 @@ public class EffectHelper {
     @SuppressWarnings("unused")
     public static EffectInstance copyEffectWithHidden(EffectInstance effectInstance) {
         EffectInstance effectCopy = new EffectInstance(effectInstance);
-        if (effectInstance.field_230115_j_ != null) {
-            effectCopy.field_230115_j_ = copyEffectWithHidden(effectInstance.field_230115_j_);
+        if (effectInstance.hiddenEffects != null) {
+            effectCopy.hiddenEffects = copyEffectWithHidden(effectInstance.hiddenEffects);
         }
         return effectCopy;
     }
 
     public static EffectInstance modifyEffectDuration(EffectInstance effectInstance, Function<EffectInstance, Integer> function) {
         effectInstance.duration = function.apply(effectInstance);
-        if (effectInstance.field_230115_j_ != null) {
-            modifyEffectDuration(effectInstance.field_230115_j_, function);
+        if (effectInstance.hiddenEffects != null) {
+            modifyEffectDuration(effectInstance.hiddenEffects, function);
         }
         return effectInstance;
     }
@@ -172,7 +172,7 @@ public class EffectHelper {
         EffectInstance effect = getRandomEffect(duration, isBad);
         if (effect != null) {
             if (withMessage && !effect.getPotion().getName().isEmpty()) {
-                player.sendMessage(LangKey.MESSAGE_SPELL_CAST_ON_YOU.getTranslationWithStyle(StyleType.MESSAGE_SPELL, new TranslationTextComponent(effect.getPotion().getName()).setStyle(StyleType.MESSAGE_SPECIAL)));
+                LangKey.MESSAGE_SPELL_CAST_ON_YOU.sendMessage(player, StyleType.MESSAGE_SPELL, new TranslationTextComponent(effect.getPotion().getName()).setStyle(StyleType.MESSAGE_SPECIAL));
             }
             addEffect(player, effect);
         }

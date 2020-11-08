@@ -1,11 +1,12 @@
 package ovh.corail.tombstone.helper;
 
-import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import net.minecraft.advancements.ICriterionTrigger;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.advancements.criterion.CriterionInstance;
+import net.minecraft.advancements.criterion.EntityPredicate;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.loot.ConditionArrayParser;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.ArrayList;
@@ -57,7 +58,7 @@ public class StatelessTrigger implements ICriterionTrigger<StatelessTrigger.Inst
     }
 
     @Override
-    public Instance deserializeInstance(JsonObject json, JsonDeserializationContext context) {
+    public Instance deserialize(JsonObject object, ConditionArrayParser conditions) {
         return new Instance(this.rl);
     }
 
@@ -70,7 +71,7 @@ public class StatelessTrigger implements ICriterionTrigger<StatelessTrigger.Inst
 
     public static class Instance extends CriterionInstance {
         Instance(ResourceLocation identifier) {
-            super(identifier);
+            super(identifier, EntityPredicate.AndPredicate.ANY_AND);
         }
     }
 

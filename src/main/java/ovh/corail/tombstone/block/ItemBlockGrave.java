@@ -9,9 +9,9 @@ import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
@@ -31,8 +31,6 @@ public class ItemBlockGrave extends BlockItem {
 
     public ItemBlockGrave(Block grave) {
         super(grave, new Item.Properties().group(ModTabs.mainTab).maxStackSize(1));
-        addPropertyOverride(new ResourceLocation("model_texture"), (stack, world, entity) -> 0f + (isEngraved(stack) ? 0.1f : 0f) + (getModelTexture(stack) == 1 ? 0.01f : 0f));
-        addPropertyOverride(new ResourceLocation("custom_model_data"), (stack, worldIn, entityIn) -> 0f);
     }
 
     @Override
@@ -40,9 +38,9 @@ public class ItemBlockGrave extends BlockItem {
     public void addInformation(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
         String engravedName = getEngravedName(stack);
         if (engravedName.isEmpty()) {
-            tooltip.add(LangKey.MESSAGE_ENGRAVABLE.getTranslationWithStyle(StyleType.TOOLTIP_DESC, StyleType.TOOLTIP_ITEM.getFormattingCode() + "[" + I18n.format(Items.IRON_INGOT.getTranslationKey()) + "]"));
+            tooltip.add(LangKey.MESSAGE_ENGRAVABLE.getText(StyleType.TOOLTIP_DESC, new StringTextComponent("[" + I18n.format(Items.IRON_INGOT.getTranslationKey()) + "]").mergeStyle(StyleType.TOOLTIP_ITEM)));
         } else {
-            tooltip.add(LangKey.MESSAGE_ENGRAVED.getTranslationWithStyle(StyleType.TOOLTIP_DESC, StyleType.TOOLTIP_ITEM.getFormattingCode() + '"' + engravedName + '"'));
+            tooltip.add(LangKey.MESSAGE_ENGRAVED.getText(StyleType.TOOLTIP_DESC, new StringTextComponent('"' + engravedName + '"').setStyle(StyleType.TOOLTIP_ITEM)));
         }
         super.addInformation(stack, world, tooltip, flag);
     }
@@ -50,7 +48,7 @@ public class ItemBlockGrave extends BlockItem {
     @Override
     public ITextComponent getDisplayName(ItemStack stack) {
         TranslationTextComponent baseTranslation = new TranslationTextComponent(getTranslationKey());
-        return getEngravedName(stack).isEmpty() ? baseTranslation : LangKey.MESSAGE_ENGRAVED_ITEM.getTranslationWithStyle(StyleType.MESSAGE_SPECIAL, baseTranslation);
+        return getEngravedName(stack).isEmpty() ? baseTranslation : LangKey.MESSAGE_ENGRAVED_ITEM.getText(StyleType.MESSAGE_SPECIAL, baseTranslation);
     }
 
     @Override

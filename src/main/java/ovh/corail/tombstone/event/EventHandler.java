@@ -1,5 +1,6 @@
 package ovh.corail.tombstone.event;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -8,8 +9,8 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.ai.attributes.AttributeModifierManager;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.entity.monster.PhantomEntity;
@@ -19,6 +20,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.loot.LootTables;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.potion.Effects;
@@ -30,20 +32,23 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
-import net.minecraft.util.concurrent.ThreadTaskExecutor;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.village.VillageSiege;
+import net.minecraft.world.DimensionType;
+import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.loot.LootTables;
+import net.minecraft.world.spawner.ISpecialSpawner;
+import net.minecraft.world.spawner.PhantomSpawner;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AnvilUpdateEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.LootTableLoadEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
@@ -83,6 +88,8 @@ import ovh.corail.tombstone.compatibility.CompatibilityMinecolonies;
 import ovh.corail.tombstone.config.ConfigTombstone;
 import ovh.corail.tombstone.config.SharedConfigTombstone;
 import ovh.corail.tombstone.helper.CooldownHandler;
+import ovh.corail.tombstone.spawner.CustomPhantomSpawner;
+import ovh.corail.tombstone.spawner.CustomVillageSiege;
 import ovh.corail.tombstone.helper.DeathHandler;
 import ovh.corail.tombstone.helper.DummyTargetEntity;
 import ovh.corail.tombstone.helper.EffectHelper;
@@ -92,12 +99,10 @@ import ovh.corail.tombstone.helper.InventoryHelper;
 import ovh.corail.tombstone.helper.LangKey;
 import ovh.corail.tombstone.helper.Location;
 import ovh.corail.tombstone.helper.LootHelper;
-import ovh.corail.tombstone.helper.PhantomSpawnerHandler;
 import ovh.corail.tombstone.helper.SpawnHelper;
 import ovh.corail.tombstone.helper.SpawnProtectionHandler;
 import ovh.corail.tombstone.helper.StyleType;
 import ovh.corail.tombstone.helper.TimeHelper;
-import ovh.corail.tombstone.helper.VillageSiegeHandler;
 import ovh.corail.tombstone.item.ItemGraveMagic;
 import ovh.corail.tombstone.item.ItemVoodooPoppet;
 import ovh.corail.tombstone.network.PacketHandler;
@@ -125,18 +130,17 @@ import static ovh.corail.tombstone.ModTombstone.*;
 @Mod.EventBusSubscriber(modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class EventHandler {
 
+    @SubscribeEvent
+    public static void onRegisterCommand(RegisterCommandsEvent event) {
+        Helper.initCommands(event.getDispatcher());
+    }
+
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLootTableLoad(LootTableLoadEvent event) {
         if (event.getName().equals(LootTables.GAMEPLAY_FISHING_JUNK)) {
-            ThreadTaskExecutor server = Helper.getServer();
-            if (server == null) {
-                LOGGER.warn("A mod called the LootTableLoadEvent from the client side");
-            } else {
-                server.deferTask(() -> {
-                    LootHelper.addLostEntries(event.getTable());
-                    LootHelper.addChestEntries(event.getLootTableManager());
-                });
-            }
+            LootHelper.addLostEntries(event.getTable());
+        } else if (ConfigTombstone.loot.treasureLootTable.get().contains(event.getName().toString())) {
+            LootHelper.addChestEntries(event.getTable());
         }
     }
 
@@ -148,7 +152,7 @@ public class EventHandler {
             /* spawn protection & shared datas to client */
             MinecraftServer server = player.getServer();
             assert server != null;
-            BlockPos spawnPos = server.getWorld(DimensionType.OVERWORLD).getSpawnPoint();
+            BlockPos spawnPos = server.getWorld(World.OVERWORLD).getSpawnPoint();
             int range = server.isDedicatedServer() ? server.getSpawnProtectionSize() : 0;
             PacketHandler.sendToPlayer(new UpdateClientMessage(spawnPos, range, Helper.isDateAroundHalloween(LocalDate.now()), Helper.isContributor(player)), player);
             PacketHandler.sendToPlayer(CooldownHandler.INSTANCE.getCooldownPacket(player), player);
@@ -202,10 +206,26 @@ public class EventHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onWorldLoad(WorldEvent.Load event) {
         if (!event.getWorld().isRemote()) {
-            // handle village siege
-            VillageSiegeHandler.instance.checkWorld((ServerWorld) event.getWorld());
-            // handle phantom spawner
-            PhantomSpawnerHandler.instance.checkWorld((ServerWorld) event.getWorld());
+            ServerWorld world = (ServerWorld) event.getWorld();
+            if (!world.getDimensionType().getEffects().equals(DimensionType.OVERWORLD.getLocation())) {
+                return;
+            }
+            ImmutableList.Builder<ISpecialSpawner> builder = new ImmutableList.Builder<>();
+            boolean valid = false;
+            for (ISpecialSpawner spawner : world.field_241104_N_) {
+                if (spawner instanceof PhantomSpawner && !(spawner instanceof CustomPhantomSpawner)) {
+                    builder.add(new CustomPhantomSpawner());
+                    valid = true;
+                } else if (spawner instanceof VillageSiege && !(spawner instanceof CustomVillageSiege)) {
+                    builder.add(new CustomVillageSiege());
+                    valid = true;
+                } else {
+                    builder.add(spawner);
+                }
+            }
+            if (valid) {
+                world.field_241104_N_ = builder.build();
+            }
         }
     }
 
@@ -253,7 +273,7 @@ public class EventHandler {
             if (prot != null) {
                 if (ModItems.voodoo_poppet.preventDeath(player, InventoryHelper.findItemInMainInventory(player, p -> ModItems.voodoo_poppet.canPreventDeath(p, prot)), prot)) {
                     event.setCanceled(true);
-                    player.sendMessage(prot.getLangKey().getTranslation().setStyle(StyleType.MESSAGE_SPECIAL));
+                    prot.getLangKey().sendMessage(player, StyleType.MESSAGE_SPECIAL);
                     ModTriggers.PREVENT_DEATH.get(prot).trigger(player);
                     return;
                 }
@@ -262,7 +282,7 @@ public class EventHandler {
             boolean preventDeathOutsideWorld = ConfigTombstone.player_death.preventDeathOutsideWorld.get() && !Helper.isValidPos(player.world, player.getPosition());
             ItemStack soul = !preventDeathOutsideWorld ? InventoryHelper.findItemInMainInventory(player, p -> p.getItem() == ModItems.soul_receptacle) : ItemStack.EMPTY;
             if (preventDeathOutsideWorld || !soul.isEmpty()) {
-                Location spawnPos = new SpawnHelper((ServerWorld) player.world, Helper.getCloserValidPos(player.world, new BlockPos(player))).findSpawnPlace(false);
+                Location spawnPos = new SpawnHelper((ServerWorld) player.world, Helper.getCloserValidPos(player.world, new BlockPos(player.getPositionVec()))).findSpawnPlace(false);
                 if (!spawnPos.isOrigin()) {
                     event.setCanceled(true);
                     if (!preventDeathOutsideWorld) {
@@ -273,14 +293,14 @@ public class EventHandler {
                     EffectHelper.addEffect(player, Effects.SATURATION, 1200, 9);
                     EffectHelper.addEffect(player, Effects.REGENERATION, 1200, 9);
                     EffectHelper.addEffect(player, ModEffects.diversion, 1200);
-                    player.sendMessage((preventDeathOutsideWorld ? LangKey.MESSAGE_CONFIG_PREVENT_DEATH : LangKey.MESSAGE_SOUL_PREVENT_DEATH).getTranslation());
+                    (preventDeathOutsideWorld ? LangKey.MESSAGE_CONFIG_PREVENT_DEATH : LangKey.MESSAGE_SOUL_PREVENT_DEATH).sendMessage(player);
                     Helper.teleportEntity(player, spawnPos);
                     player.fallDistance = 0f;
                     return;
                 }
             }
             if (ConfigTombstone.recovery.backupOnDeath.get() && !event.getEntityLiving().isSpectator()) {
-                CommandTBRecovery.savePlayer((ServerPlayerEntity) event.getEntityLiving(), success -> LOGGER.info((success ? LangKey.MESSAGE_RECOVERY_SAVE_PLAYER_SUCCESS : LangKey.MESSAGE_RECOVERY_SAVE_PLAYER_FAILED).getTranslation(event.getEntityLiving().getName()).getString()));
+                CommandTBRecovery.savePlayer((ServerPlayerEntity) event.getEntityLiving(), success -> LOGGER.info((success ? LangKey.MESSAGE_RECOVERY_SAVE_PLAYER_SUCCESS : LangKey.MESSAGE_RECOVERY_SAVE_PLAYER_FAILED).getText(event.getEntityLiving().getName()).getString()));
             }
         }
     }
@@ -316,8 +336,8 @@ public class EventHandler {
         if (!event.getTarget().equals(attacker.revengeTarget) && !event.getTarget().isPassenger()) {
             int lvl = Math.min(EntityHelper.getEnchantmentLevel(event.getTarget(), ModEnchantments.shadow_step), 5);
             if (lvl > 0) {
-                IAttributeInstance attribute = attacker.getAttributes().getAttributeInstance(SharedMonsterAttributes.FOLLOW_RANGE);
-                double range = attribute == null ? 16d : attribute.getValue();
+                AttributeModifierManager attributeManager = attacker.getAttributeManager();
+                double range = attributeManager.hasAttributeInstance(Attributes.FOLLOW_RANGE) ? attributeManager.getAttributeValue(Attributes.FOLLOW_RANGE) : 16d;
                 double mult = MathHelper.clamp((event.getTarget().isSneaking() ? 0.6d : 1d) - ((double) lvl * 0.2d) + (attacker.world.isDaytime() ? 0.5d : 0d), 0.05d, 1d);
                 if (attacker.getDistance(event.getTarget()) < (range * mult)) {
                     attacker.revengeTarget = event.getTarget();
@@ -548,7 +568,7 @@ public class EventHandler {
             ModItems.grave_key.reenchantOnDeath(player, keys.stream().filter(p -> !ModItems.grave_key.isEnchanted(p)).findFirst().orElse(ItemStack.EMPTY));
             storeSoulboundsOnBody(player, keys, soulbounds);
             if (!hasDrop) {
-                player.sendMessage(LangKey.MESSAGE_NO_LOOT_FOR_GRAVE.getTranslationWithStyle(StyleType.MESSAGE_SPECIAL));
+            	LangKey.MESSAGE_NO_LOOT_FOR_GRAVE.sendMessage(player, StyleType.MESSAGE_SPECIAL);
             }
             return;
         }
@@ -557,12 +577,12 @@ public class EventHandler {
 
         // check if the area requires no grave
         if (deathHandler.isNoGraveLocation(new Location(player))) {
-            player.sendMessage(LangKey.MESSAGE_NO_GRAVE_LOCATION.getTranslationWithStyle(StyleType.MESSAGE_SPECIAL));
+        	LangKey.MESSAGE_NO_GRAVE_LOCATION.sendMessage(player, StyleType.MESSAGE_SPECIAL);
             storeSoulboundsOnBody(player, keys, soulbounds);
             return;
         }
 
-        BlockPos initPos = Helper.getCloserValidPos(world, new BlockPos(player));
+        BlockPos initPos = Helper.getCloserValidPos(world, new BlockPos(player.getPosition()));
 
         // check if there's a grave of this player in the chunk and also if the last grave is close (with enough spaces to fill it with drops)
         Location spawnPos = Location.ORIGIN;
@@ -577,7 +597,7 @@ public class EventHandler {
             }
             if (spawnPos.isOrigin()) {
                 Location lastGrave = deathHandler.getLastGrave(player.getGameProfile().getName());
-                if (!lastGrave.isOrigin() && lastGrave.dim == Helper.getDimensionId(world) && Helper.getDistanceSq(lastGrave.getPos(), initPos) <= 400d) {
+                if (!lastGrave.isOrigin() && lastGrave.dim.equals(world.getDimensionKey()) && Helper.getDistanceSq(lastGrave.getPos(), initPos) <= 400d) {
                     TileEntity tile = world.getTileEntity(lastGrave.getPos());
                     if (tile instanceof TileEntityGrave) {
                         TileEntityGrave grave = (TileEntityGrave) tile;
@@ -599,7 +619,7 @@ public class EventHandler {
             spawnPos = new SpawnHelper(world, initPos).findSpawnPlace(true);
             if (spawnPos.isOrigin()) {
                 storeSoulboundsOnBody(player, keys, soulbounds);
-                player.sendMessage(LangKey.MESSAGE_NO_PLACE_FOR_GRAVE.getTranslationWithStyle(StyleType.MESSAGE_SPECIAL));
+                LangKey.MESSAGE_NO_PLACE_FOR_GRAVE.sendMessage(player, StyleType.MESSAGE_SPECIAL);
                 LOGGER.info("There was nowhere to place the grave!");
                 return;
             }
@@ -619,8 +639,8 @@ public class EventHandler {
         TileEntity tile = world.getTileEntity(spawnPos.getPos());
         if (!(tile instanceof TileEntityGrave)) {
             storeSoulboundsOnBody(player, keys, soulbounds);
-            player.sendMessage(LangKey.MESSAGE_FAIL_TO_PLACE_GRAVE.getTranslationWithStyle(StyleType.MESSAGE_SPECIAL));
-            LOGGER.info(LangKey.MESSAGE_FAIL_TO_PLACE_GRAVE.getTranslation()); // Server lang
+            LangKey.MESSAGE_FAIL_TO_PLACE_GRAVE.sendMessage(player, StyleType.MESSAGE_SPECIAL);
+            LOGGER.info(LangKey.MESSAGE_FAIL_TO_PLACE_GRAVE.getText()); // Server lang
             return;
         }
         deathHandler.setLastDeathLocation(player, new Location(spawnPos.x, spawnPos.y + 1, spawnPos.z, spawnPos.dim));
@@ -633,10 +653,10 @@ public class EventHandler {
         if (needAccess && ConfigTombstone.player_death.pvpMode.get() && event.getSource() != null && event.getSource().getTrueSource() instanceof PlayerEntity) {
             needAccess = false;
         }
-        player.sendMessage((hasGrave ? LangKey.MESSAGE_EXISTING_GRAVE : LangKey.MESSAGE_NEW_GRAVE).getTranslationWithStyle(StyleType.MESSAGE_SPECIAL,
-                LangKey.MESSAGE_JOURNEYMAP.getTranslationWithStyle(StyleType.TOOLTIP_DESC, LangKey.MESSAGE_LAST_GRAVE.getTranslation(), spawnPos.x, spawnPos.y, spawnPos.z, spawnPos.dim),
-                LangKey.createComponentTranslationWithStyle(player, needAccess ? StyleType.COLOR_OFF : StyleType.COLOR_ON, needAccess ? LangKey.MESSAGE_LOCKED : LangKey.MESSAGE_UNLOCKED, needAccess && SharedConfigTombstone.player_death.decayTime.get() > 0 ? SharedConfigTombstone.player_death.decayTime.get() + " min" : "")
-        ));
+        (hasGrave ? LangKey.MESSAGE_EXISTING_GRAVE : LangKey.MESSAGE_NEW_GRAVE).sendMessage(player, StyleType.MESSAGE_SPECIAL,
+                LangKey.MESSAGE_JOURNEYMAP.getText(StyleType.TOOLTIP_DESC, LangKey.MESSAGE_LAST_GRAVE.getText(), spawnPos.x, spawnPos.y, spawnPos.z, spawnPos.dim.getLocation().toString()),
+                (needAccess ? LangKey.MESSAGE_LOCKED : LangKey.MESSAGE_UNLOCKED).getText(needAccess && SharedConfigTombstone.player_death.decayTime.get() > 0 ? SharedConfigTombstone.player_death.decayTime.get() + " min" : "").setStyle(needAccess ? StyleType.COLOR_OFF : StyleType.COLOR_ON)
+        );
         if (ConfigTombstone.player_death.playerGraveAccess.get()) {
             if (hasGrave) {
                 ItemStack key = ItemStack.EMPTY;
@@ -738,7 +758,7 @@ public class EventHandler {
                 event.setUseBlock(Event.Result.DEFAULT);
                 event.setUseItem(Event.Result.DEFAULT);
             }
-            if (event.getWorld().isRemote && SpawnProtectionHandler.getInstance().isBlockProtected(Helper.getDimensionId(event.getWorld()), event.getPos())) {
+            if (event.getWorld().isRemote && SpawnProtectionHandler.getInstance().isBlockProtected(event.getWorld().getDimensionKey(), event.getPos())) {
                 PacketHandler.sendToServer(new TombstoneActivatedMessage(event.getPos()));
             }
         }
@@ -871,7 +891,7 @@ public class EventHandler {
     public static void onPlayerInteractEntity(PlayerInteractEvent.EntityInteract event) {
         ItemStack mainHandStack;
         if (event.getHand() == Hand.MAIN_HAND && EntityHelper.isValidPlayer(event.getPlayer()) && (mainHandStack = event.getPlayer().getHeldItemMainhand()).getItem() == ModItems.bone_needle && event.getTarget() instanceof LivingEntity) {
-            if (mainHandStack.interactWithEntity(event.getPlayer(), (LivingEntity) event.getTarget(), event.getHand())) {
+            if (mainHandStack.interactWithEntity(event.getPlayer(), (LivingEntity) event.getTarget(), event.getHand()).isSuccess()) {
                 event.setCancellationResult(ActionResultType.SUCCESS);
                 event.setCanceled(true);
             }

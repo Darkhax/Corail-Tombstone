@@ -42,7 +42,7 @@ public class ItemBookOfDisenchantment extends ItemGeneric implements ISoulConsum
 
     @Override
     public ITextComponent getDisplayName(ItemStack stack) {
-        return super.getDisplayName(stack).setStyle(StyleType.MESSAGE_SPECIAL);
+        return super.getDisplayName(stack).copyRaw().setStyle(StyleType.MESSAGE_SPECIAL);
     }
 
     @Override
@@ -78,7 +78,7 @@ public class ItemBookOfDisenchantment extends ItemGeneric implements ISoulConsum
         }
         if (SupportMods.TETRA.isLoaded() && ConfigTombstone.compatibility.disableDisenchantmentForTetra.get()) {
             ResourceLocation registryName = offhand.getItem().getRegistryName();
-            if (registryName != null && registryName.getNamespace().equals(SupportMods.TETRA.getName()) && registryName.getPath().startsWith("modular_")) {
+            if (registryName != null && registryName.getNamespace().equals(SupportMods.TETRA.getString()) && registryName.getPath().startsWith("modular_")) {
                 return false;
             }
         }
@@ -114,12 +114,12 @@ public class ItemBookOfDisenchantment extends ItemGeneric implements ISoulConsum
 
     @Override
     public ITextComponent getEnchantSuccessMessage(PlayerEntity player) {
-        return LangKey.MESSAGE_DISENCHANTMENT_SUCCESS.getTranslation();
+        return LangKey.MESSAGE_DISENCHANTMENT_SUCCESS.getText();
     }
 
     @Override
     public ITextComponent getEnchantFailedMessage(PlayerEntity player) {
-        return LangKey.MESSAGE_DISENCHANTMENT_FAILED.getTranslation();
+        return LangKey.MESSAGE_DISENCHANTMENT_FAILED.getText();
     }
 
     @Override

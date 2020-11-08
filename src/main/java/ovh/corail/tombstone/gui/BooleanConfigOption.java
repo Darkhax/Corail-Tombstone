@@ -1,12 +1,15 @@
 package ovh.corail.tombstone.gui;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.AbstractOption;
 import net.minecraft.client.GameSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.OptionButton;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.client.settings.AbstractOption;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -42,16 +45,16 @@ public class BooleanConfigOption extends AbstractOption {
             this.dirty.accept(true);
         }) {
             @Override
-            public void renderButton(int mouseX, int mouseY, float partialTicks) {
+            public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
                 Minecraft minecraft = Minecraft.getInstance();
-                renderBg(minecraft, mouseX, mouseY);
+                renderBg(matrixStack, minecraft, mouseX, mouseY);
                 int j = isHovered() ? 0xff897235 : 0xffffffff;
-                drawCenteredString(minecraft.fontRenderer, getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, j | MathHelper.ceil(this.alpha * 255f) << 24);
+                drawCenteredString(matrixStack, minecraft.fontRenderer, getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, j | MathHelper.ceil(this.alpha * 255f) << 24);
             }
         };
     }
 
-    private String getOptionName() {
-        return getDisplayString() + I18n.format(get() ? "options.on" : "options.off");
+    private ITextComponent getOptionName() {
+        return ((IFormattableTextComponent) this.getBaseMessageTranslation()).append(new TranslationTextComponent(get() ? "options.on" : "options.off"));
     }
 }

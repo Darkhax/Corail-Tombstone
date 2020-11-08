@@ -11,18 +11,18 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 abstract class CustomParticle extends TexturedParticle {
-    protected CustomParticle(World world, double x, double y, double z) {
+    protected CustomParticle(ClientWorld world, double x, double y, double z) {
         super(world, x, y, z);
     }
 
-    protected CustomParticle(World world, double x, double y, double z, double motionX, double motionY, double motionZ) {
+    protected CustomParticle(ClientWorld world, double x, double y, double z, double motionX, double motionY, double motionZ) {
         super(world, x, y, z, motionX, motionY, motionZ);
     }
 

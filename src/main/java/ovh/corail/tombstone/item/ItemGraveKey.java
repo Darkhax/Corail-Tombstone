@@ -9,7 +9,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -137,24 +136,24 @@ public class ItemGraveKey extends ItemGraveMagic {
 
     @Override
     public ITextComponent getEnchantFailedMessage(PlayerEntity player) {
-        return LangKey.MESSAGE_CANT_ENCHANT_GRAVE_KEY.getTranslation();
+        return LangKey.MESSAGE_CANT_ENCHANT_GRAVE_KEY.getText();
     }
 
     @Override
     protected boolean doEffects(World world, ServerPlayerEntity player, ItemStack stack) {
         Location location = getTombPos(stack);
         if (location.isOrigin()) {
-            player.sendMessage(LangKey.MESSAGE_INVALID_LOCATION.getTranslation());
+            LangKey.MESSAGE_INVALID_LOCATION.sendMessage(player);
             return false;
         }
         if (!location.isSameDimension(world) && !ConfigTombstone.general.teleportDim.get()) {
-            player.sendMessage(LangKey.MESSAGE_TELEPORT_SAME_DIMENSION.getTranslation());
+            LangKey.MESSAGE_TELEPORT_SAME_DIMENSION.sendMessage(player);
             return false;
         }
         assert player.getServer() != null;
-        ServerWorld targetWorld = player.getServer().getWorld(DimensionType.getById(location.dim));
-        if (Helper.isInvalidDimension(location.dim) || !Helper.isValidPos(targetWorld, location.getPos())) {
-            player.sendMessage(LangKey.MESSAGE_INVALID_LOCATION.getTranslation());
+        ServerWorld targetWorld = player.getServer().getWorld(location.dim);
+        if (targetWorld == null || !Helper.isValidPos(targetWorld, location.getPos())) {
+            LangKey.MESSAGE_INVALID_LOCATION.sendMessage(player);
             return false;
         }
         NBTStackHelper.setBoolean(stack, ENCHANT_NBT_BOOL, false);
@@ -163,7 +162,7 @@ public class ItemGraveKey extends ItemGraveMagic {
             if (ConfigTombstone.general.nerfGhostlyShape.get()) {
                 EffectHelper.capPotionDuration(newPlayer, ModEffects.ghostly_shape, 200);
             }
-            newPlayer.sendMessage(LangKey.MESSAGE_TELEPORT_SUCCESS.getTranslation());
+            LangKey.MESSAGE_TELEPORT_SUCCESS.sendMessage(newPlayer);
             ModTriggers.TELEPORT_TO_GRAVE.trigger(player);
         });
         return true;

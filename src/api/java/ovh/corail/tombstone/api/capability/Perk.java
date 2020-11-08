@@ -1,11 +1,11 @@
 package ovh.corail.tombstone.api.capability;
 
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 import ovh.corail.tombstone.api.TombstoneAPIProps;
 
@@ -14,6 +14,7 @@ import javax.annotation.Nullable;
 public abstract class Perk extends ForgeRegistryEntry<Perk> implements Comparable<Perk>, IStringSerializable {
     protected final String name;
     protected final ResourceLocation icon;
+    protected ITextComponent translation;
 
     public Perk(String name, @Nullable ResourceLocation icon) {
         this.name = name;
@@ -22,17 +23,11 @@ public abstract class Perk extends ForgeRegistryEntry<Perk> implements Comparabl
 
     public abstract int getLevelMax();
 
-    @Deprecated
-    public boolean isDisabled() {
+    public boolean isDisabled(@Nullable PlayerEntity player) {
         return false;
     }
 
-    public boolean isDisabled(@Nullable PlayerEntity player) {
-        return isDisabled();
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    public abstract String getTooltip(int level, int actualLevel, int levelWithBonus);
+    public abstract ITextComponent getTooltip(int level, int actualLevel, int levelWithBonus);
 
     public abstract int getCost(int level);
 
@@ -53,14 +48,15 @@ public abstract class Perk extends ForgeRegistryEntry<Perk> implements Comparabl
         return TombstoneAPIProps.OWNER + ".perk." + this.name;
     }
 
-    @OnlyIn(Dist.CLIENT)
-    public String getClientTranslation() {
-        return I18n.format(getTranslationKey());
+    public ITextComponent getTranslation() {
+        if (this.translation == null) {
+            this.translation = new TranslationTextComponent(getTranslationKey());
+        }
+        return this.translation;
     }
 
-    @OnlyIn(Dist.CLIENT)
-    public String getSpecialInfo(int levelWithBonus) {
-        return "";
+    public ITextComponent getSpecialInfo(int levelWithBonus) {
+        return StringTextComponent.EMPTY;
     }
 
     @Override
@@ -69,7 +65,7 @@ public abstract class Perk extends ForgeRegistryEntry<Perk> implements Comparabl
     }
 
     @Override
-    public String getName() {
+    public String getString() {
         return this.name;
     }
 

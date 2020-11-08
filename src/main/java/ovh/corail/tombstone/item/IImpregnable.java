@@ -33,10 +33,9 @@ public interface IImpregnable {
         String id = getEntityType(stack);
         if (!id.isEmpty()) {
             EntityType<?> entityType = EntityType.byKey(id).orElse(null);
-            return LangKey.MESSAGE_IMPREGNATE.getTranslationWithStyle(StyleType.MESSAGE_SPECIAL, (entityType == null ? LangKey.MESSAGE_UNKNOWN.getTranslation() : entityType.getName()).setStyle(StyleType.TOOLTIP_ITEM));
+            return LangKey.MESSAGE_IMPREGNATE.getText(StyleType.MESSAGE_SPECIAL, (entityType == null ? LangKey.MESSAGE_UNKNOWN.getText() : entityType.getName().copyRaw()).setStyle(StyleType.TOOLTIP_ITEM));
         }
         return null;
     }
-
     String ENTITY_TYPE_NBT_STRING = "entity_type";
 }

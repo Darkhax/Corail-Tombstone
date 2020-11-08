@@ -7,9 +7,10 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -49,7 +50,6 @@ public class ItemGeneric extends Item implements IDisableable {
         super(builder);
         this.name = name;
         this.supplierEnabled = supplierEnabled;
-        addPropertyOverride(new ResourceLocation("custom_model_data"), (stack, worldIn, entityIn) -> 0f);
     }
 
     public String getSimpleName() {
@@ -113,7 +113,7 @@ public class ItemGeneric extends Item implements IDisableable {
     }
 
     public void addItemDesc(List<ITextComponent> list, String id, Object... format) {
-        list.add(LangKey.makeTranslationWithStyle(StyleType.TOOLTIP_DESC, getTranslationKey() + ".desc" + id, format));
+        list.add(new TranslationTextComponent(getTranslationKey() + ".desc" + id, format).setStyle(StyleType.TOOLTIP_DESC));
     }
 
     public void addItemUse(List<ITextComponent> list) {
@@ -121,23 +121,23 @@ public class ItemGeneric extends Item implements IDisableable {
     }
 
     public void addItemUse(List<ITextComponent> list, String id, Object... format) {
-        list.add(LangKey.makeTranslationWithStyle(StyleType.TOOLTIP_USE, getTranslationKey() + ".use" + id, format));
+        list.add(new TranslationTextComponent(getTranslationKey() + ".use" + id, format).setStyle(StyleType.TOOLTIP_USE));
     }
 
     public void addItemUse(List<ITextComponent> list, LangKey langKey, Object... format) {
-        list.add(langKey.getTranslationWithStyle(StyleType.TOOLTIP_USE, format));
+        list.add(langKey.getText(StyleType.TOOLTIP_USE, format));
     }
 
     public void addInfo(List<ITextComponent> list, LangKey langKey, Object... format) {
-        list.add(langKey.getTranslationWithStyle(StyleType.TOOLTIP_DESC, format));
+        list.add(langKey.getText(StyleType.TOOLTIP_DESC, format));
     }
 
     public void addWarn(List<ITextComponent> list, LangKey langKey, Object... format) {
-        list.add(langKey.getTranslationWithStyle(StyleType.COLOR_OFF, format));
+        list.add(langKey.getText(StyleType.COLOR_OFF, format));
     }
 
     public void addInfoInBeta(List<ITextComponent> list) {
-        list.add(LangKey.TOOLTIP_BETA.getTranslationWithStyle(StyleType.TOOLTIP_IN_BETA));
+        list.add(LangKey.TOOLTIP_BETA.getText(StyleType.TOOLTIP_IN_BETA));
     }
 
     public void addInfoShowTooltip(List<ITextComponent> list) {
@@ -148,7 +148,7 @@ public class ItemGeneric extends Item implements IDisableable {
         ClientPlayerEntity player = Minecraft.getInstance().player;
         if (player != null && !location.isOrigin()) {
             BlockPos pos = player.getPosition();
-            list.add(LangKey.MESSAGE_DISTANCE.getTranslation((int) Helper.getDistance(location.getPos(), pos), location.x, location.y, location.z, location.dim));
+            list.add(LangKey.MESSAGE_DISTANCE.getText(TextFormatting.BLUE, (int) Helper.getDistance(location.getPos(), pos), location.x, location.y, location.z, location.dim.getLocation().toString()));
         }
     }
 

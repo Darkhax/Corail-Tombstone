@@ -4,6 +4,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.Pair;
 import ovh.corail.tombstone.block.BlockGraveMarble.MarbleType;
 import ovh.corail.tombstone.block.GraveModel;
@@ -13,11 +15,14 @@ import ovh.corail.tombstone.registry.ModEffects;
 import ovh.corail.tombstone.registry.ModPerks;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import static ovh.corail.tombstone.ModTombstone.LOGGER;
 
@@ -27,12 +32,13 @@ public class DeathHandler {
     public final String IS_PLAYER_DEAD_NBT_BOOL = "tb_is_player_dead";
     public final String PRESERVED_EFFECTS_NBT_LIST = "tb_preserved_effects";
     public final String LAST_DEATH_LOCATION_NBT_TAG = "tb_last_death_location";
-    private final HashMap<UUID, Pair<GraveModel, MarbleType>> optionFavoriteGrave = new HashMap<>();
-    private final HashMap<UUID, Boolean> optionEquipElytraInPriority = new HashMap<>();
-    private final HashMap<UUID, Boolean> optionKnowledgeMessage = new HashMap<>();
-    private final HashMap<UUID, Boolean> optionPriorizeToolOnHotbar = new HashMap<>();
-    private final HashMap<UUID, Boolean> optionActivateGraveBySneaking = new HashMap<>();
-    private final HashMap<String, Location> lastGraveList = new HashMap<>();
+    private final Map<UUID, Pair<GraveModel, MarbleType>> optionFavoriteGrave = new HashMap<>();
+    private final Map<UUID, Boolean> optionEquipElytraInPriority = new HashMap<>();
+    private final Map<UUID, Boolean> optionKnowledgeMessage = new HashMap<>();
+    private final Map<UUID, Boolean> optionPriorizeToolOnHotbar = new HashMap<>();
+    private final Map<UUID, Boolean> optionActivateGraveBySneaking = new HashMap<>();
+    private final Map<String, Location> lastGraveList = new HashMap<>();
+    private Predicate<Location> no_grave_locations = l -> false;
 
     private DeathHandler() {
     }
@@ -51,30 +57,18 @@ public class DeathHandler {
         }
     }
 
-    public void logLastGrave(@Nullable PlayerEntity player, int x, int y, int z, int dim) {
+    public void logLastGrave(@Nullable PlayerEntity player, int x, int y, int z, RegistryKey<World> dim) {
         if (player == null) {
             return;
         }
         lastGraveList.put(player.getGameProfile().getName(), new Location(x, y, z, dim));
         if (ConfigTombstone.player_death.logPlayerGrave.get()) {
-            LOGGER.info("A new grave of the player " + player.getGameProfile().getName() + " was created at position [x:" + x + ", y:" + y + ", z:" + z + ", dim:" + dim + "]");
+            LOGGER.info("A new grave of the player " + player.getGameProfile().getName() + " was created at position [x:" + x + ", y:" + y + ", z:" + z + ", dim:" + dim.getLocation().toString() + "]");
         }
     }
 
     public boolean isNoGraveLocation(Location location) {
-        for (String s : ConfigTombstone.player_death.noGraveLocation.get()) {
-            if (!s.isEmpty()) {
-                String[] res = s.split(",");
-                if (res.length == 5) {
-                    if (new Location(Integer.valueOf(res[0].trim()), Integer.valueOf(res[1].trim()), Integer.valueOf(res[2].trim()), Integer.valueOf(res[3].trim())).isInRangeAndDimension(location, Integer.valueOf(res[4].trim()))) {
-                        return true;
-                    }
-                } else if (res.length == 1 && Integer.valueOf(res[0].trim()).equals(location.dim)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return this.no_grave_locations.test(location);
     }
 
     public void setLastDeathLocation(PlayerEntity player, Location location) {
@@ -160,6 +154,32 @@ public class DeathHandler {
 
     public boolean getOptionActivateGraveBySneaking(UUID id) {
         return this.optionActivateGraveBySneaking.getOrDefault(id, false);
+    }
+
+    public void updateNoGraveLocations() {
+        List<Predicate<Location>> list = new ArrayList<>();
+        for (String s : ConfigTombstone.player_death.noGraveLocation.get()) {
+            if (!s.isEmpty()) {
+                String[] res = s.split(",");
+                if (res.length == 1) {
+                    list.add(l -> l.isSameDimension(res[0].trim()));
+                } else if (res.length == 5) {
+                    int x, y, z, range;
+                    try {
+                        x = Integer.valueOf(res[0].trim());
+                        y = Integer.valueOf(res[1].trim());
+                        z = Integer.valueOf(res[2].trim());
+                        range = Integer.valueOf(res[4].trim());
+                    } catch (NumberFormatException e) {
+                        LOGGER.warn("invalid number in noGraveLocations with provided string: " + s);
+                        continue;
+                    }
+                    list.add(l -> l.isSameDimension(res[3].trim()) && l.isInRange(x, y, z, range));
+
+                }
+            }
+        }
+        this.no_grave_locations = list.stream().reduce(Predicate::or).orElse(l -> false);
     }
 
     public void clear() {

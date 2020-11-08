@@ -1,12 +1,16 @@
 package ovh.corail.tombstone.block;
 
+import static ovh.corail.tombstone.ModTombstone.MOD_ID;
+
+import javax.annotation.Nullable;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.IBucketPickupHandler;
 import net.minecraft.block.ILiquidContainer;
 import net.minecraft.fluid.Fluid;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.fluid.IFluidState;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.DirectionProperty;
@@ -22,13 +26,9 @@ import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import ovh.corail.tombstone.tileentity.TileEntityWritableGrave;
 
-import javax.annotation.Nullable;
-
-import static ovh.corail.tombstone.ModTombstone.MOD_ID;
-
-@SuppressWarnings({ "deprecation", "WeakerAccess" })
 public abstract class BlockGraveBase<T extends TileEntityWritableGrave> extends Block implements IBucketPickupHandler, ILiquidContainer {
-    public static final DirectionProperty FACING;
+    
+	public static final DirectionProperty FACING;
     public static final BooleanProperty IS_ENGRAVED, WATERLOGGED;
     public static final IntegerProperty MODEL_TEXTURE;
 
@@ -104,7 +104,7 @@ public abstract class BlockGraveBase<T extends TileEntityWritableGrave> extends 
     }
 
     @Override
-    public IFluidState getFluidState(BlockState state) {
+    public FluidState getFluidState(BlockState state) {
         return state.get(WATERLOGGED) ? Fluids.WATER.getStillFluidState(false) : Fluids.EMPTY.getDefaultState();
     }
 
@@ -114,7 +114,7 @@ public abstract class BlockGraveBase<T extends TileEntityWritableGrave> extends 
     }
 
     @Override
-    public boolean receiveFluid(IWorld world, BlockPos pos, BlockState state, IFluidState fluidState) {
+    public boolean receiveFluid(IWorld world, BlockPos pos, BlockState state, FluidState fluidState) {
         if (!state.get(WATERLOGGED) && fluidState.getFluid() == Fluids.WATER) {
             if (!world.isRemote()) {
                 world.setBlockState(pos, state.with(WATERLOGGED, true), 3);
@@ -138,13 +138,5 @@ public abstract class BlockGraveBase<T extends TileEntityWritableGrave> extends 
 
     public GraveModel getGraveType() {
         return graveModel;
-    }
-
-    public static final Direction[] rotations = new Direction[] { Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST };
-
-    @Override
-    @Nullable
-    public Direction[] getValidRotations(BlockState state, IBlockReader world, BlockPos pos) {
-        return rotations;
     }
 }

@@ -13,6 +13,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import ovh.corail.tombstone.ModTombstone;
@@ -41,7 +42,7 @@ public class IntegrationTOP implements Function<ITheOneProbe, Void> {
                     toKeep.add(oldElements.get(i));
                 }
                 oldElements.clear();
-                probeInfo.horizontal(new LayoutStyle().alignment(ElementAlignment.ALIGN_TOPLEFT).spacing(2)).item(stack).vertical(new LayoutStyle().alignment(ElementAlignment.ALIGN_TOPLEFT).spacing(2)).itemLabel(stack).text(TextFormatting.BLUE.toString() + TextFormatting.ITALIC + ModTombstone.MOD_NAME);
+                probeInfo.horizontal(new LayoutStyle().alignment(ElementAlignment.ALIGN_TOPLEFT).spacing(2)).item(stack).vertical(new LayoutStyle().alignment(ElementAlignment.ALIGN_TOPLEFT).spacing(2)).itemLabel(stack).text(new StringTextComponent(ModTombstone.MOD_NAME).mergeStyle(TextFormatting.BLUE, TextFormatting.ITALIC));
                 cache = probeInfo.getElements();
                 cache.addAll(toKeep);
                 ELEMENTS.put(grave, new ArrayList<>(cache));

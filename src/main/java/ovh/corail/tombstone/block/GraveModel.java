@@ -163,4 +163,10 @@ public enum GraveModel implements IStringSerializable {
                 }
         }
     }
+
+	@Override
+	public String getString() {
+
+		return this.name;
+	}
 }

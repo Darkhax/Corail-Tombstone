@@ -71,7 +71,7 @@ public class ItemTabletOfCupidity extends ItemTablet {
                 if (!spawnPos.isOrigin()) {
                     CallbackHandler.addCallback(1, () -> {
                         ServerPlayerEntity newPlayer = Helper.teleportEntity(player, spawnPos);
-                        newPlayer.sendMessage(LangKey.MESSAGE_TELEPORT_SUCCESS.getTranslation());
+                        LangKey.MESSAGE_TELEPORT_SUCCESS.sendMessage(newPlayer);
                         EntityHelper.addAlignment(newPlayer, ConfigTombstone.alignment.pointsTabletOfCupidity.get(), ConfigTombstone.alignment.chanceTabletOfCupidity.get());
                         EffectHelper.addRandomEffect(newPlayer, 1200, true, true);
                         ModTriggers.USE_CUPIDITY.trigger(newPlayer);
@@ -80,7 +80,7 @@ public class ItemTabletOfCupidity extends ItemTablet {
                 }
             }
         }
-        player.sendMessage(LangKey.MESSAGE_TABLET_SEARCH_FAILED.getTranslation());
+        LangKey.MESSAGE_TABLET_SEARCH_FAILED.sendMessage(player);
         return true; // to consume uses
     }
 

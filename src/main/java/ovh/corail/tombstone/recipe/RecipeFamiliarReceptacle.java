@@ -9,6 +9,7 @@ import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.ShapedRecipe;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
 import net.minecraftforge.common.Tags;
 import ovh.corail.tombstone.capability.TBCapabilityProvider;
 import ovh.corail.tombstone.config.SharedConfigTombstone;
@@ -16,33 +17,35 @@ import ovh.corail.tombstone.helper.Helper;
 import ovh.corail.tombstone.registry.ModItems;
 
 import javax.annotation.Nullable;
+import java.util.stream.IntStream;
 
 public class RecipeFamiliarReceptacle extends ShapedRecipe {
+    private boolean setTag = false;
 
     public RecipeFamiliarReceptacle(ResourceLocation rl) {
-        this(rl, 3, 3, getAdditionalIngredients());
+        this(rl, 3, 3, getIngredientList());
+    }
+
+    private static NonNullList<Ingredient> getIngredientList() {
+        Ingredient tear = Ingredient.fromStacks(new ItemStack(Items.GHAST_TEAR));
+        Ingredient iron = Ingredient.fromItems(Items.IRON_INGOT);
+        return NonNullList.from(Ingredient.EMPTY, tear, iron, tear, iron, Ingredient.fromStacks(new ItemStack(ModItems.impregnated_diamond)), iron, tear, iron, tear);
     }
 
     public RecipeFamiliarReceptacle(ResourceLocation rl, int width, int height, NonNullList<Ingredient> ingredients) {
         super(rl, "familiar_receptacle", width, height, ingredients, new ItemStack(ModItems.familiar_receptacle));
     }
 
-    private static NonNullList<Ingredient> getAdditionalIngredients() {
-        NonNullList<Ingredient> ingredients = NonNullList.create();
-        Ingredient tear = Ingredient.fromStacks(new ItemStack(Items.GHAST_TEAR));
-        Ingredient iron = Ingredient.fromTag(Tags.Items.INGOTS_IRON);
-        ingredients.add(tear);
-        ingredients.add(iron);
-        ingredients.add(tear);
-
-        ingredients.add(iron);
-        ingredients.add(Ingredient.fromStacks(new ItemStack(ModItems.impregnated_diamond)));
-        ingredients.add(iron);
-
-        ingredients.add(tear);
-        ingredients.add(iron);
-        ingredients.add(tear);
-        return ingredients;
+    @Override
+    public boolean matches(CraftingInventory inv, World world) {
+        if (!this.setTag) {
+            Ingredient ironTag = Ingredient.fromTag(Tags.Items.INGOTS_IRON);
+            NonNullList<Ingredient> ing = getIngredients();
+            ItemStack ironStack = new ItemStack(Items.IRON_INGOT);
+            IntStream.range(0, getIngredients().size()).filter(i -> ing.get(i).test(ironStack)).forEach(i -> ing.set(i, ironTag));
+            this.setTag = true;
+        }
+        return super.matches(inv, world);
     }
 
     @Override

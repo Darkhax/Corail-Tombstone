@@ -1,16 +1,5 @@
 package ovh.corail.tombstone.helper;
 
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.dimension.DimensionType;
-import net.minecraft.world.gen.feature.Feature;
-import net.minecraft.world.gen.feature.structure.Structure;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.common.DimensionManager;
-import net.minecraftforge.registries.GameData;
-import org.apache.commons.lang3.tuple.Pair;
-
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -18,6 +7,20 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.google.common.collect.Streams;
+
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
+import net.minecraft.world.gen.feature.structure.Structure;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public enum SupportStructures {
     VILLAGE("village", 68),
@@ -95,21 +98,27 @@ public enum SupportStructures {
 
     @Nullable
     public static String getRandomStructure(Predicate<ResourceLocation> predic) {
-        final List<ResourceLocation> list = GameData.getStructureFeatures().keySet().stream().filter(predic).collect(Collectors.toList());
+        final List<ResourceLocation> list = ForgeRegistries.STRUCTURE_FEATURES.getKeys().stream().filter(predic).collect(Collectors.toList());
         return list.isEmpty() ? null : list.get(Helper.random.nextInt(list.size())).toString();
     }
 
     public static boolean hasStructureInWorld(@Nullable ServerWorld world, Structure<?> structure) {
-        return world != null && world.getWorldInfo().isMapFeaturesEnabled() && world.getChunkProvider().getChunkGenerator().getBiomeProvider().hasStructure(structure);
+        return world != null && world.getChunkProvider().getChunkGenerator().getBiomeProvider().hasStructure(structure);
     }
 
+    @Nullable
     public static Structure<?> getStructure(String name) {
-        return Feature.STRUCTURES.get(getStructureNameForSearch(name));
+    	for (Structure<?> structure : ForgeRegistries.STRUCTURE_FEATURES) {
+    		if (name.equalsIgnoreCase(structure.getRegistryName().toString())) {
+    			return structure;
+    		}
+    	}
+        return null;
     }
 
-    @SuppressWarnings("deprecation")
-    public static List<DimensionType> getDimensionTypesForStructure(MinecraftServer server, Structure<?> structure) {
-        return DimensionManager.getRegistry().stream().filter(dimensionType -> hasStructureInWorld(DimensionManager.getWorld(server, dimensionType, true, true), structure)).collect(Collectors.toList());
+    public static List<RegistryKey<World>> getDimensionTypesForStructure(MinecraftServer server, Structure<?> structure) {
+    	
+        return Streams.stream(server.getWorlds()).filter(world -> hasStructureInWorld(world, structure)).map(World::getDimensionKey).collect(Collectors.toList());
     }
 
     private static final Map<String, String> STRUCTURE_NAMES = new HashMap<>();

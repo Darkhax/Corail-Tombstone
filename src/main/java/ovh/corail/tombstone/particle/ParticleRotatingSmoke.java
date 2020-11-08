@@ -4,18 +4,18 @@ import net.minecraft.client.particle.IAnimatedSprite;
 import net.minecraft.client.particle.IParticleFactory;
 import net.minecraft.client.particle.IParticleRenderType;
 import net.minecraft.client.particle.Particle;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.particles.BasicParticleType;
-import net.minecraft.world.World;
 
 public class ParticleRotatingSmoke extends TransparentParticle {
     private final IAnimatedSprite spriteSet;
     private final float rotIncrement;
 
-    private ParticleRotatingSmoke(IAnimatedSprite spriteSet, World world, double x, double y, double z) {
+    private ParticleRotatingSmoke(IAnimatedSprite spriteSet, ClientWorld world, double x, double y, double z) {
         super(world, x, y + 0.3d, z);
         this.motionX = this.motionY = this.motionZ = 0d;
         setAlphaF(0.5f);
-        multipleParticleScaleBy(2f);
+        multiplyParticleScaleBy(2f);
         setMaxAge(100);
         this.canCollide = false;
         this.prevParticleAngle = this.particleAngle = (float) (world.rand.nextFloat() * Math.PI * 2f);
@@ -61,7 +61,7 @@ public class ParticleRotatingSmoke extends TransparentParticle {
         }
 
         @Override
-        public Particle makeParticle(BasicParticleType type, World world, double x, double y, double z, double motionX, double motionY, double motionZ) {
+        public Particle makeParticle(BasicParticleType type, ClientWorld world, double x, double y, double z, double motionX, double motionY, double motionZ) {
             return new ParticleRotatingSmoke(this.spriteSet, world, x, y, z);
         }
     }
