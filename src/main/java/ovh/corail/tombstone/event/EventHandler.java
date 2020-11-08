@@ -207,7 +207,7 @@ public class EventHandler {
     public static void onWorldLoad(WorldEvent.Load event) {
         if (!event.getWorld().isRemote()) {
             ServerWorld world = (ServerWorld) event.getWorld();
-            if (!world.getDimensionType().getEffects().equals(DimensionType.OVERWORLD.getLocation())) {
+            if (!world.getDimensionType().isSame(DimensionType.OVERWORLD_TYPE)) {
                 return;
             }
             ImmutableList.Builder<ISpecialSpawner> builder = new ImmutableList.Builder<>();
