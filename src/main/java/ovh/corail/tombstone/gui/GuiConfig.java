@@ -97,13 +97,13 @@ public class GuiConfig extends TBScreen {
         this.misc1Buttons.add(new IntegerConfigOption("Grave Skin", () -> graveSkinRule.ordinal(), (b) -> graveSkinRule = GraveSkinRule.values()[b], GraveSkinRule.values().length - 1, d -> isDirty = d) {
             @Override
             protected ITextComponent getOptionName() {
-                return ((IFormattableTextComponent) getOptionName()).append(new TranslationTextComponent(GraveSkinRule.values()[get()].name()));
+                return ((IFormattableTextComponent) this.getBaseMessageTranslation()).append(new TranslationTextComponent(GraveSkinRule.values()[get()].name()));
             }
         }.createWidget(getMinecraft().gameSettings, this.guiLeft + 3, this.guiTop + 120, 190));
         this.misc1Buttons.add(new IntegerConfigOption("Fog Density", () -> fogDensity.ordinal(), (b) -> fogDensity = FogDensity.values()[b], FogDensity.values().length - 1, d -> isDirty = d) {
             @Override
             protected ITextComponent getOptionName() {
-                return ((IFormattableTextComponent) getOptionName()).append(new TranslationTextComponent(FogDensity.values()[get()].name()));
+                return ((IFormattableTextComponent) this.getBaseMessageTranslation()).append(new TranslationTextComponent(FogDensity.values()[get()].name()));
             }
         }.createWidget(getMinecraft().gameSettings, this.guiLeft + 3, this.guiTop + 134, 190));
         this.misc1Buttons.add(new BooleanConfigOption("Favor Tools On Hotbar", () -> priorizeToolOnHotbar, (b) -> priorizeToolOnHotbar = b, d -> isDirty = d).createWidget(getMinecraft().gameSettings, this.guiLeft + 3, this.guiTop + 148, 190));
@@ -125,7 +125,7 @@ public class GuiConfig extends TBScreen {
         this.effectButtons.add(new IntegerConfigOption("Fog Period", () -> fogPeriod.ordinal(), (b) -> fogPeriod = FogPeriod.values()[b], FogPeriod.values().length - 1, d -> isDirty = d) {
             @Override
             protected ITextComponent getOptionName() {
-                return ((IFormattableTextComponent) getOptionName()).append(new TranslationTextComponent(FogPeriod.values()[get()].name()));
+                return ((IFormattableTextComponent) this.getBaseMessageTranslation()).append(new TranslationTextComponent(FogPeriod.values()[get()].name()));
             }
         }.createWidget(getMinecraft().gameSettings, this.guiLeft + 3, this.guiTop + 92, 190));
         for (Widget w : this.effectButtons) {

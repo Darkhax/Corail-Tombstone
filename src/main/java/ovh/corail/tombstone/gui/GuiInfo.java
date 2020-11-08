@@ -1,16 +1,12 @@
 package ovh.corail.tombstone.gui;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.renderer.Rectangle2d;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.util.ICharacterConsumer;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -38,7 +34,6 @@ public class GuiInfo extends TBScreen {
     private int currentPage;
     private String                           title;
     private final List<IReorderingProcessor> contentLines = new ArrayList<>();
-    private final List<Rectangle2d>          underlines   = new ArrayList<>();
     private final List<InfoLink> infoLinks = new ArrayList<>();
     private ItemStack icon;
 
@@ -101,24 +96,10 @@ public class GuiInfo extends TBScreen {
 
     private void updateContent(@Nullable Info currentInfo) {
         this.contentLines.clear();
-        this.underlines.clear();
         this.infoLinks.clear();
         this.icon = currentInfo == null ? new ItemStack(ModBlocks.decorative_graves.get(GraveModel.TOMBSTONE)) : currentInfo.icon.get();
         String content = I18n.format(currentInfo == null ? MOD_ID + ".compendium.main.desc" : currentInfo.getContent());
         Arrays.stream(content.split("[\\r\\n]+")).filter(p -> p.length() > 0).forEach(c -> this.contentLines.addAll(this.font.trimStringToWidth(new StringTextComponent(c), this.xSize - 15)));
-        for (final IReorderingProcessor line : this.contentLines) {
-            // only search the underlines at start of line
-            String lineString = "";// line.getString();
-            if (lineString.startsWith(TextFormatting.UNDERLINE.toString())) {
-                int endIndex = lineString.indexOf(TextFormatting.RESET.toString());
-                if (endIndex == -1) {
-                    endIndex = lineString.length() - 1;
-                }
-                this.underlines.add(new Rectangle2d(0, 0, this.font.getStringWidth(lineString.substring(2, endIndex)) - 2, 0));
-            } else {
-                this.underlines.add(null);
-            }
-        }
 
         int x = this.guiLeft + this.xSize + 5;
         int y = this.guiTop + 10;
@@ -179,12 +160,6 @@ public class GuiInfo extends TBScreen {
                 IReorderingProcessor line = this.contentLines.get(i);
                 // draw text line
                 this.font.func_238407_a_(matrixStack, line, this.guiLeft + 10, this.guiTop + 39 + (count * (this.font.FONT_HEIGHT + 1)), this.textColor);
-                // draw underlines
-                Rectangle2d underline = this.underlines.get(i);
-                if (underline != null) {
-                    int startX = this.guiLeft + 10 + underline.getX();
-                    hLine(matrixStack, startX, startX + underline.getWidth(), this.guiTop + 39 + (count * (this.font.FONT_HEIGHT + 1)) + this.font.FONT_HEIGHT - 1, this.textColor);
-                }
                 count++;
             }
         }

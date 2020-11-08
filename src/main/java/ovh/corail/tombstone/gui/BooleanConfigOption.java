@@ -55,6 +55,6 @@ public class BooleanConfigOption extends AbstractOption {
     }
 
     private ITextComponent getOptionName() {
-        return ((IFormattableTextComponent) getOptionName()).append(new TranslationTextComponent(get() ? "options.on" : "options.off"));
+        return ((IFormattableTextComponent) this.getBaseMessageTranslation()).append(new TranslationTextComponent(get() ? "options.on" : "options.off"));
     }
 }
