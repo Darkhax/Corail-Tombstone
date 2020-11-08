@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.client.settings.PointOfView;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
@@ -293,7 +294,7 @@ public class ClientEventHandler {
         } else {
             return;
         }
-        if (location.isOrigin() || !location.dim.equals(player.world.func_234923_W_()) || !World.isValid(location.getPos())) {
+        if (location.isOrigin() || !location.dim.equals(player.world.getDimensionKey()) || !World.isValid(location.getPos())) {
             return;
         }
         createBox(event.getMatrixStack(), location.x, location.y, location.z, 1f);
@@ -383,7 +384,7 @@ public class ClientEventHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void renderAuras(RenderWorldLastEvent event) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.gameSettings.thirdPersonView == 0 && mc.player != null && ConfigTombstone.client.showMagicCircle.get()) {
+        if (mc.gameSettings.getPointOfView() == PointOfView.FIRST_PERSON && mc.player != null && ConfigTombstone.client.showMagicCircle.get()) {
             Aura.addAura(mc.player);
         }
         if (!AURAS.isEmpty()) {

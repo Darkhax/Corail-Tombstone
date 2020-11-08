@@ -45,10 +45,10 @@ public class TeleportationHandler {
         if (entity == null || !entity.isAlive()) {
             return entity;
         }
-        boolean interDimensional = !sourceWorld.func_234923_W_().equals(targetWorld.func_234923_W_());
+        boolean interDimensional = !sourceWorld.getDimensionKey().equals(targetWorld.getDimensionKey());
         boolean isPlayer = entity instanceof ServerPlayerEntity;
         if (interDimensional) {
-            if (ForgeHooks.onTravelToDimension(entity, targetWorld.func_234923_W_())) {
+            if (ForgeHooks.onTravelToDimension(entity, targetWorld.getDimensionKey())) {
                 if (isPlayer) {
                     return teleportPlayerInterdimensional((ServerPlayerEntity) entity, server, targetWorld, xCoord, yCoord, zCoord, yaw, pitch);
                 } else {
@@ -81,7 +81,7 @@ public class TeleportationHandler {
             entity.writeUnlessRemoved(nbt);
             nbt.remove("Dimension");
             newEntity.read(nbt);
-            newEntity.timeUntilPortal = entity.timeUntilPortal;
+            newEntity.field_242273_aw = entity.field_242273_aw;
             newEntity.setLocationAndAngles(xCoord, yCoord, zCoord, yaw, pitch);
             newEntity.setMotion(motion);
             targetWorld.addFromAnotherDimension(newEntity);

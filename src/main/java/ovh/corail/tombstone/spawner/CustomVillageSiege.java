@@ -50,7 +50,7 @@ public class CustomVillageSiege extends VillageSiege {
     public int func_230253_a_(ServerWorld serverWorld, boolean spawnHostileMobs, boolean spawnPeacefulMobs) {
         /* when it's night */
         if (!serverWorld.isDaytime() && spawnHostileMobs) {
-            float angle = serverWorld.getCelestialAngle(0f);
+            float angle = serverWorld.getCelestialAngleRadians(0f);
             /* when switch to night */
             if (angle == 0.5d) {
                 sendDevLog("Launching a village siege");

@@ -173,7 +173,7 @@ public class Helper {
     }
 
     public static RegistryKey<World> getDimensionType(World world) {
-        return world.func_234923_W_();
+        return world.getDimensionKey();
     }
 
     public static BlockPos getCloserValidPos(World world, BlockPos pos) {
@@ -189,7 +189,7 @@ public class Helper {
             z = Math.min(Math.max(pos.getZ(), (int) border.minZ()), (int) border.maxZ());
         }
         if (!validY) {
-            y = Math.max(Math.min(pos.getY(), world.func_230315_m_().func_241513_m_()), 0);
+            y = Math.max(Math.min(pos.getY(), world.getDimensionType().getLogicalHeight()), 0);
         }
         return new BlockPos(x, y, z);
     }
@@ -425,7 +425,7 @@ public class Helper {
     }
 
     public static boolean isNight(World world) {
-        float angle = world.getCelestialAngle(0.0f);
+        float angle = world.getCelestialAngleRadians(0.0f);
         return angle >= 0.245f && angle <= 0.755f;
     }
 
@@ -617,10 +617,15 @@ public class Helper {
         if (!entityTypeString.isEmpty()) {
             ResourceLocation resourceLocation = ResourceLocation.tryCreate(entityTypeString);
             if (resourceLocation != null) {
-                return TAMEABLE.computeIfAbsent(resourceLocation, rl -> Registry.ENTITY_TYPE.getValue(rl).map(entry -> {
+                return TAMEABLE.computeIfAbsent(resourceLocation, rl -> {
+                    final EntityType<?> entry = Registry.ENTITY_TYPE.getValueForKey(RegistryKey.getOrCreateKey(Registry.ENTITY_TYPE_KEY, rl));
+                    if (entry == null)
+                    {
+                        return false;
+                    }
                     Entity entity = entry.create(world);
                     return isTameable(entity);
-                }).orElse(false));
+                });
             }
         }
         return false;
@@ -677,7 +682,7 @@ public class Helper {
     }
 
     public static Optional<TextFormatting> fromColor(Color color) {
-        return Stream.of(TextFormatting.values()).filter(f -> f.getColor() != null && f.getColor().equals(color.field_240740_c_)).findFirst();
+        return Stream.of(TextFormatting.values()).filter(f -> f.getColor() != null && f.getColor().equals(color.getColor())).findFirst();
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -730,16 +735,16 @@ public class Helper {
     @OnlyIn(Dist.CLIENT)
     public static void initModelProperties() {
         for (Block decorativeGrave : ModBlocks.decorative_graves.values()) {
-            ItemModelsProperties.func_239418_a_(decorativeGrave.asItem(), new ResourceLocation("model_texture"), (stack, world, entity) -> (ItemBlockGrave.isEngraved(stack) ? 0.1f : 0f) + (ItemBlockGrave.getModelTexture(stack) == 1 ? 0.01f : 0f));
+            ItemModelsProperties.registerProperty(decorativeGrave.asItem(), new ResourceLocation("model_texture"), (stack, world, entity) -> (ItemBlockGrave.isEngraved(stack) ? 0.1f : 0f) + (ItemBlockGrave.getModelTexture(stack) == 1 ? 0.01f : 0f));
         }
-        ItemModelsProperties.func_239418_a_(ModItems.bone_needle, new ResourceLocation("filled"), (stack, world, entity) -> ModItems.bone_needle.getEntityType(stack).isEmpty() ? 0f : 1f);
-        ItemModelsProperties.func_239418_a_(ModItems.lost_tablet, new ResourceLocation("structure"), (stack, world, player) -> {
+        ItemModelsProperties.registerProperty(ModItems.bone_needle, new ResourceLocation("filled"), (stack, world, entity) -> ModItems.bone_needle.getEntityType(stack).isEmpty() ? 0f : 1f);
+        ItemModelsProperties.registerProperty(ModItems.lost_tablet, new ResourceLocation("structure"), (stack, world, player) -> {
             String structureId = ModItems.lost_tablet.getStructureId(stack);
             return structureId != null ? SupportStructures.VILLAGE.is(structureId) ? 0.5f : 1f : 0f;
         });
-        ItemModelsProperties.func_239418_a_(ModItems.tablet_of_home, new ResourceLocation("ancient"), (stack, worldIn, entityIn) -> ModItems.tablet_of_home.isAncient(stack) ? 1f : 0f);
-        ItemModelsProperties.func_239418_a_(ModItems.tablet_of_recall, new ResourceLocation("ancient"), (stack, worldIn, entityIn) -> ModItems.tablet_of_recall.isAncient(stack) ? 1f : 0f);
-        ItemModelsProperties.func_239418_a_(ModItems.fishing_rod_of_misadventure, new ResourceLocation("cast"), (stack, world, entity) -> {
+        ItemModelsProperties.registerProperty(ModItems.tablet_of_home, new ResourceLocation("ancient"), (stack, worldIn, entityIn) -> ModItems.tablet_of_home.isAncient(stack) ? 1f : 0f);
+        ItemModelsProperties.registerProperty(ModItems.tablet_of_recall, new ResourceLocation("ancient"), (stack, worldIn, entityIn) -> ModItems.tablet_of_recall.isAncient(stack) ? 1f : 0f);
+        ItemModelsProperties.registerProperty(ModItems.fishing_rod_of_misadventure, new ResourceLocation("cast"), (stack, world, entity) -> {
             if (entity == null) {
                 return 0f;
             }

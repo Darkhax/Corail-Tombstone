@@ -10,7 +10,7 @@ public class Location {
     public int x, y, z;
     public RegistryKey<World> dim;
     static final BlockPos ORIGIN_POS = new BlockPos(0, Integer.MIN_VALUE, 0);
-    public static final Location ORIGIN = new Location(ORIGIN_POS, World.field_234918_g_);
+    public static final Location ORIGIN = new Location(ORIGIN_POS, World.OVERWORLD);
 
     public Location(BlockPos pos, RegistryKey<World> dim) {
         this(pos.getX(), pos.getY(), pos.getZ(), dim);
@@ -21,7 +21,7 @@ public class Location {
     }
 
     public Location(int x, int y, int z, World world) {
-        this(x, y, z, world.func_234923_W_());
+        this(x, y, z, world.getDimensionKey());
     }
 
     public Location(int x, int y, int z, RegistryKey<World> dim) {
@@ -48,11 +48,11 @@ public class Location {
     }
 
     public boolean isSameDimension(World world) {
-        return this.dim.equals(world.func_234923_W_());
+        return this.dim.equals(world.getDimensionKey());
     }
 
     public boolean isSameDimension(String worldRL) {
-        return this.dim.func_240901_a_().toString().equals(worldRL);
+        return this.dim.getLocation().toString().equals(worldRL);
     }
 
     public double getDistanceSq(Location location) {

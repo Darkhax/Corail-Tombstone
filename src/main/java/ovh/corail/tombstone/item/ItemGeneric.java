@@ -148,7 +148,7 @@ public class ItemGeneric extends Item implements IDisableable {
         ClientPlayerEntity player = Minecraft.getInstance().player;
         if (player != null && !location.isOrigin()) {
             BlockPos pos = player.getPosition();
-            list.add(LangKey.MESSAGE_DISTANCE.getText(TextFormatting.BLUE, (int) Helper.getDistance(location.getPos(), pos), location.x, location.y, location.z, location.dim.func_240901_a_().toString()));
+            list.add(LangKey.MESSAGE_DISTANCE.getText(TextFormatting.BLUE, (int) Helper.getDistance(location.getPos(), pos), location.x, location.y, location.z, location.dim.getLocation().toString()));
         }
     }
 

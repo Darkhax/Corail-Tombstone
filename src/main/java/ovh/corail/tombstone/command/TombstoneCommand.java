@@ -17,6 +17,7 @@ import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.WorldGenRegistries;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -95,7 +96,12 @@ abstract class TombstoneCommand {
 
     Biome getOrThrowBiome(CommandContext<CommandSource> context, String name) {
         ResourceLocation rl = context.getArgument(name, ResourceLocation.class);
-        return Registry.BIOME.getValue(rl).orElseThrow(LangKey.MESSAGE_INVALID_BIOME::asCommandException);
+        final Biome biome = WorldGenRegistries.BIOME.getValueForKey(RegistryKey.getOrCreateKey(Registry.BIOME_KEY, rl));
+        if (biome == null)
+        {
+            throw LangKey.MESSAGE_INVALID_BIOME.asCommandException();
+        }
+        return biome;
     }
 
     protected void sendMessage(CommandSource source, IFormattableTextComponent message, boolean allowLogging) {
@@ -122,6 +128,6 @@ abstract class TombstoneCommand {
     static final String DIM_PARAM = "dim";
     static final String AMOUNT_PARAM = "amount";
     static final SuggestionProvider<CommandSource> SUGGESTION_STRUCTURE = (ctx, build) -> ISuggestionProvider.suggestIterable(ForgeRegistries.STRUCTURE_FEATURES.getKeys(), build);
-    static final SuggestionProvider<CommandSource> SUGGESTION_BIOME = (ctx, build) -> ISuggestionProvider.suggestIterable(Registry.BIOME.keySet(), build);
+    static final SuggestionProvider<CommandSource> SUGGESTION_BIOME = (ctx, build) -> ISuggestionProvider.suggestIterable(WorldGenRegistries.BIOME.keySet(), build);
     static final SuggestionProvider<CommandSource> AMOUNT_SUGGESTION = (ctx, build) -> build.suggest(1, () -> "[0-MAX]").buildFuture();
 }

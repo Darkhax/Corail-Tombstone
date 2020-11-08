@@ -63,7 +63,7 @@ public class DeathHandler {
         }
         lastGraveList.put(player.getGameProfile().getName(), new Location(x, y, z, dim));
         if (ConfigTombstone.player_death.logPlayerGrave.get()) {
-            LOGGER.info("A new grave of the player " + player.getGameProfile().getName() + " was created at position [x:" + x + ", y:" + y + ", z:" + z + ", dim:" + dim.func_240901_a_().toString() + "]");
+            LOGGER.info("A new grave of the player " + player.getGameProfile().getName() + " was created at position [x:" + x + ", y:" + y + ", z:" + z + ", dim:" + dim.getLocation().toString() + "]");
         }
     }
 

@@ -63,8 +63,8 @@ public class SpawnHelper {
 
     public SpawnHelper(ServerWorld world, BlockPos initPos) {
         this.world = world;
-        this.dimId = world.func_234923_W_();
-        this.actualHeight = world.func_230315_m_().func_241513_m_();
+        this.dimId = world.getDimensionKey();
+        this.actualHeight = world.getDimensionType().getLogicalHeight();
         this.initPos = Helper.getCloserValidPos(world, initPos);
     }
 

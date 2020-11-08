@@ -104,7 +104,7 @@ public class ItemTabletOfAssistance extends ItemTablet {
             LangKey.MESSAGE_TELEPORT_FAILED.sendMessage(player);
             return false;
         }
-        if (!receiver.world.func_234923_W_().equals(player.world.func_234923_W_()) && !ConfigTombstone.general.teleportDim.get()) {
+        if (!receiver.world.getDimensionKey().equals(player.world.getDimensionKey()) && !ConfigTombstone.general.teleportDim.get()) {
             LangKey.MESSAGE_TELEPORT_SAME_DIMENSION.sendMessage(player);
             return false;
         }

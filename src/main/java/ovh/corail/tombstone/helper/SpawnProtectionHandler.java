@@ -29,7 +29,7 @@ public class SpawnProtectionHandler {
     }
 
     public boolean isBlockProtected(RegistryKey<World> dimension, BlockPos currentPos) {
-        if (!isActive || !dimension.equals(World.field_234918_g_)) {
+        if (!isActive || !dimension.equals(World.OVERWORLD)) {
             return false;
         }
         int i = MathHelper.abs(currentPos.getX() - spawnPos.getX());

@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.OptionButton;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
@@ -54,6 +55,6 @@ public class BooleanConfigOption extends AbstractOption {
     }
 
     private ITextComponent getOptionName() {
-        return func_238238_a_().append(new TranslationTextComponent(get() ? "options.on" : "options.off"));
+        return ((IFormattableTextComponent) getOptionName()).append(new TranslationTextComponent(get() ? "options.on" : "options.off"));
     }
 }

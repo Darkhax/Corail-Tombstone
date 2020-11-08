@@ -118,7 +118,7 @@ public enum SupportStructures {
 
     public static List<RegistryKey<World>> getDimensionTypesForStructure(MinecraftServer server, Structure<?> structure) {
     	
-        return Streams.stream(server.getWorlds()).filter(world -> hasStructureInWorld(world, structure)).map(World::func_234923_W_).collect(Collectors.toList());
+        return Streams.stream(server.getWorlds()).filter(world -> hasStructureInWorld(world, structure)).map(World::getDimensionKey).collect(Collectors.toList());
     }
 
     private static final Map<String, String> STRUCTURE_NAMES = new HashMap<>();

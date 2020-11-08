@@ -133,7 +133,7 @@ public class NBTStackHelper {
     }
 
     public static CompoundNBT setWorldKey(CompoundNBT tag, String keyName, RegistryKey<World> worldKey) {
-        World.field_234917_f_.encodeStart(NBTDynamicOps.INSTANCE, worldKey).resultOrPartial(ModTombstone.LOGGER::error).ifPresent(rl -> {
+        World.CODEC.encodeStart(NBTDynamicOps.INSTANCE, worldKey).resultOrPartial(ModTombstone.LOGGER::error).ifPresent(rl -> {
             tag.put(keyName, rl);
         });
         return tag;
@@ -146,7 +146,7 @@ public class NBTStackHelper {
 
     @Nullable
     public static RegistryKey<World> getWorldKey(@Nullable CompoundNBT tag, String keyName) {
-        return tag != null && tag.contains(keyName) ? World.field_234917_f_.parse(NBTDynamicOps.INSTANCE, tag.get(keyName)).result().orElse(null) : null;
+        return tag != null && tag.contains(keyName) ? World.CODEC.parse(NBTDynamicOps.INSTANCE, tag.get(keyName)).result().orElse(null) : null;
     }
 
     public static boolean removeLocation(ItemStack stack, String keyName) {
