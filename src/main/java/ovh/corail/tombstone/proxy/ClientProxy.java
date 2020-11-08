@@ -1,6 +1,7 @@
 package ovh.corail.tombstone.proxy;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.PointOfView;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Util;
@@ -49,7 +50,8 @@ public class ClientProxy implements IProxy {
     @Override
     public void produceShadowStep(LivingEntity entity) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player != null && mc.player.equals(entity) && mc.gameSettings.thirdPersonView == 0) {
+//        if (mc.player != null && mc.player.equals(entity) && mc.gameSettings.thirdPersonView == 0) {
+        if (mc.player != null && mc.player.equals(entity) && mc.gameSettings.getPointOfView() == PointOfView.FIRST_PERSON) {
             return;
         }
         ClientWorld world = mc.world;

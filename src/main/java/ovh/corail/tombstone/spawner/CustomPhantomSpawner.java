@@ -32,14 +32,14 @@ public class CustomPhantomSpawner extends PhantomSpawner {
             return 0;
         }
         this.ticksUntilSpawn += (60 + world.rand.nextInt(60)) * 20;
-        if (world.getSkylightSubtracted() < 5 && world.func_230315_m_().hasSkyLight()) {
+        if (world.getSkylightSubtracted() < 5 && world.getDimensionType().hasSkyLight()) {
             return 0;
         }
         int i = 0;
         for (PlayerEntity player : world.getPlayers()) {
             if (!player.isSpectator()) {
                 BlockPos currentPos = player.getPosition();
-                if (!world.func_230315_m_().hasSkyLight() || currentPos.getY() >= world.getSeaLevel() && world.canSeeSky(currentPos)) {
+                if (!world.getDimensionType().hasSkyLight() || currentPos.getY() >= world.getSeaLevel() && world.canSeeSky(currentPos)) {
                     DifficultyInstance diffForLocation = world.getDifficultyForLocation(currentPos);
                     if (diffForLocation.isHarderThan(world.rand.nextFloat() * 3f)) {
                         ServerStatisticsManager statManager = ((ServerPlayerEntity) player).getStats();

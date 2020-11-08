@@ -5,6 +5,7 @@ import net.minecraft.client.renderer.Rectangle2d;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.StringTextComponent;
@@ -35,7 +36,7 @@ public class GuiInfo extends TBScreen {
     private int pageCount;
     private int currentPage;
     private String title;
-    private final List<ITextProperties> contentLines = new ArrayList<>();
+    private final List<IReorderingProcessor> contentLines = new ArrayList<>();
     private final List<Rectangle2d> underlines = new ArrayList<>();
     private final List<InfoLink> infoLinks = new ArrayList<>();
     private ItemStack icon;
@@ -103,10 +104,10 @@ public class GuiInfo extends TBScreen {
         this.infoLinks.clear();
         this.icon = currentInfo == null ? new ItemStack(ModBlocks.decorative_graves.get(GraveModel.TOMBSTONE)) : currentInfo.icon.get();
         String content = I18n.format(currentInfo == null ? MOD_ID + ".compendium.main.desc" : currentInfo.getContent());
-        Arrays.stream(content.split("[\\r\\n]+")).filter(p -> p.length() > 0).forEach(c -> this.contentLines.addAll(this.font.func_238425_b_(new StringTextComponent(c), this.xSize - 15)));
-        for (ITextProperties line : this.contentLines) {
+        Arrays.stream(content.split("[\\r\\n]+")).filter(p -> p.length() > 0).forEach(c -> this.contentLines.addAll(this.font.trimStringToWidth(new StringTextComponent(c), this.xSize - 15)));
+        for (IReorderingProcessor line : this.contentLines) {
             // only search the underlines at start of line
-            String lineString = line.getString();
+            String lineString = line.toString();
             if (lineString.startsWith(TextFormatting.UNDERLINE.toString())) {
                 int endIndex = lineString.indexOf(TextFormatting.RESET.toString());
                 if (endIndex == -1) {
@@ -174,7 +175,7 @@ public class GuiInfo extends TBScreen {
             fill(matrixStack, this.guiLeft + 5, this.guiTop + 34, this.guiLeft + this.xSize - 5, this.guiTop + 44 + (this.font.FONT_HEIGHT + 1) * (indexEnd - indexStart + 1), 0x55000000);
             int count = 0;
             for (int i = indexStart; i <= indexEnd; i++) {
-                ITextProperties line = this.contentLines.get(i);
+                IReorderingProcessor line = this.contentLines.get(i);
                 // draw text line
                 this.font.func_238422_b_(matrixStack, line, this.guiLeft + 10, this.guiTop + 39 + (count * (this.font.FONT_HEIGHT + 1)), this.textColor);
                 // draw underlines

@@ -35,7 +35,7 @@ public class CommandTBSiege extends TombstoneCommand {
         if (!ConfigTombstone.village_siege.handleVillageSiege.get()) {
             throw LangKey.MESSAGE_DISABLED_COMMAND.asCommandException();
         }
-        ServerWorld world = sender.getServer().getWorld(World.field_234918_g_);
+        ServerWorld world = sender.getServer().getWorld(World.OVERWORLD);
         if (world == null) {
             // should never happen
             throw LangKey.MESSAGE_UNLOADED_DIMENSION.asCommandException();

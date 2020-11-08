@@ -6,6 +6,9 @@ import net.minecraft.item.EnchantedBookItem;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import ovh.corail.tombstone.block.GraveModel;
@@ -22,9 +25,8 @@ public class ModTabs {
         }
 
         @Override
-        @OnlyIn(Dist.CLIENT)
-        public String getTranslationKey() {
-            return MOD_NAME;
+        public ITextComponent getGroupName() {
+            return new StringTextComponent(MOD_NAME);
         }
 
         @OnlyIn(Dist.CLIENT)

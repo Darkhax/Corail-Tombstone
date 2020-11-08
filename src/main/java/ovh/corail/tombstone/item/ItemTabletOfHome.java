@@ -54,7 +54,7 @@ public class ItemTabletOfHome extends ItemTablet {
         MinecraftServer server = player.getServer();
         assert server != null;
         Pair<ServerWorld, BlockPos> respawnPoint = CommandTBTeleportHome.getRespawnPoint(server, player);
-        if (!ConfigTombstone.general.teleportDim.get() && !respawnPoint.getLeft().func_234923_W_().equals(world.func_234923_W_())) {
+        if (!ConfigTombstone.general.teleportDim.get() && !respawnPoint.getLeft().getDimensionKey().equals(world.getDimensionKey())) {
             LangKey.MESSAGE_TELEPORT_SAME_DIMENSION.sendMessage(player);
             return false;
         }

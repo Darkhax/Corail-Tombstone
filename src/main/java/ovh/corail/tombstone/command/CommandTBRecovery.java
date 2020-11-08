@@ -245,12 +245,12 @@ public class CommandTBRecovery extends TombstoneCommand {
             CompoundNBT nbt = JsonToNBT.getTagFromJson(reader.readLine());
             reader.close();
             if (!nbt.keySet().isEmpty()) {
-                RegistryKey<World> sourceDim = player.world.func_234923_W_();
+                RegistryKey<World> sourceDim = player.world.getDimensionKey();
                 RegistryKey<World> targetDim = NBTStackHelper.getWorldKey(nbt, "Dimension");
                 MinecraftServer server = sender.getServer();
                 ServerWorld targetWorld;
                 if (targetDim == null || (targetWorld = sender.getServer().getWorld(targetDim)) == null) {
-                    targetDim = World.field_234918_g_;
+                    targetDim = World.OVERWORLD;
                     targetWorld = server.getWorld(targetDim);
                 }
                 ListNBT pos = nbt.getList("Pos", 6);

@@ -1,12 +1,12 @@
 buildscript {
-  repositories {
-    maven { url = 'https://files.minecraftforge.net/maven' }
-    jcenter()
-    mavenCentral()
-  }
-  dependencies {
-    classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
-  }
+    repositories {
+        maven { url = 'https://files.minecraftforge.net/maven' }
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+    }
 }
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
@@ -25,92 +25,92 @@ archivesBaseName = 'tombstone'
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
 sourceSets {
-  api
-  main {
-    compileClasspath += sourceSets.api.output
-    runtimeClasspath += sourceSets.api.output
-  }
+    api
+    main {
+        compileClasspath += sourceSets.api.output
+        runtimeClasspath += sourceSets.api.output
+    }
 }
 
 configurations {
-  apiCompile.extendsFrom(compile)
+    apiCompile.extendsFrom(compile)
 }
 
 minecraft {
-  mappings channel: 'snapshot', version: '20200723-1.16.1'
-  // makeObfSourceJar = false
-  accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
-  runs {
-    client {
-      workingDirectory project.file('run')
-      property 'forge.logging.markers', '' //SCAN,REGISTRIES,REGISTRYDUMP
-      property 'forge.logging.console.level', 'info'
-      mods {
-        tombstone {
-          source sourceSets.main
-          source sourceSets.api
+    mappings channel: 'snapshot', version: '20200916-1.16.2'
+    // makeObfSourceJar = false
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', '' //SCAN,REGISTRIES,REGISTRYDUMP
+            property 'forge.logging.console.level', 'info'
+            mods {
+                tombstone {
+                    source sourceSets.main
+                    source sourceSets.api
+                }
+            }
         }
-      }
-    }
-    server {
-      workingDirectory project.file('run')
-      property 'forge.logging.markers', '' //SCAN,REGISTRIES,REGISTRYDUMP
-      property 'forge.logging.console.level', 'info'
-      mods {
-        tombstone {
-          source sourceSets.main
-          source sourceSets.api
+        server {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', '' //SCAN,REGISTRIES,REGISTRYDUMP
+            property 'forge.logging.console.level', 'info'
+            mods {
+                tombstone {
+                    source sourceSets.main
+                    source sourceSets.api
+                }
+            }
         }
-      }
     }
-  }
 }
 
 repositories {
-  maven { url = "http://dvs1.progwml6.com/files/maven" }
-  maven { url = "https://maven.theillusivec4.top/" }
-  maven { url "https://maven.tterrag.com/" }
-  maven { url "https://maven.tehnut.info" }
-  maven { url = "https://minecraft.curseforge.com/api/maven/" }
+    maven { url = "http://dvs1.progwml6.com/files/maven" }
+    maven { url = "https://maven.theillusivec4.top/" }
+    maven { url "https://maven.tterrag.com/" }
+    maven { url "https://maven.tehnut.info" }
+    maven { url = "https://minecraft.curseforge.com/api/maven/" }
 }
 
 dependencies {
-  minecraft 'net.minecraftforge:forge:1.16.1-32.0.98'
-  
-  runtimeOnly fg.deobf("mezz.jei:jei-1.16.1:7.0.1.9")
-  compileOnly fg.deobf("mezz.jei:jei-1.16.1:7.0.1.9:api")
-  
-  runtimeOnly fg.deobf("top.theillusivec4.curios:curios:FORGE-1.16.1-3.0")
-  compileOnly fg.deobf("top.theillusivec4.curios:curios:FORGE-1.16.1-3.0:api")
-  
-  compile fg.deobf("mcjty.theoneprobe:TheOneProbe-1.16:1.16-3.0.1-beta-4")
-  
-  compileOnly fg.deobf("mcp.mobius.waila:Hwyla:1.10.10-B77_1.16.1:api")
-  runtimeOnly fg.deobf("mcp.mobius.waila:Hwyla:1.10.10-B77_1.16.1")
-  
-  compile fg.deobf("cosmetic-armor-reworked:CosmeticArmorReworked:1.16.1:v1b")
+    minecraft 'net.minecraftforge:forge:1.16.3-34.1.0'
+
+    runtimeOnly fg.deobf("mezz.jei:jei-1.16.2:7.3.2.25")
+    compileOnly fg.deobf("mezz.jei:jei-1.16.2:7.3.2.25:api")
+
+    runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.16.3-4.0.1.0")
+    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.16.3-4.0.1.0:api")
+
+    compile fg.deobf("mcjty.theoneprobe:TheOneProbe-1.16:1.16-3.0.4-beta-7")
+
+    compileOnly fg.deobf("mcp.mobius.waila:Hwyla:1.10.11-B78_1.16.2:api")
+    runtimeOnly fg.deobf("mcp.mobius.waila:Hwyla:1.10.11-B78_1.16.2")
+
+    compile fg.deobf("cosmetic-armor-reworked:CosmeticArmorReworked:1.16.3:v1")
 }
 
 jar {
-  from sourceSets.api.output
-  from sourceSets.main.output
-  manifest {
-    attributes([
-        "Specification-Title"     : "tombstone",
-        "Specification-Vendor"    : "Corail31",
-        "Specification-Version"   : "1",
-        "Implementation-Title"    : "tombstone",
-        "Implementation-Version"  : "${version}",
-        "Implementation-Vendor"   : "Corail31",
-        "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-    ])
-  }
+    from sourceSets.api.output
+    from sourceSets.main.output
+    manifest {
+        attributes([
+                "Specification-Title"     : "tombstone",
+                "Specification-Vendor"    : "Corail31",
+                "Specification-Version"   : "1",
+                "Implementation-Title"    : "tombstone",
+                "Implementation-Version"  : "${version}",
+                "Implementation-Vendor"   : "Corail31",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
 }
 
 task apiJar(type: Jar) {
-  from sourceSets.api.allJava
-  from sourceSets.api.output
-  classifier = 'api'
+    from sourceSets.api.allJava
+    from sourceSets.api.output
+    classifier = 'api'
 }
 
 /*reobf {
@@ -133,20 +133,20 @@ import groovy.json.JsonOutput
 task updateVersionTracker {
 
     onlyIf {
-    
+
         project.hasProperty('versionTrackerAPI')
     }
-    
+
     doLast {
         def body = [
-            'author': "Darkhax",
-            'projectName': "tombstone",
-            'gameVersion': "1.15.2",
-            'projectVersion': "${version}",
-            'homepage': "https://www.curseforge.com/minecraft/mc-mods/corail-tombstone",
-            'uid': "${project.findProperty('versionTrackerKey')}"
+                'author'        : "Darkhax",
+                'projectName'   : "tombstone",
+                'gameVersion'   : "1.15.2",
+                'projectVersion': "${version}",
+                'homepage'      : "https://www.curseforge.com/minecraft/mc-mods/corail-tombstone",
+                'uid'           : "${project.findProperty('versionTrackerKey')}"
         ]
-    
+
         // Opens a connection to the version tracker API and writes the payload JSON.
         def req = new URL(project.findProperty('versionTrackerAPI')).openConnection()
         req.setRequestMethod('POST')
@@ -172,10 +172,10 @@ publishing {
             // Allows the maven pom file to be modified.
             pom.withXml {
                 // Go through all the dependencies.
-                asNode().dependencies.dependency.each { dep ->    
+                asNode().dependencies.dependency.each { dep ->
 
                     // Check if the dependency has been mapped with MCP
-                    if (dep.version.last().value().last().contains('_mapped_snapshot_') || dep.version.last().value().last().contains('_mapped_stable_')) {    
+                    if (dep.version.last().value().last().contains('_mapped_snapshot_') || dep.version.last().value().last().contains('_mapped_stable_')) {
 
                         // Remove the MCP mapped artifact from the dependency list.
                         println 'Surpressing MCP mapped artifact ' + dep.artifactId.last().value().last() + ' from maven dependencies.'

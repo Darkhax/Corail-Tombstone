@@ -16,6 +16,7 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.Biomes;
 import net.minecraft.world.biome.provider.BiomeProvider;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.BiomeManager;
 import ovh.corail.tombstone.helper.EntityHelper;
 import ovh.corail.tombstone.helper.Helper;
 import ovh.corail.tombstone.helper.LangKey;
@@ -57,7 +58,7 @@ public class CommandTBTeleportBiome extends TombstoneCommand {
         checkAlive(target);
         checkNotSpectator(target);
 
-        if (biome == Biomes.MOUNTAIN_EDGE) {
+        if (biome.getRegistryName() == Biomes.MOUNTAIN_EDGE.getLocation()) {
             throw LangKey.MESSAGE_NO_BIOME_FOR_DIMENSION.asCommandException();
         }
 
@@ -79,7 +80,7 @@ public class CommandTBTeleportBiome extends TombstoneCommand {
         }
         runNextTick(() -> {
             Entity newEntity = Helper.teleportEntity(target, spawnLoc);
-            sendMessage(sender, LangKey.MESSAGE_TELEPORT_TARGET_TO_LOCATION.getText(newEntity.getName(), LangKey.MESSAGE_HERE.getText(), spawnLoc.x, spawnLoc.y, spawnLoc.z, spawnLoc.dim.func_240901_a_().toString()), false);
+            sendMessage(sender, LangKey.MESSAGE_TELEPORT_TARGET_TO_LOCATION.getText(newEntity.getName(), LangKey.MESSAGE_HERE.getText(), spawnLoc.x, spawnLoc.y, spawnLoc.z, spawnLoc.dim.getLocation().toString()), false);
             if (EntityHelper.isValidPlayer(newEntity)) {
                 LangKey.MESSAGE_TELEPORT_SUCCESS.sendMessage((PlayerEntity) newEntity, StyleType.MESSAGE_SPELL);
             }
@@ -89,7 +90,7 @@ public class CommandTBTeleportBiome extends TombstoneCommand {
 
     private Location findNearestBiome(ServerWorld world, int x, int y, int z, int radius, int radiusStep, Biome biome, Random random, boolean onionSearch) {
         BiomeProvider biomeProvider = world.getChunkProvider().getChunkGenerator().getBiomeProvider();
-        RegistryKey<World> dimId = world.func_234923_W_();
+        RegistryKey<World> dimId = world.getDimensionKey();
         int xMin = x >> 2;
         int zMin = z >> 2;
         int radiusMax = radius >> 2;
@@ -109,7 +110,7 @@ public class CommandTBTeleportBiome extends TombstoneCommand {
                     }
                     int xBiomeChunk = xMin + biomeStepX;
                     int zBiomeChunk = zMin + biomeStepZ;
-                    if (biome.equals(biomeProvider.getNoiseBiome(xBiomeChunk, yBiomeChunk, zBiomeChunk))) {
+                    if (biome.getCategory().equals(biomeProvider.getNoiseBiome(xBiomeChunk, yBiomeChunk, zBiomeChunk).getCategory())) {
                         if (biomePos.isOrigin() || random.nextInt(count + 1) == 0) {
                             biomePos = new Location(xBiomeChunk << 2, y, zBiomeChunk << 2, dimId);
                             if (onionSearch) {

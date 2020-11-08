@@ -54,7 +54,7 @@ public class CommandTBTeleportHome extends TombstoneCommand {
         if (EntityHelper.isValidPlayer(newEntity)) {
             LangKey.MESSAGE_TELEPORT_SUCCESS.sendMessage((PlayerEntity) newEntity, StyleType.MESSAGE_SPELL);
         }
-        sendMessage(sender, LangKey.MESSAGE_TELEPORT_TARGET_TO_LOCATION.getText(newEntity.getName(), LangKey.MESSAGE_HERE.getText(), location.x, location.y, location.z, location.dim.func_240901_a_().toString()), false);
+        sendMessage(sender, LangKey.MESSAGE_TELEPORT_TARGET_TO_LOCATION.getText(newEntity.getName(), LangKey.MESSAGE_HERE.getText(), location.x, location.y, location.z, location.dim.getLocation().toString()), false);
         return 1;
     }
 
@@ -68,9 +68,9 @@ public class CommandTBTeleportHome extends TombstoneCommand {
             }
         }
         // overworld
-        ServerWorld overworld = server.getWorld(World.field_234918_g_);
+        ServerWorld overworld = server.getWorld(World.OVERWORLD);
         assert overworld != null;
         // default spawn in overworld
-        return Pair.of(overworld, overworld.func_241135_u_());
+        return Pair.of(overworld, overworld.getSpawnPoint());
     }
 }

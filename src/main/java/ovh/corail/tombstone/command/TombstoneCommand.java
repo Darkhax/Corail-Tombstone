@@ -95,7 +95,10 @@ abstract class TombstoneCommand {
 
     Biome getOrThrowBiome(CommandContext<CommandSource> context, String name) {
         ResourceLocation rl = context.getArgument(name, ResourceLocation.class);
-        return Registry.BIOME.getValue(rl).orElseThrow(LangKey.MESSAGE_INVALID_BIOME::asCommandException);
+        Biome biome = ForgeRegistries.BIOMES.getValue(rl);
+        if (biome == null)
+            throw LangKey.MESSAGE_INVALID_BIOME.asCommandException();
+        return biome;
     }
 
     protected void sendMessage(CommandSource source, IFormattableTextComponent message, boolean allowLogging) {
@@ -122,6 +125,6 @@ abstract class TombstoneCommand {
     static final String DIM_PARAM = "dim";
     static final String AMOUNT_PARAM = "amount";
     static final SuggestionProvider<CommandSource> SUGGESTION_STRUCTURE = (ctx, build) -> ISuggestionProvider.suggestIterable(ForgeRegistries.STRUCTURE_FEATURES.getKeys(), build);
-    static final SuggestionProvider<CommandSource> SUGGESTION_BIOME = (ctx, build) -> ISuggestionProvider.suggestIterable(Registry.BIOME.keySet(), build);
+    static final SuggestionProvider<CommandSource> SUGGESTION_BIOME = (ctx, build) -> ISuggestionProvider.suggestIterable(ForgeRegistries.BIOMES.getKeys(), build);
     static final SuggestionProvider<CommandSource> AMOUNT_SUGGESTION = (ctx, build) -> build.suggest(1, () -> "[0-MAX]").buildFuture();
 }

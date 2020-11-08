@@ -53,7 +53,9 @@ public class BooleanConfigOption extends AbstractOption {
         };
     }
 
+
+
     private ITextComponent getOptionName() {
-        return func_238238_a_().append(new TranslationTextComponent(get() ? "options.on" : "options.off"));
+        return new TranslationTextComponent(get() ? "options.on.composed" : "options.off.composed", this.getBaseMessageTranslation());
     }
 }
