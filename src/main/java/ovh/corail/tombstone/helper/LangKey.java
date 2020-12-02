@@ -186,7 +186,7 @@ public enum LangKey {
     }
     
     public String asLog() {
-    	return this.getText().getUnformattedComponentText();
+    	return this.getText().getString();
     }
     
     public IFormattableTextComponent getText(TextFormatting format, Object... args) {

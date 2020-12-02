@@ -171,7 +171,7 @@ public class EventHandler {
                 long systemTicks = TimeHelper.systemTicks();
                 if (TimeHelper.atInterval(systemTicks, TimeHelper.tickFromMinute(1))) {
                     if (ConfigTombstone.recovery.recoveryPlayerEnable.get() && TimeHelper.atInterval(systemTicks, TimeHelper.tickFromMinute(ConfigTombstone.recovery.recoveryPlayerTimer.get()))) {
-                        CommandTBRecovery.saveAllPlayers(server, success -> LOGGER.info((success ? LangKey.MESSAGE_RECOVERY_SAVE_PLAYER_SUCCESS : LangKey.MESSAGE_RECOVERY_SAVE_PLAYER_FAILED).asLog()));
+                        CommandTBRecovery.saveAllPlayers(server, success -> LOGGER.info((success ? LangKey.MESSAGE_RECOVERY_SAVE_ALL_PLAYERS_SUCCESS : LangKey.MESSAGE_RECOVERY_SAVE_ALL_PLAYERS_FAILED).asLog()));
                     }
                     CommandTBAcceptTeleport.cleanTickets(systemTicks);
                 }
