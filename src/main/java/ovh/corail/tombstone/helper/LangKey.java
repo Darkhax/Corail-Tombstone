@@ -239,9 +239,7 @@ public enum LangKey {
         return Helper.getFormattingCode(style) + getClientTranslation(params);
     }
 
-    public static ITextComponent createComponentCommand(PlayerEntity sender, String command, LangKey langKey, Object... params) {
-        ITextComponent compo = langKey.getText(StyleType.COLOR_ON, params);
-        compo.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command));
-        return compo;
+    public static ITextComponent createComponentCommand(String command, LangKey langKey, Object... params) {
+        return langKey.getText(StyleType.COLOR_ON, params).modifyStyle(s -> s.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command)));
     }
 }

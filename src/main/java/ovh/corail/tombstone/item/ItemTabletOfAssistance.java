@@ -108,7 +108,7 @@ public class ItemTabletOfAssistance extends ItemTablet {
             LangKey.MESSAGE_TELEPORT_SAME_DIMENSION.sendMessage(player);
             return false;
         }
-        ITextComponent hereClick = LangKey.createComponentCommand(receiver, "/tbacceptteleport " + player.getUniqueID(), LangKey.MESSAGE_HERE);
+        ITextComponent hereClick = LangKey.createComponentCommand("/tbacceptteleport " + player.getUniqueID(), LangKey.MESSAGE_HERE);
         LangKey.MESSAGE_REQUEST_TO_JOIN_RECEIVER.sendMessage(receiver, StyleType.MESSAGE_SPECIAL, hereClick, player.getName());
         CommandTBAcceptTeleport.addTicket(receiver, player, 120);
         LangKey.MESSAGE_REQUEST_TO_JOIN_SENDER.sendMessage(player, receiver.getName());

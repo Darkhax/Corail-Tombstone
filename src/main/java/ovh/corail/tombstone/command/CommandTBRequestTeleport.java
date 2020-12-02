@@ -56,7 +56,7 @@ public class CommandTBRequestTeleport extends TombstoneCommand {
         }
         CooldownHandler.INSTANCE.resetCooldown(player, CooldownType.REQUEST_TELEPORT);
         CommandTBAcceptTeleport.addTicket(target, player, Math.max(120, ConfigTombstone.general.cooldownRequestTeleport.get() * 60));
-        ITextComponent hereClick = LangKey.createComponentCommand(target, "/tbacceptteleport " + player.getUniqueID(), LangKey.MESSAGE_HERE);
+        ITextComponent hereClick = LangKey.createComponentCommand("/tbacceptteleport " + player.getUniqueID(), LangKey.MESSAGE_HERE);
         LangKey.MESSAGE_REQUEST_TO_JOIN_RECEIVER.sendMessage(target, StyleType.MESSAGE_SPECIAL, hereClick, player.getName());
         LangKey.MESSAGE_REQUEST_TO_JOIN_SENDER.sendMessage(player, target.getName());
         return 1;

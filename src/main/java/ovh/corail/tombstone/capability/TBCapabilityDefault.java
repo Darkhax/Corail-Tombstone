@@ -57,7 +57,7 @@ public class TBCapabilityDefault implements ITBCapability {
                 int newPerkPoints = getTotalPerkPoints();
                 int adjust = newPerkPoints - oldPerkPoints;
                 if (adjust > 0) {
-                    LangKey.MESSAGE_ACCESS_GUI.sendMessage(player, StyleType.MESSAGE_SPECIAL, adjust, LangKey.createComponentCommand(player, "/tbgui", LangKey.MESSAGE_HERE));
+                    LangKey.MESSAGE_ACCESS_GUI.sendMessage(player, StyleType.MESSAGE_SPECIAL, adjust, LangKey.createComponentCommand("/tbgui", LangKey.MESSAGE_HERE));
                     if (oldPerkPoints == 0) {
                         ModTriggers.FIRST_KNOWLEDGE.trigger(player);
                     }
