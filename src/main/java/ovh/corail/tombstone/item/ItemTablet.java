@@ -36,7 +36,10 @@ public abstract class ItemTablet extends ItemGraveMagic {
 
     @Override
     protected ItemStack onConsumeItem(PlayerEntity player, ItemStack stack) {
-        return Helper.getRandom(1, 10) < EntityHelper.getPerkLevelWithBonus(player, ModPerks.rune_inscriber) ? stack : ItemStack.EMPTY;
+        if (Helper.getRandom(1, 10) < EntityHelper.getPerkLevelWithBonus(player, ModPerks.rune_inscriber)) {
+            return stack;
+        }
+        return super.onConsumeItem(player, stack);
     }
 
     @Override

@@ -60,7 +60,12 @@ public abstract class ItemGraveMagic extends ItemGeneric implements ISoulConsume
 
     protected ItemStack onConsumeItem(PlayerEntity player, ItemStack stack) {
         // could change this for creative player
-        return ItemStack.EMPTY;
+        int useCount = getUseCount(stack);
+        if (useCount < 2) {
+            return ItemStack.EMPTY;
+        }
+        setUseCount(stack, --useCount);
+        return stack;
     }
 
     @Override
@@ -139,22 +144,16 @@ public abstract class ItemGraveMagic extends ItemGeneric implements ISoulConsume
         if (EntityHelper.isValidPlayerMP(entity)) {
             ServerPlayerEntity player = (ServerPlayerEntity) entity;
             if (isEnchanted(stack)) {
-                int useCount = getUseCount(stack);
-                if (useCount < 0) {
-                    return ItemStack.EMPTY;
-                }
                 if (doEffects(world, player, stack)) {
                     ModSounds.playSoundAllAround(ModSounds.MAGIC_USE01, SoundCategory.PLAYERS, world, player.getPosition(), 0.5f, 0.5f);
-                    if (!canConsumeOnUse() || --useCount > 0) {
+                    if (canConsumeOnUse()) {
+                        stack = onConsumeItem(player, stack);
+                    }
+                    if (!stack.isEmpty()) {
                         setCooldown(world, stack, getCastingCooldown());
-                        setUseCount(stack, useCount);
-                        return stack;
-                    } else {
-                        return onConsumeItem(player, stack);
                     }
                 } else {
                     EntityHelper.setCooldown(player, this, 10);
-                    return stack;
                 }
             }
         }
