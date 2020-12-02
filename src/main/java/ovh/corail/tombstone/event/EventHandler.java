@@ -597,7 +597,7 @@ public class EventHandler {
             }
             if (spawnPos.isOrigin()) {
                 Location lastGrave = deathHandler.getLastGrave(player.getGameProfile().getName());
-                if (!lastGrave.isOrigin() && lastGrave.dim.equals(world.getDimensionKey()) && Helper.getDistanceSq(lastGrave.getPos(), initPos) <= 400d) {
+                if (!lastGrave.isOrigin() && lastGrave.isSameDimension(world) && Helper.getDistanceSq(lastGrave.getPos(), initPos) <= 400d) {
                     TileEntity tile = world.getTileEntity(lastGrave.getPos());
                     if (tile instanceof TileEntityGrave) {
                         TileEntityGrave grave = (TileEntityGrave) tile;
@@ -654,7 +654,7 @@ public class EventHandler {
             needAccess = false;
         }
         (hasGrave ? LangKey.MESSAGE_EXISTING_GRAVE : LangKey.MESSAGE_NEW_GRAVE).sendMessage(player, StyleType.MESSAGE_SPECIAL,
-                LangKey.MESSAGE_JOURNEYMAP.getText(StyleType.TOOLTIP_DESC, LangKey.MESSAGE_LAST_GRAVE.getText(), spawnPos.x, spawnPos.y, spawnPos.z, spawnPos.dim.getLocation().toString()),
+                LangKey.MESSAGE_JOURNEYMAP.getText(StyleType.TOOLTIP_DESC, LangKey.MESSAGE_LAST_GRAVE.getText(), spawnPos.x, spawnPos.y, spawnPos.z, spawnPos.getDimString()),
                 (needAccess ? LangKey.MESSAGE_LOCKED : LangKey.MESSAGE_UNLOCKED).getText(needAccess && SharedConfigTombstone.player_death.decayTime.get() > 0 ? SharedConfigTombstone.player_death.decayTime.get() + " min" : "").setStyle(needAccess ? StyleType.COLOR_OFF : StyleType.COLOR_ON)
         );
         if (ConfigTombstone.player_death.playerGraveAccess.get()) {

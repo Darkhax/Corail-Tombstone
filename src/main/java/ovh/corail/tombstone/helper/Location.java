@@ -82,8 +82,12 @@ public class Location {
         return getDistanceSq(location) <= range * range;
     }
 
+    public String getDimString() {
+        return this.dim.getLocation().toString();
+    }
+
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this).add("x", x).add("y", y).add("z", z).add("dim", dim).toString();
+        return MoreObjects.toStringHelper(this).add("x", x).add("y", y).add("z", z).add("dim", getDimString()).toString();
     }
 }

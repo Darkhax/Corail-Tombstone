@@ -79,7 +79,7 @@ public class CommandTBTeleport extends TombstoneCommand {
         if (EntityHelper.isValidPlayer(newEntity)) {
             LangKey.MESSAGE_TELEPORT_SUCCESS.sendMessage((PlayerEntity) newEntity, StyleType.MESSAGE_SPELL);
         }
-        sendMessage(sender, LangKey.MESSAGE_TELEPORT_TARGET_TO_LOCATION.getText(newEntity.getName(), LangKey.MESSAGE_HERE.getText(), destLoc.x, destLoc.y, destLoc.z, destLoc.dim.getLocation().toString()), false);
+        sendMessage(sender, LangKey.MESSAGE_TELEPORT_TARGET_TO_LOCATION.getText(newEntity.getName(), LangKey.MESSAGE_HERE.getText(), destLoc.x, destLoc.y, destLoc.z, destLoc.getDimString()), false);
         return 1;
     }
 }

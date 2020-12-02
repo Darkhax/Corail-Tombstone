@@ -42,7 +42,7 @@ public class CommandTBShowLastGrave extends TombstoneCommand {
             throw LangKey.MESSAGE_NO_GRAVE.asCommandException();
         }
 
-        sendMessage(sender, LangKey.MESSAGE_LAST_GRAVE_PLACE.getText(targetName, LangKey.MESSAGE_LAST_GRAVE.getText(), lastGrave.x, lastGrave.y, lastGrave.z, lastGrave.dim.getLocation().toString()), false);
+        sendMessage(sender, LangKey.MESSAGE_LAST_GRAVE_PLACE.getText(targetName, LangKey.MESSAGE_LAST_GRAVE.getText(), lastGrave.x, lastGrave.y, lastGrave.z, lastGrave.getDimString()), false);
         return 1;
     }
 }

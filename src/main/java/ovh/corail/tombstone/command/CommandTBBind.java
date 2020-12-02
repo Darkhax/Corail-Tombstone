@@ -85,7 +85,7 @@ public class CommandTBBind extends TombstoneCommand {
         IntStream.range(0, locations.size()).forEach(i -> {
             Location location = locations.get(i);
             if (!location.isOrigin()) {
-                player.sendMessage(new StringTextComponent((i + 1) + " -> {" + location.x + ", " + location.y + ", " + location.z + ", " + location.dim + "}"), Util.DUMMY_UUID);
+                player.sendMessage(new StringTextComponent((i + 1) + " -> {" + location.x + ", " + location.y + ", " + location.z + ", " + location.getDimString() + "}"), Util.DUMMY_UUID);
             }
         });
         return 1;
@@ -115,7 +115,7 @@ public class CommandTBBind extends TombstoneCommand {
         if (EntityHelper.isValidPlayer(newEntity)) {
             LangKey.MESSAGE_TELEPORT_SUCCESS.sendMessage((PlayerEntity) newEntity, StyleType.MESSAGE_SPELL);
         }
-        sendMessage(sender, LangKey.MESSAGE_TELEPORT_TARGET_TO_LOCATION.getText(newEntity.getName(), LangKey.MESSAGE_HERE.getText(), spawnPlace.x, spawnPlace.y, spawnPlace.z, spawnPlace.dim.getLocation().toString()), false);
+        sendMessage(sender, LangKey.MESSAGE_TELEPORT_TARGET_TO_LOCATION.getText(newEntity.getName(), LangKey.MESSAGE_HERE.getText(), spawnPlace.x, spawnPlace.y, spawnPlace.z, spawnPlace.getDimString()), false);
         return 1;
     }
 

@@ -69,7 +69,7 @@ public class CommandTBTeleportDiscovery extends TombstoneCommand {
         }
         runNextTick(() -> {
             Entity newEntity = Helper.teleportEntity(target, spawnLoc);
-            sendMessage(sender, LangKey.MESSAGE_TELEPORT_TARGET_TO_LOCATION.getText(newEntity.getName(), LangKey.MESSAGE_HERE.getText(), spawnLoc.x, spawnLoc.y, spawnLoc.z, spawnLoc.dim.getLocation().toString()), false);
+            sendMessage(sender, LangKey.MESSAGE_TELEPORT_TARGET_TO_LOCATION.getText(newEntity.getName(), LangKey.MESSAGE_HERE.getText(), spawnLoc.x, spawnLoc.y, spawnLoc.z, spawnLoc.getDimString()), false);
             if (EntityHelper.isValidPlayer(newEntity)) {
                 LangKey.MESSAGE_TELEPORT_SUCCESS.sendMessage((PlayerEntity) newEntity, StyleType.MESSAGE_SPELL);
             }

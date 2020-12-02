@@ -294,7 +294,7 @@ public class ClientEventHandler {
         } else {
             return;
         }
-        if (location.isOrigin() || !location.dim.equals(player.world.getDimensionKey()) || !World.isValid(location.getPos())) {
+        if (location.isOrigin() || !location.isSameDimension(player.world) || !World.isValid(location.getPos())) {
             return;
         }
         createBox(event.getMatrixStack(), location.x, location.y, location.z, 1f);
