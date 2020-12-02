@@ -178,7 +178,7 @@ public class CommandTBRecovery extends TombstoneCommand {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     private static boolean savePlayerData(CompoundNBT tag, File saveFolder) {
-        String dateString = new SimpleDateFormat("yyyyMMdd-hhmmss", Locale.US).format(new Date());
+        String dateString = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(new Date());
         try (FileWriter writer = new FileWriter(new File(saveFolder, dateString + ".save"))) {
             writer.write(tag.toString());
             writer.close();

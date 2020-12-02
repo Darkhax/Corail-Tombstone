@@ -627,7 +627,7 @@ public class EventHandler {
 
         BlockState state;
         if (!hasGrave) {
-            deathHandler.logLastGrave(player, spawnPos.x, spawnPos.y, spawnPos.z, spawnPos.dim);
+            deathHandler.logLastGrave(player, spawnPos);
             Direction facing = player.getHorizontalFacing().getOpposite();
             Pair<GraveModel, MarbleType> favoriteGrave = deathHandler.getFavoriteGrave(player);
             Block graveBlock = ModBlocks.graves.get(favoriteGrave.getLeft());

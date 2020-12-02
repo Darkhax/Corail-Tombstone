@@ -117,7 +117,7 @@ public class CommandTBReviveFamiliar extends TombstoneCommand {
             ModTombstone.LOGGER.info("The backup folder for familiars cannot be created");
             return;
         }
-        final String dateString = new SimpleDateFormat("yyyyMMdd-hhmmss", Locale.US).format(new Date());
+        final String dateString = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(new Date());
         final File accessedFile = new File(saveFolder, dateString + "_" + saveName + ".save");
         ThreadedBackup.INSTANCE.queueBackup(() -> {
             try (FileWriter writer = new FileWriter(accessedFile)) {
