@@ -1,14 +1,14 @@
 package ovh.corail.tombstone.enchantment;
 
-import net.minecraft.client.resources.I18n;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentType;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import ovh.corail.tombstone.helper.Helper;
 import ovh.corail.tombstone.helper.LangKey;
 import ovh.corail.tombstone.helper.StyleType;
 
@@ -53,13 +53,13 @@ public abstract class TombstoneEnchantment extends Enchantment {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public List<String> getTooltipInfos(ItemStack stack) {
-        List<String> infos = new ArrayList<>();
+    public List<ITextComponent> getTooltipInfos(ItemStack stack) {
+        List<ITextComponent> infos = new ArrayList<>();
         if (stack.getItem() == Items.ENCHANTED_BOOK) {
-            infos.add(Helper.getFormattingCode(StyleType.TOOLTIP_ENCHANT) + I18n.format(getName() + ".desc"));
+            infos.add(new TranslationTextComponent(getName() + ".desc").mergeStyle(StyleType.TOOLTIP_ENCHANT));
         }
         if (!isEnabled()) {
-            infos.add(LangKey.MESSAGE_DISABLED.getClientTranslationWithStyle(StyleType.COLOR_OFF));
+            infos.add(LangKey.MESSAGE_DISABLED.getText(StyleType.COLOR_OFF));
         }
         return infos;
     }

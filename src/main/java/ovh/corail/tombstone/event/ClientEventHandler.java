@@ -28,7 +28,6 @@ import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
@@ -244,9 +243,9 @@ public class ClientEventHandler {
                         ITextComponent currentTooltip = event.getToolTip().get(line);
                         return currentTooltip instanceof TranslationTextComponent && enchant.getName().equals(((TranslationTextComponent) currentTooltip).getKey());
                     }).findFirst().ifPresent(line -> {
-                        List<String> infos = ((TombstoneEnchantment) enchant).getTooltipInfos(event.getItemStack());
-                        for (String info : infos) {
-                            event.getToolTip().add(++line, new StringTextComponent(info));
+                        List<ITextComponent> infos = ((TombstoneEnchantment) enchant).getTooltipInfos(event.getItemStack());
+                        for (ITextComponent info : infos) {
+                            event.getToolTip().add(++line, info);
                         }
                     })
             );

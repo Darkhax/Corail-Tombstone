@@ -23,6 +23,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
@@ -80,13 +81,13 @@ public class ItemAnkhOfPray extends ItemGeneric implements ISoulConsumer {
                         int cd = CooldownHandler.INSTANCE.getCooldown(player, CooldownType.NEXT_PRAY) / 20;
                         if (cd > 0) {
                             long hour = cd / 3600;
-                            StringBuilder timeString = new StringBuilder(Helper.getFormattingCode(StyleType.TOOLTIP_DESC)).append("[");
+                            StringBuilder timeString = new StringBuilder("[");
                             if (hour > 0) {
                                 cd -= hour * 3600;
                                 timeString.append(String.format("%02d", hour)).append(":");
                             }
                             timeString.append(String.format("%02d", cd / 60)).append(":").append(String.format("%02d", cd % 60)).append("]");
-                            addItemUse(list, "1", timeString);
+                            addItemUse(list, "1", new StringTextComponent(timeString.toString()).mergeStyle(StyleType.TOOLTIP_DESC));
                         }
                     } else {
                         addItemUse(list, "2");

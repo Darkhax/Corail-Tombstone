@@ -14,7 +14,7 @@ import javax.annotation.Nullable;
 public abstract class Perk extends ForgeRegistryEntry<Perk> implements Comparable<Perk>, IStringSerializable {
     protected final String name;
     protected final ResourceLocation icon;
-    protected ITextComponent translation;
+    private ITextComponent translation;
 
     public Perk(String name, @Nullable ResourceLocation icon) {
         this.name = name;

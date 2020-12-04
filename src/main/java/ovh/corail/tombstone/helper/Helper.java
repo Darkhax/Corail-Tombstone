@@ -51,9 +51,6 @@ import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.util.text.Color;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.border.WorldBorder;
@@ -113,7 +110,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static ovh.corail.tombstone.ModTombstone.MOD_ID;
 
@@ -653,36 +649,6 @@ public class Helper {
 
     public static boolean isPacketToServer(NetworkEvent.Context ctx) {
         return ctx.getDirection().getOriginationSide() == LogicalSide.CLIENT && ctx.getDirection().getReceptionSide() == LogicalSide.SERVER;
-    }
-
-    public static String getFormattingCode(Style style) {
-        if (style.isEmpty()) {
-            return "";
-        }
-        StringBuilder stringbuilder = new StringBuilder();
-        if (style.getColor() != null) {
-            fromColor(style.getColor()).ifPresent(stringbuilder::append);
-        }
-        if (style.getBold()) {
-            stringbuilder.append(TextFormatting.BOLD);
-        }
-        if (style.getItalic()) {
-            stringbuilder.append(TextFormatting.ITALIC);
-        }
-        if (style.getUnderlined()) {
-            stringbuilder.append(TextFormatting.UNDERLINE);
-        }
-        if (style.getObfuscated()) {
-            stringbuilder.append(TextFormatting.OBFUSCATED);
-        }
-        if (style.getStrikethrough()) {
-            stringbuilder.append(TextFormatting.STRIKETHROUGH);
-        }
-        return stringbuilder.toString();
-    }
-
-    public static Optional<TextFormatting> fromColor(Color color) {
-        return Stream.of(TextFormatting.values()).filter(f -> f.getColor() != null && f.getColor().equals(color.getColor())).findFirst();
     }
 
     @SuppressWarnings("ConstantConditions")

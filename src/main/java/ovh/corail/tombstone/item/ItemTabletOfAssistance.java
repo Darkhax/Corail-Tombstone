@@ -9,6 +9,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -46,7 +47,7 @@ public class ItemTabletOfAssistance extends ItemTablet {
                 String engraved_name = getEngravedName(stack);
                 if (engraved_name.isEmpty()) {
                     addItemDesc(list);
-                    addItemUse(list, "2", Helper.getFormattingCode(StyleType.TOOLTIP_ITEM) + "[" + I18n.format(ModItems.grave_dust.getTranslationKey(stack)).toLowerCase() + "]");
+                    addItemUse(list, "2", new StringTextComponent("[" + I18n.format(ModItems.grave_dust.getTranslationKey(stack)).toLowerCase() + "]").mergeStyle((StyleType.TOOLTIP_ITEM)));
                 } else {
                     addInfo(list, LangKey.MESSAGE_ENGRAVED, '"' + engraved_name + '"');
                     addItemUse(list, "3");

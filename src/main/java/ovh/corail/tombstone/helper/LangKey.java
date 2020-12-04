@@ -234,11 +234,6 @@ public enum LangKey {
         return I18n.format(getKey(), params);
     }
 
-    @OnlyIn(Dist.CLIENT)
-    public String getClientTranslationWithStyle(Style style, Object... params) {
-        return Helper.getFormattingCode(style) + getClientTranslation(params);
-    }
-
     public static ITextComponent createComponentCommand(String command, LangKey langKey, Object... params) {
         return langKey.getText(StyleType.COLOR_ON, params).modifyStyle(s -> s.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command)));
     }
