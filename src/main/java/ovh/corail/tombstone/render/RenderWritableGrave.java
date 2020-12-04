@@ -13,8 +13,12 @@ import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Direction;
+import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -157,35 +161,36 @@ public class RenderWritableGrave<T extends TileEntityWritableGrave> extends Tile
         FontRenderer fontRender = this.renderDispatcher.fontRenderer;
 
         // rip message
-        showString(TextFormatting.BOLD + LangKey.MESSAGE_RIP.getClientTranslation(), matrixStack, iRenderTypeBuffer, fontRender, (is_original ? 8 : 0), ConfigTombstone.client.textColorRIP.get() + 0xff000000, 0.007f, light);
+        showString(LangKey.MESSAGE_RIP.getText().mergeStyle(TextFormatting.BOLD), matrixStack, iRenderTypeBuffer, fontRender, (is_original ? 8 : 0), ConfigTombstone.client.textColorRIP.get() + 0xff000000, 0.007f, light);
 
         // owner message
-        showString(TextFormatting.BOLD + te.getOwnerName(), matrixStack, iRenderTypeBuffer, fontRender, (is_original ? 14 : 11), ConfigTombstone.client.textColorOwner.get() + 0xff000000, 0.005f, light);
+        showString(new StringTextComponent(te.getOwnerName()).mergeStyle(TextFormatting.BOLD), matrixStack, iRenderTypeBuffer, fontRender, (is_original ? 14 : 11), ConfigTombstone.client.textColorOwner.get() + 0xff000000, 0.005f, light);
 
         // death date message
         float scaleForDate = ConfigTombstone.client.dateInMCTime.get() ? 0.005f : 0.004f;
-        showString(TextFormatting.BOLD + LangKey.MESSAGE_DIED_ON.getClientTranslation(), matrixStack, iRenderTypeBuffer, fontRender, 26, ConfigTombstone.client.textColorDeathDate.get() + 0xff000000, scaleForDate, light);
+        showString(LangKey.MESSAGE_DIED_ON.getText(TextFormatting.BOLD), matrixStack, iRenderTypeBuffer, fontRender, 26, ConfigTombstone.client.textColorDeathDate.get() + 0xff000000, scaleForDate, light);
 
         if (ConfigTombstone.client.dateInMCTime.get()) {
             // time goes 72 times faster than real time
             long days = te.countTicks / 24000; // TODO incorrect, tiles don't always tick, store gametime
-            String dateString = LangKey.MESSAGE_DAY.getClientTranslation(days);
-            showString(TextFormatting.BOLD + dateString, matrixStack, iRenderTypeBuffer, fontRender, 36, ConfigTombstone.client.textColorDeathDate.get() + 0xff000000, scaleForDate, light);
+            IFormattableTextComponent dateString = LangKey.MESSAGE_DAY.getText(days).mergeStyle(TextFormatting.BOLD);
+            showString(dateString, matrixStack, iRenderTypeBuffer, fontRender, 36, ConfigTombstone.client.textColorDeathDate.get() + 0xff000000, scaleForDate, light);
         } else {
             Date date = new Date(te.getOwnerDeathTime());
-            String dateString = new SimpleDateFormat("dd/MM/yyyy").format(date);
-            String timeString = LangKey.MESSAGE_AT.getClientTranslation() + " " + new SimpleDateFormat("HH:mm:ss").format(date);
-            showString(TextFormatting.BOLD + dateString, matrixStack, iRenderTypeBuffer, fontRender, 36, ConfigTombstone.client.textColorDeathDate.get() + 0xff000000, scaleForDate, light);
-            showString(TextFormatting.BOLD + timeString, matrixStack, iRenderTypeBuffer, fontRender, 46, ConfigTombstone.client.textColorDeathDate.get() + 0xff000000, scaleForDate, light);
+            IFormattableTextComponent dateString = new StringTextComponent(new SimpleDateFormat("dd/MM/yyyy").format(date)).mergeStyle(TextFormatting.BOLD);
+            IFormattableTextComponent timeString = LangKey.MESSAGE_AT.getText().appendString(" ").appendString(new SimpleDateFormat("HH:mm:ss").format(date)).mergeStyle(TextFormatting.BOLD);
+            showString(dateString, matrixStack, iRenderTypeBuffer, fontRender, 36, ConfigTombstone.client.textColorDeathDate.get() + 0xff000000, scaleForDate, light);
+            showString(timeString, matrixStack, iRenderTypeBuffer, fontRender, 46, ConfigTombstone.client.textColorDeathDate.get() + 0xff000000, scaleForDate, light);
         }
 
         matrixStack.pop();
     }
 
-    private void showString(String content, MatrixStack matrixStack, IRenderTypeBuffer iRenderTypeBuffer, FontRenderer fontRenderer, int posY, int color, float scale, int light) {
+    private void showString(ITextComponent content, MatrixStack matrixStack, IRenderTypeBuffer iRenderTypeBuffer, FontRenderer fontRenderer, int posY, int color, float scale, int light) {
         matrixStack.push();
         matrixStack.scale(scale, scale, scale);
-        fontRenderer.renderString(content, (float) (-fontRenderer.getStringWidth(content) / 2), posY - 30, color, false, matrixStack.getLast().getMatrix(), iRenderTypeBuffer, false, 0, light);
+        IReorderingProcessor ireorderingprocessor = content.func_241878_f();
+        fontRenderer.func_238407_a_(matrixStack, ireorderingprocessor, -fontRenderer.func_243245_a(ireorderingprocessor) / 2f, posY - 30, color);
         matrixStack.pop();
     }
 

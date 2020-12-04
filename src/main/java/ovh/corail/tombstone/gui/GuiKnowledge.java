@@ -112,8 +112,7 @@ public class GuiKnowledge extends TBScreen {
 
         hLine(matrixStack, this.guiLeft + 5, this.guiRight - 5, this.guiTop + 4, this.textColor);
         hLine(matrixStack, this.guiLeft + 5, this.guiRight - 5, this.guiTop + 6, this.textColor);
-        String titleName = LangKey.MESSAGE_KNOWLEDGE_OF_DEATH.getClientTranslation();
-        this.font.drawString(matrixStack, titleName, this.halfWidth - this.font.getStringWidth(titleName) / 2f, this.guiTop + 9f, this.textColor);
+        drawCenteredString(matrixStack, this.font, LangKey.MESSAGE_KNOWLEDGE_OF_DEATH.getText(), this.halfWidth, this.guiTop + 9, this.textColor);
         hLine(matrixStack, this.guiLeft + 5, this.guiRight - 5, this.guiTop + 18, this.textColor);
         hLine(matrixStack, this.guiLeft + 5, this.guiRight - 5, this.guiTop + 20, this.textColor);
 

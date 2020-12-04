@@ -1,6 +1,5 @@
 package ovh.corail.tombstone.helper;
 
-import net.minecraft.client.resources.I18n;
 import net.minecraft.command.CommandException;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Util;
@@ -10,8 +9,6 @@ import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.ClickEvent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.UUID;
 
@@ -227,11 +224,6 @@ public enum LangKey {
 
     public CommandException asCommandException(Object... params) {
         return new CommandException(getText(params));
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    public String getClientTranslation(Object... params) {
-        return I18n.format(getKey(), params);
     }
 
     public static ITextComponent createComponentCommand(String command, LangKey langKey, Object... params) {

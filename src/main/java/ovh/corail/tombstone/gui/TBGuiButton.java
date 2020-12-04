@@ -30,6 +30,6 @@ public class TBGuiButton extends Button {
         Minecraft minecraft = Minecraft.getInstance();
         renderBg(matrixStack, minecraft, mouseX, mouseY);
         int j = isHovered() || this.forceHighlight ? 0xff897235 : getFGColor();
-        this.drawCenteredString(matrixStack, minecraft.fontRenderer, getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, j | MathHelper.ceil(this.alpha * 255f) << 24);
+        drawCenteredString(matrixStack, minecraft.fontRenderer, getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, j | MathHelper.ceil(this.alpha * 255f) << 24);
     }
 }

@@ -294,9 +294,8 @@ public class GuiConfig extends TBScreen {
         }
         renderBackground(matrixStack);
         RenderSystem.color4f(1f, 1f, 1f, 1f);
-        String customTitle = title.getString();
         fill(matrixStack, this.guiLeft + 5, this.guiTop + 5, this.guiRight - 5, this.guiTop + 20 + font.FONT_HEIGHT, 0x55000000);
-        drawString(matrixStack, this.font, customTitle, this.halfWidth - this.font.getStringWidth(customTitle) / 2, this.guiTop + 14, this.textColor);
+        drawCenteredString(matrixStack, this.font, this.title, this.halfWidth, this.guiTop + 14, this.textColor);
         RenderSystem.color4f(1f, 1f, 1f, 1f);
 
         String playerName = getMinecraft().player != null ? getMinecraft().player.getName().getString() : "Corail31";
