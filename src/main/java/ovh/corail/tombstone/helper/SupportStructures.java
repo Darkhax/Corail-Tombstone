@@ -37,7 +37,9 @@ public enum SupportStructures {
     OCEAN_RUIN("ocean_ruin", 68),
     BURIED_TREASURE("buried_treasure", 68),
     SHIPWRECK("shipwreck", 68),
-    PILLAGER_OUTPOST("pillager_outpost", 68);
+    PILLAGER_OUTPOST("pillager_outpost", 68),
+    RUINED_PORTAL("ruined_portal", 68),
+    NETHER_FOSSIL("nether_fossil", 68);
 
     private final String structureName;
     private final int y;
